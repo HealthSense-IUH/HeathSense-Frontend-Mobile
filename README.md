@@ -1,56 +1,187 @@
-# Welcome to your Expo app 👋
+# HeathSence Frontend Mobile
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+HeathSence mobile app built with Expo SDK 57, Expo Router, Gluestack UI v5, and NativeWind v5.
 
-## Get started
+## Tech Stack
 
-1. Install dependencies
+- Expo SDK 57
+- React Native 0.86
+- React 19
+- Expo Router
+- Gluestack UI v5
+- NativeWind v5 with Tailwind CSS v4 tokens
+- TypeScript
 
-   ```bash
-   npm install
-   ```
+## Getting Started
 
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+Install dependencies:
 
 ```bash
-npm run reset-project
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Start the development server:
 
-### Other setup steps
+```bash
+npm run start
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+Start with a clean Metro cache after changing Babel, Metro, NativeWind, or theme config:
 
-## Learn more
+```bash
+npx expo start -c
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+Run on a specific platform:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+npm run android
+npm run ios
+npm run web
+```
 
-## Join the community
+## Project Structure
 
-Join our community of developers creating universal apps.
+```txt
+src/
+  app/
+    _layout.tsx
+    index.tsx
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+  components/
+    ui/
+      gluestack-ui-provider/
+        index.tsx
+        index.web.tsx
+        script.ts
+
+  constants/
+    theme.ts
+
+  global.css
+```
+
+## Routing
+
+This project uses Expo Router.
+
+- `src/app/_layout.tsx` is the root layout.
+- `src/app/index.tsx` is the `/` route.
+- Add new screens by adding files under `src/app`.
+
+Example:
+
+```txt
+src/app/login.tsx        -> /login
+src/app/profile.tsx      -> /profile
+src/app/users/[id].tsx   -> /users/:id
+```
+
+## UI Provider
+
+The root layout wraps the app with `GluestackUIProvider`:
+
+```tsx
+<GluestackUIProvider mode="system">
+  <Slot />
+</GluestackUIProvider>
+```
+
+The provider gives the app shared support for:
+
+- Gluestack overlays
+- Toasts
+- Light/dark mode
+- Root layout sizing
+
+Native uses `index.tsx`; web uses `index.web.tsx`.
+
+## Styling And Theme
+
+Global design tokens live in:
+
+```txt
+src/global.css
+```
+
+Use NativeWind classes with semantic tokens:
+
+```tsx
+bg-background
+text-foreground
+bg-card
+text-primary
+bg-secondary
+bg-accent
+border-border
+```
+
+To change the app theme, update the CSS variables in `src/global.css`.
+
+Use `src/constants/theme.ts` only when a component needs colors from TypeScript or `StyleSheet`.
+
+## Path Alias
+
+The `@` alias points to `src`.
+
+```ts
+import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
+import '@/global.css';
+```
+
+Do not import from `@/src/...`.
+
+## NativeWind Notes
+
+NativeWind is configured in:
+
+- `babel.config.js`
+- `metro.config.js`
+- `nativewind-env.d.ts`
+- `react-native-css-env.d.ts`
+
+Important: this project uses `nativewind/babel` without `jsxImportSource: 'nativewind'` because the installed NativeWind preview version does not expose `nativewind/jsx-runtime`.
+
+If Metro shows stale styling or bundling issues, restart with:
+
+```bash
+npx expo start -c
+```
+
+## Suggested Feature Structure
+
+For future features, keep routes in `src/app` and feature logic in `src/modules`.
+
+```txt
+src/
+  app/
+    (auth)/
+      login.tsx
+    (tabs)/
+      home.tsx
+
+  modules/
+    auth/
+      api/
+      components/
+      hooks/
+      types/
+
+    user/
+      api/
+      components/
+      hooks/
+      types/
+```
+
+Route files should compose screens. Business logic, API calls, hooks, and feature components should live in their module.
+
+## Useful Commands
+
+```bash
+npm run start
+npm run android
+npm run ios
+npm run web
+npm run lint
+```
