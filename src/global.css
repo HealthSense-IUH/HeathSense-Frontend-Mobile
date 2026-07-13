@@ -3,92 +3,181 @@
 @import "tailwindcss/utilities.css";
 @import "nativewind/theme";
 
-/* Health app theme tokens inspired by Samsung Health's clean blue/green UI. */
+/* Asklepios Design System V1.3 Colors */
 @layer theme {
   :root {
-    --primary: 0 112 243;
+    --primary: 15 103 254; /* Therapeia Blue 60 */
     --primary-foreground: 255 255 255;
-    --card: 255 255 255;
-    --secondary: 232 245 255;
-    --secondary-foreground: 18 42 76;
-    --background: 246 250 255;
+    --card: 255 255 255; /* White */
+    --secondary: 217 251 251; /* Panacea Teal 10 */
+    --secondary-foreground: 0 60 68; /* Panacea Teal 80 */
+    --background: 242 245 249; /* Asklepios Gray 10 */
     --popover: 255 255 255;
-    --popover-foreground: 14 28 48;
-    --muted: 236 244 250;
-    --muted-foreground: 91 110 132;
-    --destructive: 226 57 70;
-    --foreground: 14 28 48;
-    --border: 218 230 239;
-    --input: 218 230 239;
-    --ring: 0 112 243;
-    --accent: 23 184 144;
+    --popover-foreground: 20 27 49; /* Asklepios Gray 90 */
+    --muted: 220 225 232; /* Asklepios Gray 20 */
+    --muted-foreground: 93 106 133; /* Asklepios Gray 60 */
+    --destructive: 218 30 46; /* Hygieia Red 60 */
+    --foreground: 9 14 29; /* Asklepios Gray 100 */
+    --border: 190 197 210; /* Asklepios Gray 30 */
+    --input: 190 197 210;
+    --ring: 15 103 254; /* Therapeia Blue 60 */
+    --accent: 110 197 34; /* Zoi Green 50 */
     --accent-foreground: 255 255 255;
   }
 
   @media (prefers-color-scheme: dark) {
     :root {
-      --primary: 67 156 255;
-      --primary-foreground: 3 18 36;
-      --card: 15 32 55;
-      --secondary: 20 48 79;
-      --secondary-foreground: 221 238 255;
-      --background: 7 18 34;
-      --popover: 15 32 55;
-      --popover-foreground: 238 246 255;
-      --muted: 20 48 79;
-      --muted-foreground: 151 173 198;
-      --destructive: 255 108 118;
-      --foreground: 238 246 255;
-      --border: 36 66 99;
-      --input: 36 66 99;
-      --accent: 45 214 168;
-      --accent-foreground: 2 35 28;
-      --ring: 67 156 255;
+      --primary: 69 140 255; /* Therapeia Blue 50 */
+      --primary-foreground: 0 17 65; /* Therapeia Blue 100 */
+      --card: 20 27 49; /* Asklepios Gray 90 */
+      --secondary: 0 84 93; /* Panacea Teal 70 */
+      --secondary-foreground: 217 251 251; /* Panacea Teal 10 */
+      --background: 9 14 29; /* Asklepios Gray 100 */
+      --popover: 20 27 49; /* Asklepios Gray 90 */
+      --popover-foreground: 242 245 249; /* Asklepios Gray 10 */
+      --muted: 36 46 73; /* Asklepios Gray 80 */
+      --muted-foreground: 158 167 184; /* Asklepios Gray 40 */
+      --destructive: 250 77 94; /* Hygieia Red 50 */
+      --foreground: 242 245 249; /* Asklepios Gray 10 */
+      --border: 61 73 102; /* Asklepios Gray 70 */
+      --input: 61 73 102;
+      --accent: 110 197 34; /* Zoi Green 50 */
+      --accent-foreground: 21 46 5; /* Zoi Green 100 */
+      --ring: 69 140 255; /* Therapeia Blue 50 */
     }
   }
 
   :root.dark {
-    --primary: 67 156 255;
-    --primary-foreground: 3 18 36;
-    --card: 15 32 55;
-    --secondary: 20 48 79;
-    --secondary-foreground: 221 238 255;
-    --background: 7 18 34;
-    --popover: 15 32 55;
-    --popover-foreground: 238 246 255;
-    --muted: 20 48 79;
-    --muted-foreground: 151 173 198;
-    --destructive: 255 108 118;
-    --foreground: 238 246 255;
-    --border: 36 66 99;
-    --input: 36 66 99;
-    --accent: 45 214 168;
-    --accent-foreground: 2 35 28;
-    --ring: 67 156 255;
+    --primary: 69 140 255;
+    --primary-foreground: 0 17 65;
+    --card: 20 27 49;
+    --secondary: 0 84 93;
+    --secondary-foreground: 217 251 251;
+    --background: 9 14 29;
+    --popover: 20 27 49;
+    --popover-foreground: 242 245 249;
+    --muted: 36 46 73;
+    --muted-foreground: 158 167 184;
+    --destructive: 250 77 94;
+    --foreground: 242 245 249;
+    --border: 61 73 102;
+    --input: 61 73 102;
+    --accent: 110 197 34;
+    --accent-foreground: 21 46 5;
+    --ring: 69 140 255;
   }
 
   :root.light {
-    --primary: 0 112 243;
+    --primary: 15 103 254;
     --primary-foreground: 255 255 255;
     --card: 255 255 255;
-    --secondary: 232 245 255;
-    --secondary-foreground: 18 42 76;
-    --background: 246 250 255;
+    --secondary: 217 251 251;
+    --secondary-foreground: 0 60 68;
+    --background: 242 245 249;
     --popover: 255 255 255;
-    --popover-foreground: 14 28 48;
-    --muted: 236 244 250;
-    --muted-foreground: 91 110 132;
-    --destructive: 226 57 70;
-    --foreground: 14 28 48;
-    --border: 218 230 239;
-    --input: 218 230 239;
-    --ring: 0 112 243;
-    --accent: 23 184 144;
+    --popover-foreground: 20 27 49;
+    --muted: 220 225 232;
+    --muted-foreground: 93 106 133;
+    --destructive: 218 30 46;
+    --foreground: 9 14 29;
+    --border: 190 197 210;
+    --input: 190 197 210;
+    --ring: 15 103 254;
+    --accent: 110 197 34;
     --accent-foreground: 255 255 255;
   }
 }
 
 @theme inline {
+  --color-therapeia-10: #EDF5FF;
+  --color-therapeia-20: #D0E4FF;
+  --color-therapeia-30: #A6CBFF;
+  --color-therapeia-40: #78AEFF;
+  --color-therapeia-50: #458CFF;
+  --color-therapeia-60: #0F67FE;
+  --color-therapeia-70: #0048CE;
+  --color-therapeia-80: #00349C;
+  --color-therapeia-90: #00206C;
+  --color-therapeia-100: #001141;
+
+  --color-panacea-10: #D9FBFB;
+  --color-panacea-20: #9EEFF0;
+  --color-panacea-30: #3DD6DB;
+  --color-panacea-40: #08BDBA;
+  --color-panacea-50: #00939D;
+  --color-panacea-60: #00737D;
+  --color-panacea-70: #00545D;
+  --color-panacea-80: #003C44;
+  --color-panacea-90: #022A30;
+  --color-panacea-100: #081A1C;
+
+  --color-eirene-10: #E5F6FF;
+  --color-eirene-20: #BAE6FF;
+  --color-eirene-30: #82CFFF;
+  --color-eirene-40: #33B1FF;
+  --color-eirene-50: #1192E8;
+  --color-eirene-60: #0072C3;
+  --color-eirene-70: #00539A;
+  --color-eirene-80: #003A6D;
+  --color-eirene-90: #012749;
+  --color-eirene-100: #061727;
+
+  --color-hygieia-10: #FFF1F3;
+  --color-hygieia-20: #FFD7DD;
+  --color-hygieia-30: #FFB3BD;
+  --color-hygieia-40: #FF8391;
+  --color-hygieia-50: #FA4D5E;
+  --color-hygieia-60: #DA1E2E;
+  --color-hygieia-70: #A21922;
+  --color-hygieia-80: #750E13;
+  --color-hygieia-90: #520407;
+  --color-hygieia-100: #2D0708;
+
+  --color-aceso-10: #F6F2FF;
+  --color-aceso-20: #E8DAFF;
+  --color-aceso-30: #D4BBFF;
+  --color-aceso-40: #BE95FF;
+  --color-aceso-50: #A56DFF;
+  --color-aceso-60: #8A3FFC;
+  --color-aceso-70: #6929C4;
+  --color-aceso-80: #491D8B;
+  --color-aceso-90: #31135E;
+  --color-aceso-100: #1C0F30;
+
+  --color-helios-10: #FFFAE5;
+  --color-helios-20: #FEF2C7;
+  --color-helios-30: #F6D053;
+  --color-helios-40: #FBBF24;
+  --color-helios-50: #F59E0B;
+  --color-helios-60: #D97706;
+  --color-helios-70: #B45309;
+  --color-helios-80: #92400E;
+  --color-helios-90: #78350F;
+  --color-helios-100: #451A03;
+
+  --color-zoi-10: #EDFCDC;
+  --color-zoi-20: #DAF7BB;
+  --color-zoi-30: #BBEF86;
+  --color-zoi-40: #92DE4A;
+  --color-zoi-50: #6EC522;
+  --color-zoi-60: #55A316;
+  --color-zoi-70: #438015;
+  --color-zoi-80: #376516;
+  --color-zoi-90: #2D5314;
+  --color-zoi-100: #152E05;
+
+  --color-asklepios-white: #FFFFFF;
+  --color-asklepios-10: #F2F5F9;
+  --color-asklepios-20: #DCE1E8;
+  --color-asklepios-30: #BEC5D2;
+  --color-asklepios-40: #9EA7B8;
+  --color-asklepios-50: #818BA0;
+  --color-asklepios-60: #5D6A85;
+  --color-asklepios-70: #3D4966;
+  --color-asklepios-80: #242E49;
+  --color-asklepios-90: #141B31;
+  --color-asklepios-100: #090E1D;
+
   --color-primary: rgb(var(--primary));
   --color-primary-foreground: rgb(var(--primary-foreground));
   --color-card: rgb(var(--card));
