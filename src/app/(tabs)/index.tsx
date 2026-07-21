@@ -1,7 +1,10 @@
 import { View, Text, ScrollView, Image } from 'react-native';
 import { Heart, Activity, Footprints, Flame, Bell } from 'lucide-react-native';
+import { useBLE } from '@/context/BLEContext';
 
 export default function HomeScreen() {
+  const { currentBPM, currentSpO2, connectedDevice } = useBLE();
+
   return (
     <ScrollView className="flex-1 bg-background">
       {/* Header */}
@@ -13,7 +16,9 @@ export default function HomeScreen() {
           </View>
           <View>
             <Text className="text-sm font-semibold text-primary">HealthSense</Text>
-            <Text className="text-xl font-bold text-foreground">Chào mừng trở lại</Text>
+            <Text className="text-xl font-bold text-foreground">
+              {connectedDevice ? "Đã kết nối thiết bị" : "Chào mừng trở lại"}
+            </Text>
           </View>
         </View>
         <View className="h-10 w-10 rounded-full bg-asklepios-10 items-center justify-center">
@@ -28,8 +33,10 @@ export default function HomeScreen() {
             <Heart color="#55A316" size={24} fill="#55A316" />
           </View>
           <View>
-            <Text className="text-sm text-zoi-70 font-medium">Trạng thái nhịp tim</Text>
-            <Text className="text-xl font-bold text-zoi-90 mt-1">Nhịp tim ổn định</Text>
+            <Text className="text-sm text-zoi-70 font-medium">Trạng thái thiết bị</Text>
+            <Text className="text-xl font-bold text-zoi-90 mt-1">
+              {connectedDevice ? "Đang theo dõi sức khoẻ..." : "Chưa kết nối thiết bị"}
+            </Text>
           </View>
         </View>
 
@@ -46,7 +53,7 @@ export default function HomeScreen() {
               </View>
               <Text className="text-xs font-semibold text-hygieia-60">BPM</Text>
             </View>
-            <Text className="text-2xl font-bold text-foreground">75</Text>
+            <Text className="text-2xl font-bold text-foreground">{currentBPM > 0 ? currentBPM : "--"}</Text>
             <Text className="text-xs text-muted-foreground mt-1">Nhịp tim</Text>
           </View>
 
@@ -58,7 +65,7 @@ export default function HomeScreen() {
               </View>
               <Text className="text-xs font-semibold text-therapeia-60">%</Text>
             </View>
-            <Text className="text-2xl font-bold text-foreground">98</Text>
+            <Text className="text-2xl font-bold text-foreground">{currentSpO2 > 0 ? currentSpO2 : "--"}</Text>
             <Text className="text-xs text-muted-foreground mt-1">Nồng độ SpO2</Text>
           </View>
 
