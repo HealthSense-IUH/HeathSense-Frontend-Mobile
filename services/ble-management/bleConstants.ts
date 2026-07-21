@@ -1,0 +1,17 @@
+export const HUY_WATCH_DEVICE_NAME = "HuyWatch";
+export const HUY_WATCH_SERVICE_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b";
+export const HUY_WATCH_CHARACTERISTIC_UUID =
+  "beb5483e-36e1-4688-b7f5-ea07361b26a8";
+export const HUY_WATCH_REPORT_CHARACTERISTIC_UUID =
+  "beb5483e-36e1-4688-b7f5-ea07361b26aa";
+
+export const HUY_WATCH_NOTIFICATION_ID = "huywatch_service";
+export const HUY_WATCH_CHANNEL_ID = "huywatch-health-channel";
+
+export const NOTIFICATION_UPDATE_INTERVAL_MS = 5000;
+export const STORE_HEALTH_UPDATE_INTERVAL_MS = 250;
+export const REQUESTED_BLE_MTU = 512;
+export const DIRECT_RECONNECT_DELAY_MS = 5000;
+export const RECONNECT_SCAN_INTERVAL_MS = 60000;
+export const RECONNECT_SCAN_WINDOW_SECONDS = 30;
+export const DIRECT_CONNECT_TIMEOUT_MS = 12000;
