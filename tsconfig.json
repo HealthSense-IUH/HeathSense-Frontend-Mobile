@@ -6,6 +6,15 @@
       "@/*": [
         "./src/*"
       ],
+      "@/services/*": [
+        "./services/*"
+      ],
+      "@/utils/*": [
+        "./utils/*"
+      ],
+      "@/types/*": [
+        "./types/*"
+      ],
       "@/assets/*": [
         "./assets/*"
       ]
