@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '@/services/authentication/authStore';
+import { useBleStore } from '@/services/ble-management/bleStore';
 import { LoginForm } from '@/components/features/auth/LoginForm';
 import { LoginRequest } from '@/types/authentication';
 
@@ -15,8 +16,13 @@ export default function LoginScreen() {
     setSuccessMessage(null);
     try {
       await login(data);
-      // Login successful -> Redirect to tabs
-      router.replace('/(tabs)' as any);
+      // Kiểm tra nếu thiết bị BLE đã ghép đôi thì vào Tabs, chưa ghép đôi thì chuyển sang trang Dò tìm BLE Scan
+      const knownDevice = useBleStore.getState().knownDevice;
+      if (knownDevice) {
+        router.replace('/(tabs)' as any);
+      } else {
+        router.replace('/(public)/scan' as any);
+      }
     } catch (err: any) {
       console.warn('[LoginScreen] Login error:', err.message);
     }

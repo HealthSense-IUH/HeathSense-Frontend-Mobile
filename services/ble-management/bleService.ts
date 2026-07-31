@@ -309,9 +309,9 @@ class HuyWatchBleService {
     if (isReportChar) {
       const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
       for (const line of lines) {
-        if (line.startsWith("R:")) {
-          // Định dạng báo cáo Screening trung bình: R:bpm,spo2
-          const parts = line.slice(2).split(",");
+        if (line.startsWith("R1:") || line.startsWith("R:")) {
+          // Báo cáo hoàn tất Pha 1 (1 phút đo PPG)
+          const parts = line.slice(line.indexOf(":") + 1).split(",");
           if (parts.length >= 2) {
             const bpm = parseInt(parts[0], 10);
             const spo2 = parseInt(parts[1], 10);
@@ -319,6 +319,29 @@ class HuyWatchBleService {
               store.setHealthData({ bpm, spo2, receivedAt: now });
             }
           }
+
+          // Hoàn tất Pha 1: Tự động dừng ghi, xuất file CSV, tải lên S3 và xác nhận với Backend
+          if (store.isRecordingPpg) {
+            if (store.recordingSampleCount >= 4500) {
+              void ppgRecorder.stopExportAndUpload().catch((err) => {
+                console.warn("Lỗi tự động xuất CSV & upload PPG khi hoàn tất Pha 1:", err);
+              });
+            } else {
+              // Ít hơn 4500 mẫu -> Hủy âm thầm không gây cảnh báo lỗi
+              ppgRecorder.cancelRecording("Số lượng mẫu không đủ 1 phút Pha 1. Hủy phiên ghi.");
+            }
+          }
+        } else if (line.startsWith("R2:")) {
+          // Báo cáo hoàn tất Pha 2 (30 giây đo trung bình - CHỈ cập nhật BPM/SpO2, KHÔNG xuất/upload file PPG)
+          const parts = line.slice(3).split(",");
+          if (parts.length >= 2) {
+            const bpm = parseInt(parts[0], 10);
+            const spo2 = parseInt(parts[1], 10);
+            if (Number.isFinite(bpm) && Number.isFinite(spo2) && bpm > 0) {
+              store.setHealthData({ bpm, spo2, receivedAt: now });
+            }
+          }
+          console.log("[BLE-Report] Đã nhận báo cáo Pha 2 (Chỉ cập nhật chỉ số, không lưu file PPG).");
         } else if (line.startsWith("W:")) {
           // Định dạng Workout vitals: W:millis,bpm,spo2
           const parts = line.slice(2).split(",");
@@ -335,7 +358,7 @@ class HuyWatchBleService {
     }
 
     // 2. XỬ LÝ CHARACTERISTIC 1 (RAW PPG)
-    // Chỉ lấy dữ liệu PPG để vẽ biểu đồ và ghi file, không tự ý cập nhật BPM/SpO2 lên UI chính
+    // Chỉ lấy dữ liệu PPG ở Pha 1 để vẽ biểu đồ và ghi file
     const lines = this.extractLines(raw);
     if (lines.length === 0) return;
 
@@ -344,6 +367,12 @@ class HuyWatchBleService {
     for (const line of lines) {
       if (line.startsWith("CMD:")) {
         console.log("[BLE-CMD]", line);
+        if (line.includes("MOTION") || line.includes("NOT_WEARING")) {
+          // Phát hiện chuyển động hoặc tháo thiết bị trong khi đo Pha 1 -> HỦY ngay phiên ghi PPG
+          if (store.isRecordingPpg) {
+            ppgRecorder.cancelRecording("Phát hiện chuyển động/tháo thiết bị khi đang đo Pha 1. Hủy phiên ghi PPG.");
+          }
+        }
       } else {
         const sample = this.parsePpgLine(line);
         if (sample) ppgSamples.push(sample);
@@ -351,6 +380,11 @@ class HuyWatchBleService {
     }
 
     if (ppgSamples.length > 0) {
+      // Tự động khởi tạo phiên ghi PPG cho Pha 1 nếu chưa kích hoạt
+      if (!store.isRecordingPpg) {
+        ppgRecorder.start();
+      }
+
       ppgRecorder.appendSamples(ppgSamples);
 
       if (now - this.storeUpdateAt >= STORE_HEALTH_UPDATE_INTERVAL_MS) {

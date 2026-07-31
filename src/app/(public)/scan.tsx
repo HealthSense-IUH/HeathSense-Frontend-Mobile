@@ -211,13 +211,22 @@ export default function BleScanScreen() {
             <Text className="text-xl font-bold text-foreground">HealthSense</Text>
           </View>
           
-          <Pressable 
-            onPress={() => void startAutoScan()} 
-            disabled={isScanning}
-            className="h-10 w-10 rounded-full bg-card border border-border items-center justify-center active:opacity-70"
-          >
-            <RefreshCw color={isScanning ? "#0F67FE" : "#64748B"} size={18} className={isScanning ? "animate-spin" : ""} />
-          </Pressable>
+          <View className="flex-row items-center gap-2">
+            <Pressable 
+              onPress={() => void startAutoScan()} 
+              disabled={isScanning}
+              className="h-10 w-10 rounded-full bg-card border border-border items-center justify-center active:opacity-70"
+            >
+              <RefreshCw color={isScanning ? "#0F67FE" : "#64748B"} size={18} className={isScanning ? "animate-spin" : ""} />
+            </Pressable>
+
+            <Pressable
+              onPress={() => router.replace("/(tabs)" as any)}
+              className="px-3.5 py-2 rounded-xl bg-card border border-border flex-row items-center active:opacity-70"
+            >
+              <Text className="text-xs font-bold text-foreground">Vào App</Text>
+            </Pressable>
+          </View>
         </View>
 
         <Text className="text-3xl font-extrabold text-foreground tracking-tight">
