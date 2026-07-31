@@ -3,6 +3,7 @@ import { bleService } from "../../services/ble-management/bleService";
 import type { KnownBleDevice } from "../../services/ble-management/bleStorage";
 import { BleConnectionStatus, useBleStore } from "../../services/ble-management/bleStore";
 import { ppgRecorder, PpgRecordingResult } from "../../services/ppg-management/ppgRecorder";
+import type { HealthRecordResponse } from "../../types/response";
 
 interface BLEContextType {
   knownDevice: KnownBleDevice | null;
@@ -31,6 +32,7 @@ interface BLEContextType {
   forgetDevice: () => Promise<void>;
   startPpgRecording: () => void;
   stopPpgRecording: () => Promise<PpgRecordingResult>;
+  stopExportAndUploadPpgRecording: () => Promise<{ recording: PpgRecordingResult; record?: HealthRecordResponse }>;
 }
 
 const BLEContext = createContext<BLEContextType | undefined>(undefined);
@@ -104,6 +106,7 @@ export const BLEProvider: React.FC<{ children: React.ReactNode }> = ({
       forgetDevice: () => bleService.forgetDevice(),
       startPpgRecording: () => ppgRecorder.start(),
       stopPpgRecording: () => ppgRecorder.stopAndExport(),
+      stopExportAndUploadPpgRecording: () => ppgRecorder.stopExportAndUpload(),
     }),
     [
       knownDevice,
