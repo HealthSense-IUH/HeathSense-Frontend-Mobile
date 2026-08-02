@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "HealthSense Mobile",
-    "slug": "healthsense-frontend-mobile",
+    "slug": "healthsense",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -59,6 +59,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "c237a4f0-7409-4a81-b3ba-a956d4441067"
+      }
+    },
+    "owner": "huynhducphu"
   }
 }
