@@ -35,6 +35,7 @@ export const requestBluetoothPermissions = async (): Promise<{
         permissions.push(
             RN.PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
             RN.PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
+            RN.PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
         );
     }
 

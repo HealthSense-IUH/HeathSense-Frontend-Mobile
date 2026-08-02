@@ -9,7 +9,7 @@ import BleManager, {
   BleDiscoverPeripheralEvent,
   BleManagerDidUpdateValueForCharacteristicEvent,
 } from "react-native-ble-manager";
-import { requestBluetoothPermissions } from "../../src/utils/blePermissions";
+import { requestBluetoothPermissions } from "../../utils/blePermissions";
 import { ppgRecorder, PpgSample } from "../ppg-management/ppgRecorder";
 import {
   DIRECT_CONNECT_TIMEOUT_MS,
