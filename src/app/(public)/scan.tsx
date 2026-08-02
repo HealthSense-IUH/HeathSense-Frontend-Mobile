@@ -13,9 +13,9 @@ import BleManager from "react-native-ble-manager";
 import {
   HUY_WATCH_DEVICE_NAME,
   HUY_WATCH_SERVICE_UUID,
-} from "../../../services/ble-management/bleConstants";
-import { useBLE } from "../../context/BLEContext";
-import { requestBluetoothPermissions } from "../../utils/blePermissions";
+} from "@/services/ble-management/bleConstants";
+import { useBLE } from "@/context/BLEContext";
+import { requestBluetoothPermissions } from "@/utils/blePermissions";
 
 type BlePeripheral = {
   id: string;

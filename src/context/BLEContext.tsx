@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useEffect, useMemo } from "react";
-import { bleService } from "../../services/ble-management/bleService";
-import type { KnownBleDevice } from "../../services/ble-management/bleStorage";
-import { BleConnectionStatus, useBleStore } from "../../services/ble-management/bleStore";
-import { ppgRecorder, PpgRecordingResult } from "../../services/ppg-management/ppgRecorder";
-import type { HealthRecordResponse } from "../../types/response";
+import { bleService } from "@/services/ble-management/bleService";
+import type { KnownBleDevice } from "@/services/ble-management/bleStorage";
+import { BleConnectionStatus, useBleStore } from "@/services/ble-management/bleStore";
+import { ppgRecorder, PpgRecordingResult } from "@/services/ppg-management/ppgRecorder";
+import type { HealthRecordResponse } from "@/types/response";
 
 interface BLEContextType {
   knownDevice: KnownBleDevice | null;

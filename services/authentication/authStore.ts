@@ -7,7 +7,7 @@ import {
   logoutApi,
   registerApi,
 } from './index';
-import { LoginRequest, RegisterRequest, UserSession } from '../../types/authentication';
+import { LoginRequest, RegisterRequest, UserSession } from '@/types/authentication';
 
 type AuthState = {
   user: UserSession | null;

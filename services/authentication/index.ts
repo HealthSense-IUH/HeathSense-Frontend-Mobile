@@ -7,14 +7,14 @@ import {
   MobileRefreshRequest,
   RegisterRequest,
   UserSession,
-} from '../../types/authentication';
+} from '@/types/authentication';
 import axiosClient, {
   ACCESS_TOKEN_KEY,
   clearStoredTokens,
   REFRESH_TOKEN_KEY,
   SESSION_ID_KEY,
   USER_SESSION_KEY,
-} from '../../utils/axiosClient';
+} from '@/utils/axiosClient';
 
 /**
  * Lưu toàn bộ Auth Data (Tokens & Session) vào SecureStore

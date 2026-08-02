@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "HeathSence-Frotend-Mobile",
-    "slug": "HeathSence-Frotend-Mobile",
+    "name": "HealthSense Mobile",
+    "slug": "healthsense-frontend-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "heathsencefrotendmobile",
+    "scheme": "healthsensemobile",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon"
@@ -30,7 +30,7 @@
         "android.permission.FOREGROUND_SERVICE",
         "android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE"
       ],
-      "package": "com.huynhducphu.HeathSenceFrotendMobile"
+      "package": "com.huynhducphu.healthsensefrontendmobile"
     },
     "web": {
       "bundler": "metro",

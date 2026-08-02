@@ -2,7 +2,7 @@ import { File } from 'expo-file-system';
 import { ApiResponse } from '@/types/authentication';
 import { PresignedUrlRequest } from '@/types/request';
 import axiosClient from '@/utils/axiosClient';
-import { HealthRecordResponse, PresignedUrlResponse } from '../../types/response';
+import { HealthRecordResponse, PresignedUrlResponse } from '@/types/response';
 import { PpgRecordingResult } from './ppgRecorder';
 
 /**

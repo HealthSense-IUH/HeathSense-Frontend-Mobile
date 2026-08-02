@@ -1,4 +1,4 @@
-import { PredictionLabel, RecordStatus } from '../ppg';
+import { PredictionLabel, RecordStatus } from '@/types/ppg';
 
 export interface PresignedUrlResponse {
     recordId: string | number;

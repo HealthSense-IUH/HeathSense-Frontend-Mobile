@@ -1,7 +1,7 @@
 import { Directory, File, Paths } from "expo-file-system";
 import * as Sharing from "expo-sharing";
-import type { HealthRecordResponse } from "../../types/response";
-import { useBleStore } from "../ble-management/bleStore";
+import type { HealthRecordResponse } from "@/types/response";
+import { useBleStore } from "@/services/ble-management/bleStore";
 
 export type PpgSample = {
   deviceMillis: number | null;
