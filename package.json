@@ -23,7 +23,7 @@
     "expo-status-bar": "~57.0.0",
     "expo-system-ui": "~57.0.0",
     "expo-web-browser": "~57.0.0",
-    "lucide-react-native": "^1.24.0",
+    "lucide-react-native": "^0.475.0",
     "nativewind": "^5.0.0-preview.2",
     "react": "19.2.3",
     "react-dom": "19.2.3",
