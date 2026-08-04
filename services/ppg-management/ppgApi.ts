@@ -63,7 +63,22 @@ export const confirmUpload = async (id: string | number): Promise<HealthRecordRe
 };
 
 /**
- * Luồng xử lý trọn gói: Tự động lấy file CSV ghi nhận được -> xin Presigned URL -> Upload S3 -> Confirm Backend
+ * Lấy thông tin chi tiết một bản ghi sức khỏe (GET /api/health-records/{id})
+ */
+export const getHealthRecord = async (id: string | number): Promise<HealthRecordResponse> => {
+    try {
+        const response = await axiosClient.get<ApiResponse<HealthRecordResponse>>(
+            `/api/health-records/${id}`
+        );
+        return response.data?.data || response.data?.result || (response.data as any);
+    } catch (err) {
+        console.error('Không thể lấy thông tin bản ghi từ Backend:', err);
+        throw err;
+    }
+};
+
+/**
+ * Luồng xử lý trọn gói: Tự động lấy file CSV ghi nhận được -> xin Presigned URL -> Upload S3 -> Confirm Backend -> Polling chờ AI
  */
 export const uploadPpgRecord = async (
     recordingResult: PpgRecordingResult
@@ -96,7 +111,25 @@ export const uploadPpgRecord = async (
         await uploadFileToS3(presigned.uploadUrl, recordingResult.uri);
 
         // 4. Xác nhận hoàn tất upload với Backend
-        const recordResponse = await confirmUpload(String(presigned.recordId));
+        let recordResponse = await confirmUpload(String(presigned.recordId));
+
+        // 5. Polling chờ AI phân tích xong (trạng thái chuyển sang COMPLETED hoặc FAILED)
+        const maxAttempts = 30; // 30 lần * 2 giây = 60 giây timeout
+        let attempts = 0;
+        
+        while (recordResponse.status === 'PROCESSING' || recordResponse.status === 'PENDING_UPLOAD') {
+            if (attempts >= maxAttempts) {
+                throw new Error('Quá thời gian chờ AI phân tích (Timeout).');
+            }
+            // Đợi 2 giây
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            recordResponse = await getHealthRecord(String(presigned.recordId));
+            attempts++;
+        }
+
+        if (recordResponse.status === 'FAILED') {
+            throw new Error('Backend báo lỗi phân tích AI thất bại.');
+        }
 
         return recordResponse;
     } catch (err) {

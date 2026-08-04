@@ -683,10 +683,6 @@ class HuyWatchBleService {
               AndroidForegroundServiceType.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE,
             ];
           }
-        } else {
-          foregroundServiceTypes = [
-            AndroidForegroundServiceType.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE,
-          ];
         }
       }
     } catch (err) {

@@ -28,6 +28,8 @@ interface BLEContextType {
   lastRecordingFileUri: string | null;
   lastRecordingFileName: string | null;
   recordingError: string | null;
+  isAnalyzing: boolean;
+  aiAnalysisResult: HealthRecordResponse | null;
   connectToDevice: (id: string, name?: string | null) => Promise<void>;
   disconnectDevice: () => Promise<void>;
   forgetDevice: () => Promise<void>;
@@ -72,6 +74,8 @@ export const BLEProvider: React.FC<{ children: React.ReactNode }> = ({
     (state) => state.lastRecordingFileName,
   );
   const recordingError = useBleStore((state) => state.recordingError);
+  const isAnalyzing = useBleStore((state) => state.isAnalyzing);
+  const aiAnalysisResult = useBleStore((state) => state.aiAnalysisResult);
 
   useEffect(() => {
     void bleService.bootstrap();
@@ -104,6 +108,8 @@ export const BLEProvider: React.FC<{ children: React.ReactNode }> = ({
       lastRecordingFileUri,
       lastRecordingFileName,
       recordingError,
+      isAnalyzing,
+      aiAnalysisResult,
       connectToDevice: (id, name) =>
         bleService.connectToDevice(id, { deviceName: name }),
       disconnectDevice: () => bleService.disconnectDevice(),
@@ -134,6 +140,8 @@ export const BLEProvider: React.FC<{ children: React.ReactNode }> = ({
       lastRecordingFileUri,
       lastRecordingFileName,
       recordingError,
+      isAnalyzing,
+      aiAnalysisResult,
     ],
   );
 
