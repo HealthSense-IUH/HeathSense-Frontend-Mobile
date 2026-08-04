@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -28,6 +28,10 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
+
+  const emailInputRef = useRef<TextInput>(null);
+  const passwordInputRef = useRef<TextInput>(null);
+  const confirmPasswordInputRef = useRef<TextInput>(null);
 
   const handleSubmit = async () => {
     setLocalError(null);
@@ -102,6 +106,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
               value={fullName}
               onChangeText={setFullName}
               editable={!isLoading}
+              returnKeyType="next"
+              onSubmitEditing={() => emailInputRef.current?.focus()}
             />
           </View>
         </View>
@@ -114,6 +120,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           <View className="flex-row items-center bg-background border border-border rounded-2xl px-3.5 py-3">
             <Mail size={18} color="#9EA7B8" className="mr-2.5" />
             <TextInput
+              ref={emailInputRef}
               className="flex-1 text-sm text-foreground font-medium p-0"
               placeholder="email@example.com"
               placeholderTextColor="#9EA7B8"
@@ -123,6 +130,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
               value={email}
               onChangeText={setEmail}
               editable={!isLoading}
+              returnKeyType="next"
+              onSubmitEditing={() => passwordInputRef.current?.focus()}
             />
           </View>
         </View>
@@ -135,6 +144,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           <View className="flex-row items-center bg-background border border-border rounded-2xl px-3.5 py-3">
             <Lock size={18} color="#9EA7B8" className="mr-2.5" />
             <TextInput
+              ref={passwordInputRef}
               className="flex-1 text-sm text-foreground font-medium p-0"
               placeholder="••••••••"
               placeholderTextColor="#9EA7B8"
@@ -142,6 +152,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
               value={password}
               onChangeText={setPassword}
               editable={!isLoading}
+              returnKeyType="next"
+              onSubmitEditing={() => confirmPasswordInputRef.current?.focus()}
             />
             <Pressable
               onPress={() => setShowPassword(!showPassword)}
@@ -165,6 +177,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           <View className="flex-row items-center bg-background border border-border rounded-2xl px-3.5 py-3">
             <Lock size={18} color="#9EA7B8" className="mr-2.5" />
             <TextInput
+              ref={confirmPasswordInputRef}
               className="flex-1 text-sm text-foreground font-medium p-0"
               placeholder="••••••••"
               placeholderTextColor="#9EA7B8"
@@ -172,6 +185,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               editable={!isLoading}
+              returnKeyType="done"
+              onSubmitEditing={handleSubmit}
             />
           </View>
         </View>

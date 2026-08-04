@@ -10,6 +10,7 @@ interface BLEContextType {
   connectedDevice: string | null;
   currentBPM: number;
   currentSpO2: number;
+  batteryLevel: number | null;
   latestPpgDeviceMillis: number | null;
   latestPpgRed: number | null;
   latestPpgIR: number | null;
@@ -30,6 +31,7 @@ interface BLEContextType {
   connectToDevice: (id: string, name?: string | null) => Promise<void>;
   disconnectDevice: () => Promise<void>;
   forgetDevice: () => Promise<void>;
+  refreshBatteryLevel: () => Promise<number | null>;
   startPpgRecording: () => void;
   stopPpgRecording: () => Promise<PpgRecordingResult>;
   stopExportAndUploadPpgRecording: () => Promise<{ recording: PpgRecordingResult; record?: HealthRecordResponse }>;
@@ -44,6 +46,7 @@ export const BLEProvider: React.FC<{ children: React.ReactNode }> = ({
   const connectedDevice = useBleStore((state) => state.connectedDeviceId);
   const currentBPM = useBleStore((state) => state.currentBPM);
   const currentSpO2 = useBleStore((state) => state.currentSpO2);
+  const batteryLevel = useBleStore((state) => state.batteryLevel);
   const latestPpgDeviceMillis = useBleStore(
     (state) => state.latestPpgDeviceMillis,
   );
@@ -80,6 +83,7 @@ export const BLEProvider: React.FC<{ children: React.ReactNode }> = ({
       connectedDevice,
       currentBPM,
       currentSpO2,
+      batteryLevel,
       latestPpgDeviceMillis,
       latestPpgRed,
       latestPpgIR,
@@ -104,6 +108,7 @@ export const BLEProvider: React.FC<{ children: React.ReactNode }> = ({
         bleService.connectToDevice(id, { deviceName: name }),
       disconnectDevice: () => bleService.disconnectDevice(),
       forgetDevice: () => bleService.forgetDevice(),
+      refreshBatteryLevel: () => bleService.readBatteryLevel(),
       startPpgRecording: () => ppgRecorder.start(),
       stopPpgRecording: () => ppgRecorder.stopAndExport(),
       stopExportAndUploadPpgRecording: () => ppgRecorder.stopExportAndUpload(),
@@ -113,6 +118,7 @@ export const BLEProvider: React.FC<{ children: React.ReactNode }> = ({
       connectedDevice,
       currentBPM,
       currentSpO2,
+      batteryLevel,
       latestPpgDeviceMillis,
       latestPpgRed,
       latestPpgIR,

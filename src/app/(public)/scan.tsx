@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Linking,
   Pressable,
   ScrollView,
   Text,
@@ -55,6 +56,14 @@ export default function BleScanScreen() {
     if (!permResult.ok) {
       setIsScanning(false);
       setScanStatusMessage("Vui lòng cấp quyền Bluetooth để tiếp tục.");
+      Alert.alert(
+        "Cần cấp quyền Bluetooth & Vị trí",
+        "Ứng dụng cần quyền Bluetooth để tìm và kết nối với đồng hồ. Vui lòng cho phép quyền Bluetooth trong Cài đặt ứng dụng.",
+        [
+          { text: "Hủy", style: "cancel" },
+          { text: "Mở Cài đặt", onPress: () => void Linking.openSettings() }
+        ]
+      );
       return;
     }
 
@@ -239,7 +248,7 @@ export default function BleScanScreen() {
         {/* Status Radar Box */}
         <View className="mt-8 bg-card rounded-3xl p-6 border border-border shadow-sm items-center justify-center">
           <View className="relative items-center justify-center my-4">
-            <View className={`h-24 w-24 rounded-full bg-primary/10 items-center justify-center ${isScanning ? "animate-ping opacity-75" : ""}`} />
+            <View className={`h-24 w-24 rounded-full bg-primary/10 items-center justify-center ${isScanning ? "opacity-80" : "opacity-30"}`} />
             <View className="absolute h-16 w-16 rounded-full bg-primary/20 items-center justify-center">
               <Radio color="#0F67FE" size={32} />
             </View>

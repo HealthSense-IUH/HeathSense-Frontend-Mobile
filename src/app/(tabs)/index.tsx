@@ -1,13 +1,13 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Heart, Activity, Footprints, Flame, Bell, Bluetooth, Radio } from 'lucide-react-native';
+import { Heart, Activity, Footprints, Flame, Bell, Bluetooth, Radio, Battery } from 'lucide-react-native';
 import { useBLE } from '@/context/BLEContext';
 import { useAuthStore } from '@/services/authentication/authStore';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { currentBPM, currentSpO2, connectedDevice, knownDevice, status } = useBLE();
+  const { currentBPM, currentSpO2, connectedDevice, knownDevice, batteryLevel } = useBLE();
   const { user } = useAuthStore();
 
   const isConnected = Boolean(connectedDevice);
@@ -59,9 +59,17 @@ export default function HomeScreen() {
               <Bluetooth color={isConnected ? '#55A316' : '#0F67FE'} size={24} />
             </View>
             <View className="flex-1">
-              <Text className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Kết nối BLE
-              </Text>
+              <View className="flex-row items-center justify-between">
+                <Text className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Kết nối BLE
+                </Text>
+                {isConnected && batteryLevel !== null && (
+                  <View className="flex-row items-center bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                    <Battery color="#10B981" size={13} className="mr-1" />
+                    <Text className="text-[11px] font-bold text-emerald-600">{batteryLevel}%</Text>
+                  </View>
+                )}
+              </View>
               <Text className="text-base font-bold text-foreground mt-0.5" numberOfLines={1}>
                 {isConnected
                   ? `HuyWatch: Đã kết nối`

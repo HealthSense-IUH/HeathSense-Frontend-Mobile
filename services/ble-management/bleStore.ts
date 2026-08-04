@@ -20,6 +20,7 @@ type BleState = {
     negotiatedMtu: number | null;
     currentBPM: number;
     currentSpO2: number;
+    batteryLevel: number | null;
     latestPpgDeviceMillis: number | null;
     latestPpgRed: number | null;
     latestPpgIR: number | null;
@@ -40,6 +41,7 @@ type BleState = {
     setNegotiatedMtu: (mtu: number | null) => void;
     setStatus: (status: BleConnectionStatus, errorMessage?: string | null) => void;
     setConnectedDevice: (deviceId: string | null) => void;
+    setBatteryLevel: (batteryLevel: number | null) => void;
     setHealthData: (payload: {
         bpm: number;
         spo2: number;
@@ -80,6 +82,7 @@ export const useBleStore = create<BleState>((set) => ({
     negotiatedMtu: null,
     currentBPM: 0,
     currentSpO2: 0,
+    batteryLevel: null,
     latestPpgDeviceMillis: null,
     latestPpgRed: null,
     latestPpgIR: null,
@@ -105,6 +108,7 @@ export const useBleStore = create<BleState>((set) => ({
         connectedDeviceId,
         lastConnectedAt: connectedDeviceId ? Date.now() : null,
         }),
+    setBatteryLevel: (batteryLevel) => set({ batteryLevel }),
     setHealthData: ({ bpm, spo2, receivedAt = Date.now() }) =>
         set({
         currentBPM: bpm,
@@ -130,6 +134,7 @@ export const useBleStore = create<BleState>((set) => ({
         set({
         currentBPM: 0,
         currentSpO2: 0,
+        batteryLevel: null,
         latestPpgDeviceMillis: null,
         latestPpgRed: null,
         latestPpgIR: null,

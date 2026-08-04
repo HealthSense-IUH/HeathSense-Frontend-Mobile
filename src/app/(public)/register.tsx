@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, ScrollView, Text, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '@/services/authentication/authStore';
 import { RegisterForm } from '@/components/features/auth/RegisterForm';
@@ -29,30 +29,37 @@ export default function RegisterScreen() {
   };
 
   return (
-    <ScrollView
-      contentContainerStyle={{ flexGrow: 1 }}
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior="padding"
       className="flex-1 bg-background"
-      keyboardShouldPersistTaps="handled"
     >
-      <View className="flex-1 justify-center items-center p-4 py-8">
-        {/* Brand Header */}
-        <View className="items-center mb-6">
-          <Text className="text-3xl font-extrabold text-primary tracking-tight">
-            Health<Text className="text-foreground">Sense</Text>
-          </Text>
-          <Text className="text-xs text-muted-foreground mt-1">
-            Tạo tài khoản mới để kết nối và quản lý dữ liệu sức khỏe
-          </Text>
-        </View>
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+        className="flex-1"
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View className="items-center px-4 py-6 w-full my-auto">
+          {/* Brand Header */}
+          <View className="items-center mb-6">
+            <Text className="text-3xl font-extrabold text-primary tracking-tight">
+              Health<Text className="text-foreground">Sense</Text>
+            </Text>
+            <Text className="text-xs text-muted-foreground mt-1">
+              Tạo tài khoản mới để kết nối và quản lý dữ liệu sức khỏe
+            </Text>
+          </View>
 
-        {/* RegisterForm component */}
-        <RegisterForm
-          onSubmit={handleRegister}
-          isLoading={isLoading}
-          error={error}
-          onNavigateToLogin={() => router.replace('/(public)/login' as any)}
-        />
-      </View>
-    </ScrollView>
+          {/* RegisterForm component */}
+          <RegisterForm
+            onSubmit={handleRegister}
+            isLoading={isLoading}
+            error={error}
+            onNavigateToLogin={() => router.replace('/(public)/login' as any)}
+          />
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

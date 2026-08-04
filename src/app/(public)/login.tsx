@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '@/services/authentication/authStore';
 import { useBleStore } from '@/services/ble-management/bleStore';
@@ -29,30 +29,37 @@ export default function LoginScreen() {
   };
 
   return (
-    <ScrollView
-      contentContainerStyle={{ flexGrow: 1 }}
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior="padding"
       className="flex-1 bg-background"
-      keyboardShouldPersistTaps="handled"
     >
-      <View className="flex-1 justify-center items-center p-4 py-8">
-        {/* Brand Header */}
-        <View className="items-center mb-8">
-          <Text className="text-3xl font-extrabold text-primary tracking-tight">
-            Health<Text className="text-foreground">Sense</Text>
-          </Text>
-          <Text className="text-xs text-muted-foreground mt-1">
-            Hệ thống theo dõi và chăm sóc sức khỏe thông minh
-          </Text>
-        </View>
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+        className="flex-1"
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View className="items-center px-4 py-6 w-full my-auto">
+          {/* Brand Header */}
+          <View className="items-center mb-8">
+            <Text className="text-3xl font-extrabold text-primary tracking-tight">
+              Health<Text className="text-foreground">Sense</Text>
+            </Text>
+            <Text className="text-xs text-muted-foreground mt-1">
+              Hệ thống theo dõi và chăm sóc sức khỏe thông minh
+            </Text>
+          </View>
 
-        {/* LoginForm component */}
-        <LoginForm
-          onSubmit={handleLogin}
-          isLoading={isLoading}
-          error={error}
-          onNavigateToRegister={() => router.push('/(public)/register' as any)}
-        />
-      </View>
-    </ScrollView>
+          {/* LoginForm component */}
+          <LoginForm
+            onSubmit={handleLogin}
+            isLoading={isLoading}
+            error={error}
+            onNavigateToRegister={() => router.push('/(public)/register' as any)}
+          />
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
