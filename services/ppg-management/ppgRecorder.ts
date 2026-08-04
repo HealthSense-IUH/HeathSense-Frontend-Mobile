@@ -195,21 +195,29 @@ class PpgRecorder {
     }
   }
 
-  /**
-   * Dừng ghi, xuất file CSV âm thầm và tự động thực hiện quy trình Upload S3 & Confirm với Backend
-   */
   async stopExportAndUpload(): Promise<{ recording: PpgRecordingResult; record?: HealthRecordResponse }> {
+    const store = useBleStore.getState();
     // Xuất file CSV âm thầm (enableSharing = false)
     const recording = await this.stopAndExport({ enableSharing: false });
     let record: HealthRecordResponse | undefined;
 
     try {
+      store.setRecordingState({ isAnalyzing: true, recordingError: null });
       // Dynamic import ppgApi để tránh phụ thuộc vòng
       const { uploadPpgRecord } = await import("./ppgApi");
       record = await uploadPpgRecord(recording);
       console.log("[PpgRecorder] Upload & Confirm thành công, Record ID:", record?.id);
+      
+      store.setRecordingState({
+        isAnalyzing: false,
+        aiAnalysisResult: record
+      });
     } catch (err) {
       console.error("[PpgRecorder] Lỗi khi upload PPG record lên Backend/S3:", err);
+      store.setRecordingState({
+        isAnalyzing: false,
+        recordingError: err instanceof Error ? err.message : "Lỗi phân tích AI"
+      });
     }
 
     return { recording, record };

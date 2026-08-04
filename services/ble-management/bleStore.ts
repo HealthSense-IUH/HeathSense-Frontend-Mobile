@@ -31,11 +31,13 @@ type BleState = {
     errorMessage: string | null;
     isRecordingPpg: boolean;
     isExportingRecording: boolean;
+    isAnalyzing: boolean;
     recordingStartedAt: number | null;
     recordingSampleCount: number;
     lastRecordingFileUri: string | null;
     lastRecordingFileName: string | null;
     recordingError: string | null;
+    aiAnalysisResult: import("@/types/response").HealthRecordResponse | null;
     setKnownDevice: (device: KnownBleDevice | null) => void;
     setInitialized: (isInitialized: boolean) => void;
     setNegotiatedMtu: (mtu: number | null) => void;
@@ -61,11 +63,13 @@ type BleState = {
             BleState,
             | "isRecordingPpg"
             | "isExportingRecording"
+            | "isAnalyzing"
             | "recordingStartedAt"
             | "recordingSampleCount"
             | "lastRecordingFileUri"
             | "lastRecordingFileName"
             | "recordingError"
+            | "aiAnalysisResult"
         >
         >,
     ) => void;
@@ -93,11 +97,13 @@ export const useBleStore = create<BleState>((set) => ({
     errorMessage: null,
     isRecordingPpg: false,
     isExportingRecording: false,
+    isAnalyzing: false,
     recordingStartedAt: null,
     recordingSampleCount: 0,
     lastRecordingFileUri: null,
     lastRecordingFileName: null,
     recordingError: null,
+    aiAnalysisResult: null,
 
     setKnownDevice: (knownDevice) => set({ knownDevice }),
     setInitialized: (isInitialized) => set({ isInitialized }),

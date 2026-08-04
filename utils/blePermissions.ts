@@ -39,12 +39,6 @@ export const requestBluetoothPermissions = async (): Promise<{
         );
     }
 
-    if(sdk >= 34){
-        permissions.push(
-            "android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE"
-        );
-    }
-
     if(permissions.length === 0){
         console.log(
             "[blePermissions] No runtime permissions required for this SDK level"
