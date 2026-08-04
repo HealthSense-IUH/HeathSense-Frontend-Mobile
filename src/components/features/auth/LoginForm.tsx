@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -26,6 +26,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
+
+  const passwordInputRef = useRef<TextInput>(null);
 
   const handleSubmit = async () => {
     setLocalError(null);
@@ -91,6 +93,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               value={email}
               onChangeText={setEmail}
               editable={!isLoading}
+              returnKeyType="next"
+              onSubmitEditing={() => passwordInputRef.current?.focus()}
             />
           </View>
         </View>
@@ -103,6 +107,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           <View className="flex-row items-center bg-background border border-border rounded-2xl px-3.5 py-3">
             <Lock size={18} color="#9EA7B8" className="mr-2.5" />
             <TextInput
+              ref={passwordInputRef}
               className="flex-1 text-sm text-foreground font-medium p-0"
               placeholder="••••••••"
               placeholderTextColor="#9EA7B8"
@@ -110,6 +115,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               value={password}
               onChangeText={setPassword}
               editable={!isLoading}
+              returnKeyType="done"
+              onSubmitEditing={handleSubmit}
             />
             <Pressable
               onPress={() => setShowPassword(!showPassword)}

@@ -3,7 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 import { ApiResponse, MobileLoginResponse } from '@/types/authentication';
 
 // Default API Base URL (Android emulator uses 10.0.2.2:8080 to connect to localhost:8080)
-export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8080/';
+export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.1.8:8080';
 
 export const ACCESS_TOKEN_KEY = 'access_token';
 export const REFRESH_TOKEN_KEY = 'refresh_token';

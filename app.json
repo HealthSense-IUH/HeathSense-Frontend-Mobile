@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "HealthSense Mobile",
+    "name": "HealthSense",
     "slug": "healthsense",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -30,6 +30,7 @@
         "android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE"
       ],
       "package": "com.huynhducphu.healthsensefrontendmobile",
+      "softwareKeyboardLayoutMode": "pan",
       "usesCleartextTraffic": true
     },
     "web": {

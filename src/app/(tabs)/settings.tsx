@@ -4,12 +4,12 @@ import { useRouter } from 'expo-router';
 import { useAuthStore } from '@/services/authentication/authStore';
 import { useBLE } from '@/context/BLEContext';
 import { LogoutButton } from '@/components/features/auth/LogoutButton';
-import { Activity, Bluetooth, Info, Radio, Shield, Trash2, Watch } from 'lucide-react-native';
+import { Activity, Battery, Bluetooth, Info, Radio, Shield, Trash2, Watch } from 'lucide-react-native';
 
 export default function SettingsScreen() {
   const router = useRouter();
   const { user, logout, isLoading } = useAuthStore();
-  const { knownDevice, connectedDevice, forgetDevice } = useBLE();
+  const { knownDevice, connectedDevice, forgetDevice, batteryLevel } = useBLE();
 
   const handleLogout = async () => {
     await logout();
@@ -51,6 +51,12 @@ export default function SettingsScreen() {
               </Text>
             </View>
           </View>
+          {connectedDevice && batteryLevel !== null && (
+            <View className="flex-row items-center bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
+              <Battery color="#10B981" size={14} className="mr-1" />
+              <Text className="text-xs font-bold text-emerald-600">{batteryLevel}%</Text>
+            </View>
+          )}
         </View>
 
         <View className="flex-row gap-3">

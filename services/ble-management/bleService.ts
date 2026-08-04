@@ -12,6 +12,9 @@ import BleManager, {
 import { requestBluetoothPermissions } from "@/utils/blePermissions";
 import { ppgRecorder, PpgSample } from "@/services/ppg-management/ppgRecorder";
 import {
+  BATTERY_SERVICE_UUID,
+  BATTERY_LEVEL_CHARACTERISTIC_UUID,
+  BATTERY_READ_INTERVAL_MS,
   DIRECT_CONNECT_TIMEOUT_MS,
   DIRECT_RECONNECT_DELAY_MS,
   HUY_WATCH_CHANNEL_ID,
@@ -90,6 +93,7 @@ class HuyWatchBleService {
   private storeUpdateAt = 0;
   private ppgLineBuffer = "";
   private listeners: EventSubscription[] = [];
+  private batteryTimer: TimerHandle | null = null;
 
   async bootstrap() {
     if (this.started) {
@@ -206,6 +210,11 @@ class HuyWatchBleService {
       store.setConnectedDevice(id);
       store.setStatus("connected");
       store.resetReconnectAttempt();
+
+      // Đọc thời lượng pin ngay khi vừa kết nối và bắt đầu đếm giờ 5 phút đọc lại 1 lần
+      void this.readBatteryLevel();
+      this.startBatteryPeriodicRead();
+
       await this.displayForegroundNotification(id);
     } catch (error) {
       const message =
@@ -223,12 +232,50 @@ class HuyWatchBleService {
     }
   }
 
+  async readBatteryLevel(): Promise<number | null> {
+    const store = useBleStore.getState();
+    const deviceId = store.connectedDeviceId;
+    if (!deviceId) return null;
+
+    try {
+      const bytes = await BleManager.read(
+        deviceId,
+        BATTERY_SERVICE_UUID,
+        BATTERY_LEVEL_CHARACTERISTIC_UUID
+      );
+      if (bytes && bytes.length > 0) {
+        const level = Math.min(100, Math.max(0, bytes[0]));
+        store.setBatteryLevel(level);
+        console.log(`[BLE] Dung lượng pin thiết bị: ${level}%`);
+        return level;
+      }
+    } catch (error) {
+      console.warn("Không thể đọc dung lượng pin qua BLE (0x180F):", error);
+    }
+    return null;
+  }
+
+  private startBatteryPeriodicRead() {
+    this.stopBatteryPeriodicRead();
+    this.batteryTimer = setInterval(() => {
+      void this.readBatteryLevel();
+    }, BATTERY_READ_INTERVAL_MS);
+  }
+
+  private stopBatteryPeriodicRead() {
+    if (this.batteryTimer) {
+      clearInterval(this.batteryTimer);
+      this.batteryTimer = null;
+    }
+  }
+
   async disconnectDevice() {
     const store = useBleStore.getState();
     const deviceId = store.connectedDeviceId ?? store.knownDevice?.id;
 
     this.manualDisconnect = true;
     this.clearReconnectTimer();
+    this.stopBatteryPeriodicRead();
 
     if (deviceId) {
       try {

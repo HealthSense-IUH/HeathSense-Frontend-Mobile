@@ -5,6 +5,10 @@ export const HUY_WATCH_CHARACTERISTIC_UUID =
 export const HUY_WATCH_REPORT_CHARACTERISTIC_UUID =
   "beb5483e-36e1-4688-b7f5-ea07361b26aa";
 
+export const BATTERY_SERVICE_UUID = "180f";
+export const BATTERY_LEVEL_CHARACTERISTIC_UUID = "2a19";
+export const BATTERY_READ_INTERVAL_MS = 5 * 60 * 1000;
+
 export const HUY_WATCH_NOTIFICATION_ID = "huywatch_service";
 export const HUY_WATCH_CHANNEL_ID = "huywatch-health-channel";
 
