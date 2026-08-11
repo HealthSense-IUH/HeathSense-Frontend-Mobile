@@ -11,18 +11,18 @@ interface TimeFilterTabsProps {
 
 export function TimeFilterTabs({ activeFilter, onChange }: TimeFilterTabsProps) {
   return (
-    <View className="flex-row items-center justify-between mx-6 mt-4 p-1 bg-muted/50 rounded-full">
+    <View className="flex-row items-center justify-between mx-6 mt-4 p-1 bg-card rounded-2xl shadow-sm border border-border">
       {FILTERS.map((filter) => (
         <TouchableOpacity
           key={filter}
           onPress={() => onChange(filter)}
-          className={`flex-1 items-center justify-center py-2 rounded-full ${
-            activeFilter === filter ? 'bg-popover shadow-sm' : ''
+          className={`flex-1 items-center justify-center py-2.5 rounded-xl ${
+            activeFilter === filter ? 'bg-primary/10' : 'bg-transparent'
           }`}
         >
           <Text
-            className={`text-sm font-semibold ${
-              activeFilter === filter ? 'text-foreground' : 'text-muted-foreground'
+            className={`text-sm ${
+              activeFilter === filter ? 'text-primary font-bold' : 'text-muted-foreground font-semibold'
             }`}
           >
             {filter}

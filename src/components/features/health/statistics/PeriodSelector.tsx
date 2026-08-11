@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { ChevronLeft, ChevronRight } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react-native';
 
 interface PeriodSelectorProps {
   year: number;
@@ -12,22 +12,20 @@ interface PeriodSelectorProps {
 export function PeriodSelector({ year, monthText, onPrev, onNext }: PeriodSelectorProps) {
   return (
     <View className="mt-6 mb-2 items-center">
-      <View className="flex-row items-center justify-between w-full px-12 mb-2">
-        <TouchableOpacity onPress={onPrev} className="p-2">
-          <ChevronLeft color="#9EA7B8" size={24} />
+      <View className="flex-row items-center justify-between bg-card px-4 py-2 rounded-full shadow-sm border border-border min-w-[200px]">
+        <TouchableOpacity onPress={onPrev} className="p-1.5 bg-primary/10 rounded-full">
+          <ChevronLeft color="#0F67FE" size={18} />
         </TouchableOpacity>
         
-        <View className="flex-row items-center">
-          <Text className="text-foreground text-lg font-bold">{year}</Text>
-          {/* A small down arrow icon could go here if it's a dropdown, but design just shows a triangle */}
-          <View className="w-0 h-0 border-l-[4px] border-r-[4px] border-t-[5px] border-l-transparent border-r-transparent border-t-muted-foreground ml-2" />
+        <View className="items-center flex-row px-4">
+          <Text className="text-foreground text-sm font-bold mr-1">{monthText}</Text>
+          <ChevronDown color="#5D6A85" size={14} />
         </View>
 
-        <TouchableOpacity onPress={onNext} className="p-2">
-          <ChevronRight color="#9EA7B8" size={24} />
+        <TouchableOpacity onPress={onNext} className="p-1.5 bg-primary/10 rounded-full">
+          <ChevronRight color="#0F67FE" size={18} />
         </TouchableOpacity>
       </View>
-      <Text className="text-muted-foreground text-base">{monthText}</Text>
     </View>
   );
 }

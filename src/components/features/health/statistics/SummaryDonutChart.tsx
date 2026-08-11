@@ -23,17 +23,13 @@ export function SummaryDonutChart({ total, stats }: SummaryDonutChartProps) {
   ].filter(item => item.value > 0);
 
   return (
-    <View className="bg-popover rounded-t-3xl mt-2 p-6 flex-1 min-h-[400px]">
+    <View className="bg-card rounded-2xl p-5 shadow-sm border border-border mx-6 mt-4 mb-8">
       <View className="flex-row items-center justify-between border-b border-border pb-4 mb-6">
         <View className="flex-row items-baseline">
           <Text className="text-muted-foreground text-sm mr-2">Tổng số lần kiểm tra</Text>
           <Text className="text-foreground text-2xl font-bold mr-1">{total.toLocaleString()}</Text>
           <Text className="text-muted-foreground text-sm">lần</Text>
         </View>
-        <TouchableOpacity className="flex-row items-center">
-          <Text className="text-muted-foreground text-sm mr-1">Ẩn bớt</Text>
-          <ChevronUp color="#9EA7B8" size={16} />
-        </TouchableOpacity>
       </View>
 
       <View className="flex-row items-center">
