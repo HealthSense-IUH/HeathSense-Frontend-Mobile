@@ -48,17 +48,12 @@
           "imageWidth": 76
         }
       ],
-      "expo-sharing",
       [
         "react-native-ble-manager",
         {
           "neverForLocation": true
         }
-      ],
-      "expo-secure-store",
-      "expo-image",
-      "expo-status-bar",
-      "expo-web-browser"
+      ]
     ],
     "experiments": {
       "typedRoutes": true
