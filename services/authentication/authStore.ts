@@ -43,16 +43,21 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           isLoading: false,
         });
 
-        // Background update profile info
-        getProfileApi()
-          .then((updatedUser) => {
-            if (updatedUser) {
-              set({ user: updatedUser });
-            }
-          })
-          .catch(() => {
-            // Keep stored user if offline
-          });
+        // Background update profile info & sync timezone
+        import('./index').then(({ updateProfileApi }) => {
+          const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+          updateProfileApi({ timezone: tz })
+            .then((updatedUser) => {
+              if (updatedUser) {
+                set({ user: updatedUser });
+              }
+            })
+            .catch((err) => {
+              console.warn('[authStore] Failed to sync timezone:', err);
+              // Fallback to getProfileApi if update fails
+              getProfileApi().then(u => u && set({ user: u })).catch(() => {});
+            });
+        });
       } else {
         set({
           user: null,
