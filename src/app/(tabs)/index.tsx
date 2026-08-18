@@ -2,12 +2,16 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Heart, Activity, Footprints, Flame, Bell, Bluetooth, Radio, Battery } from 'lucide-react-native';
-import { useBLE } from '@/context/BLEContext';
+import { useBleStore } from '@/services/ble-management/bleStore';
 import { useAuthStore } from '@/services/authentication/authStore';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { currentBPM, currentSpO2, connectedDevice, knownDevice, batteryLevel } = useBLE();
+  const currentBPM = useBleStore(state => state.currentBPM);
+  const currentSpO2 = useBleStore(state => state.currentSpO2);
+  const connectedDevice = useBleStore(state => state.connectedDeviceId);
+  const knownDevice = useBleStore(state => state.knownDevice);
+  const batteryLevel = useBleStore(state => state.batteryLevel);
   const { user } = useAuthStore();
 
   const isConnected = Boolean(connectedDevice);

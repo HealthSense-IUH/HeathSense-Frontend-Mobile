@@ -292,10 +292,27 @@ class HuyWatchBleService {
   }
 
   async forgetDevice() {
+    const store = useBleStore.getState();
+    const deviceId = store.connectedDeviceId ?? store.knownDevice?.id;
+
     await this.disconnectDevice();
+    
+    // Clear OS-level Bluetooth pairing/bonding cache (Very important after Firmware update)
+    if (deviceId) {
+      if (Platform.OS === "android") {
+        // Fire and forget, don't await to prevent hanging if Android BLE stack is unresponsive
+        BleManager.removeBond(deviceId)
+          .then(() => console.log("[BLE] Đã xóa lịch sử ghép đôi (Bond) trên Android."))
+          .catch((e) => console.log("[BLE] Không thể xóa Bond hoặc thiết bị chưa được Bond:", e));
+      }
+      
+      BleManager.removePeripheral(deviceId)
+        .then(() => console.log("[BLE] Đã xóa peripheral cache."))
+        .catch((e) => console.log("[BLE] Lỗi removePeripheral:", e));
+    }
+
     bleStorage.clearKnownDevice();
 
-    const store = useBleStore.getState();
     store.setKnownDevice(null);
     store.setStatus("unpaired");
     store.resetReconnectAttempt();

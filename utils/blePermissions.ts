@@ -1,14 +1,19 @@
 import * as RN from "react-native";
 
+let hasGrantedPermissionsCache = false;
+
 /**
  * Yêu cầu cấp quyền Bluetooth runtime cho hệ điều hành Android.
  * @returns {Promise<boolean>} Trả về true nếu tất cả quyền được cấp (hoặc hệ điều hành là iOS), ngược lại trả về false.
  */
-
 export const requestBluetoothPermissions = async (): Promise<{
     ok: boolean;
     results?: Record<string, string>;
 }> => {
+    if (hasGrantedPermissionsCache) {
+        return { ok: true };
+    }
+
     if(RN.Platform.OS != "android"){
         return {ok: true};
     }
@@ -65,6 +70,7 @@ export const requestBluetoothPermissions = async (): Promise<{
 
     if (toRequest.length === 0){
         console.log("[blePermissions] All permissions already granted");
+        hasGrantedPermissionsCache = true;
         return {ok: true};
     }
 
@@ -80,6 +86,10 @@ export const requestBluetoothPermissions = async (): Promise<{
             allGranted = false;
             console.warn(`[blePermissions] Permission denied: ${p} -> ${value}`);
         }
+    }
+
+    if (allGranted) {
+        hasGrantedPermissionsCache = true;
     }
 
     return {ok: allGranted, results};

@@ -2,17 +2,16 @@ import React, { useState } from 'react';
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 import { HeartPulse, UploadCloud, CheckCircle2, AlertCircle } from 'lucide-react-native';
 import { useBLE } from '@/context/BLEContext';
+import { useBleStore } from '@/services/ble-management/bleStore';
 
 export function AFibScreeningCard() {
-  const {
-    isRecordingPpg,
-    recordingSampleCount,
-    isExportingRecording,
-    stopExportAndUploadPpgRecording,
-    recordingError,
-    isAnalyzing,
-    aiAnalysisResult,
-  } = useBLE();
+  const { stopExportAndUploadPpgRecording } = useBLE();
+  const isRecordingPpg = useBleStore(state => state.isRecordingPpg);
+  const recordingSampleCount = useBleStore(state => state.recordingSampleCount);
+  const isExportingRecording = useBleStore(state => state.isExportingRecording);
+  const recordingError = useBleStore(state => state.recordingError);
+  const isAnalyzing = useBleStore(state => state.isAnalyzing);
+  const aiAnalysisResult = useBleStore(state => state.aiAnalysisResult);
 
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStatusMsg, setUploadStatusMsg] = useState<string | null>(null);

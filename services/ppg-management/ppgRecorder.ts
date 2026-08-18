@@ -208,6 +208,12 @@ class PpgRecorder {
       record = await uploadPpgRecord(recording);
       console.log("[PpgRecorder] Upload & Confirm thành công, Record ID:", record?.id);
       
+      // Invalidate React Query cache to automatically refresh UI graphs
+      const { queryClient } = await import("@/utils/queryClient");
+      const { QUERY_KEYS } = await import("@/constants/queryKeys");
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.HEALTH_STATS] });
+      // queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.HEALTH_RECORDS] }); // If you have records list
+
       store.setRecordingState({
         isAnalyzing: false,
         aiAnalysisResult: record
