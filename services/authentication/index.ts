@@ -153,4 +153,13 @@ export const getProfileApi = async (): Promise<UserSession> => {
   return user;
 };
 
+export const updateProfileApi = async (data: Partial<UserSession>): Promise<UserSession> => {
+  const response = await axiosClient.put<ApiResponse<UserSession>>('/api/users/profile', data);
+  const user = response.data?.data || response.data?.result || (response.data as any);
+  if (user) {
+    await SecureStore.setItemAsync(USER_SESSION_KEY, JSON.stringify(user));
+  }
+  return user;
+};
+
 export { clearStoredTokens };

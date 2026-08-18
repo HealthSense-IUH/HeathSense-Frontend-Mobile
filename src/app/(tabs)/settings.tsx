@@ -26,11 +26,6 @@ export default function SettingsScreen() {
         </Text>
       </View>
 
-      {/* Logout Profile Card & Button */}
-      <View className="mb-6">
-        <LogoutButton user={user} onLogout={handleLogout} isLoading={isLoading} />
-      </View>
-
       {/* Bluetooth Device Management Section */}
       <View className="bg-card border border-border rounded-3xl p-5 shadow-sm mb-6">
         <Text className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-4">
@@ -117,6 +112,11 @@ export default function SettingsScreen() {
             <Text className="text-xs text-muted-foreground">Spring Boot Microservices & Redis</Text>
           </View>
         </View>
+      </View>
+
+      {/* Logout Profile Card & Button */}
+      <View className="mb-6">
+        <LogoutButton user={user} onLogout={handleLogout} isLoading={isLoading} />
       </View>
     </ScrollView>
   );

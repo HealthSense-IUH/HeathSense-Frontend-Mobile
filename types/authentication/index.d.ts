@@ -5,6 +5,7 @@ export interface UserSession {
     fullName: string;
     role: string;
     accountStatus: string;
+    timezone?: string;
 }
 
 export interface ApiResponse<T> {
