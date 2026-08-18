@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, ScrollView, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BarChart } from 'react-native-gifted-charts';
@@ -13,6 +13,16 @@ type FilterType = 'Ngày' | 'Tuần' | 'Tháng' | 'Năm';
 export default function SmartHealthScreen() {
   const [activeFilter, setActiveFilter] = useState<FilterType>('Năm');
   const [referenceDate, setReferenceDate] = useState(new Date());
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    // Thay thế InteractionManager (đã bị deprecated) bằng setTimeout để đợi Animation mượt mà kết thúc
+    const timer = setTimeout(() => {
+      setIsReady(true);
+    }, 400); // Đợi 400ms tương đương thời gian chạy Animation vuốt màn hình
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   const { data, loading, error } = useHealthStatistics(activeFilter, referenceDate);
 
@@ -128,6 +138,11 @@ export default function SmartHealthScreen() {
         ) : error ? (
           <View className="py-20 justify-center items-center">
             <Text className="text-destructive font-bold">{error}</Text>
+          </View>
+        ) : !isReady ? (
+          <View className="py-20 justify-center items-center">
+            <ActivityIndicator size="large" color="#0F67FE" />
+            <Text className="mt-4 text-muted-foreground">Đang chuẩn bị biểu đồ...</Text>
           </View>
         ) : (
           <>

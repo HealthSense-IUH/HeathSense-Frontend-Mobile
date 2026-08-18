@@ -2,17 +2,19 @@ import React from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '@/services/authentication/authStore';
+import { useLogoutMutation } from '@/hooks/mutations/useAuthMutations';
 import { useBLE } from '@/context/BLEContext';
 import { LogoutButton } from '@/components/features/auth/LogoutButton';
 import { Activity, Battery, Bluetooth, Info, Radio, Shield, Trash2, Watch } from 'lucide-react-native';
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const { user, logout, isLoading } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
+  const logoutMutation = useLogoutMutation();
   const { knownDevice, connectedDevice, forgetDevice, batteryLevel } = useBLE();
 
   const handleLogout = async () => {
-    await logout();
+    await logoutMutation.mutateAsync();
     router.replace('/(public)/login' as any);
   };
 
@@ -116,7 +118,7 @@ export default function SettingsScreen() {
 
       {/* Logout Profile Card & Button */}
       <View className="mb-6">
-        <LogoutButton user={user} onLogout={handleLogout} isLoading={isLoading} />
+        <LogoutButton user={user} onLogout={handleLogout} isLoading={logoutMutation.isPending} />
       </View>
     </ScrollView>
   );
