@@ -9,4 +9,5 @@ export enum PredictionLabel{
     NORMAL = 'NORMAL',
     AFIB = 'AFIB',
     UNCERTAIN = 'UNCERTAIN',
+    AFIB_SUSPECTED = 'AFIB_SUSPECTED',
 }

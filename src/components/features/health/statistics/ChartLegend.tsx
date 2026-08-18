@@ -2,15 +2,17 @@ import React from 'react';
 import { View, Text } from 'react-native';
 
 export const STATUS_COLORS = {
-  NORMAL: '#6EC522', // zoi-50 (Green)
-  AFIB_RISK: '#D97706', // helios-60 (Orange)
-  AFIB_SUSPECTED: '#750E13', // hygieia-80 (Dark Red)
+  NORMAL: '#6EC522', // status-normal
+  UNCERTAIN: '#9EA7B8', // status-uncertain
+  AFIB_SUSPECTED: '#D97706', // status-afib-suspected
+  AFIB_RISK: '#750E13', // status-afib
 };
 
 const LEGEND_ITEMS = [
   { label: 'Không có bất thường', color: STATUS_COLORS.NORMAL },
-  { label: 'Nguy cơ rung tâm nhĩ', color: STATUS_COLORS.AFIB_RISK },
+  { label: 'Không rõ ràng', color: STATUS_COLORS.UNCERTAIN },
   { label: 'Nghi ngờ rung tâm nhĩ', color: STATUS_COLORS.AFIB_SUSPECTED },
+  { label: 'Nguy cơ rung tâm nhĩ', color: STATUS_COLORS.AFIB_RISK },
 ];
 
 export function ChartLegend() {

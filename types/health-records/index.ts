@@ -3,6 +3,7 @@ export interface HealthStatItemResponse {
   normalCount: number;
   afibRiskCount: number;
   uncertainCount: number;
+  afibSuspectedCount: number;
 }
 
 export interface HealthStatisticsResponse {
@@ -10,4 +11,5 @@ export interface HealthStatisticsResponse {
   totalNormal: number;
   totalAfibRisk: number;
   totalUncertain: number;
+  totalAfibSuspected: number;
 }

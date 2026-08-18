@@ -52,13 +52,17 @@ export default function SmartHealthScreen() {
         stacks.push({ value: item.normalCount, color: STATUS_COLORS.NORMAL });
         stackSum += item.normalCount;
       }
+      if (item.uncertainCount > 0) {
+        stacks.push({ value: item.uncertainCount, color: STATUS_COLORS.UNCERTAIN, borderTopLeftRadius: 2, borderTopRightRadius: 2 });
+        stackSum += item.uncertainCount;
+      }
+      if (item.afibSuspectedCount > 0) {
+        stacks.push({ value: item.afibSuspectedCount, color: STATUS_COLORS.AFIB_SUSPECTED, borderTopLeftRadius: 2, borderTopRightRadius: 2 });
+        stackSum += item.afibSuspectedCount;
+      }
       if (item.afibRiskCount > 0) {
         stacks.push({ value: item.afibRiskCount, color: STATUS_COLORS.AFIB_RISK, borderTopLeftRadius: 2, borderTopRightRadius: 2 });
         stackSum += item.afibRiskCount;
-      }
-      if (item.uncertainCount > 0) {
-        stacks.push({ value: item.uncertainCount, color: STATUS_COLORS.AFIB_SUSPECTED, borderTopLeftRadius: 2, borderTopRightRadius: 2 });
-        stackSum += item.uncertainCount;
       }
       
       if (stacks.length === 0) {
@@ -86,7 +90,7 @@ export default function SmartHealthScreen() {
     return { chartData: mapped, maxValue: calcMax };
   }, [data]);
 
-  const totalResults = (data?.totalNormal || 0) + (data?.totalAfibRisk || 0) + (data?.totalUncertain || 0);
+  const totalResults = (data?.totalNormal || 0) + (data?.totalAfibRisk || 0) + (data?.totalAfibSuspected || 0) + (data?.totalUncertain || 0);
 
   // FIX: Thay vì phụ thuộc 100% vào class "flex-1" của Tailwind trên SafeAreaView (có thể bị lỗi trên phiên bản NativeWind hiện tại), 
   // FIX: Gán cứng flex: 1 để không bị bóp height, nhưng giữ className bg-background để hỗ trợ Dark Mode.
@@ -171,8 +175,9 @@ export default function SmartHealthScreen() {
               total={totalResults} 
               stats={{
                 normal: data?.totalNormal || 0,
-                afibRisk: data?.totalAfibRisk || 0,
-                afibSuspected: data?.totalUncertain || 0
+                uncertain: data?.totalUncertain || 0,
+                afibSuspected: data?.totalAfibSuspected || 0,
+                afibRisk: data?.totalAfibRisk || 0
               }} 
             />
           </>

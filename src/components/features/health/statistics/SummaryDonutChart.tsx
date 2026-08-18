@@ -6,8 +6,9 @@ import { STATUS_COLORS } from './ChartLegend';
 
 interface SummaryStats {
   normal: number;
-  afibRisk: number;
+  uncertain: number;
   afibSuspected: number;
+  afibRisk: number;
 }
 
 interface SummaryDonutChartProps {
@@ -20,6 +21,7 @@ export function SummaryDonutChart({ total, stats }: SummaryDonutChartProps) {
     { value: stats.normal || 1, color: STATUS_COLORS.NORMAL }, // Fallback value so chart draws something if all 0
     { value: stats.afibRisk, color: STATUS_COLORS.AFIB_RISK },
     { value: stats.afibSuspected, color: STATUS_COLORS.AFIB_SUSPECTED },
+    { value: stats.uncertain, color: STATUS_COLORS.UNCERTAIN },
   ].filter(item => item.value > 0);
 
   return (
@@ -50,14 +52,19 @@ export function SummaryDonutChart({ total, stats }: SummaryDonutChartProps) {
         {/* Stats List */}
         <View className="flex-1 ml-6">
           <StatRow 
+            label="Nguy cơ rung tâm nhĩ" 
+            count={stats.afibRisk} 
+            color={STATUS_COLORS.AFIB_RISK} 
+          />
+          <StatRow 
             label="Nghi ngờ rung tâm nhĩ" 
             count={stats.afibSuspected} 
             color={STATUS_COLORS.AFIB_SUSPECTED} 
           />
           <StatRow 
-            label="Nguy cơ rung tâm nhĩ" 
-            count={stats.afibRisk} 
-            color={STATUS_COLORS.AFIB_RISK} 
+            label="Không rõ ràng" 
+            count={stats.uncertain} 
+            color={STATUS_COLORS.UNCERTAIN} 
           />
           <StatRow 
             label="Không có bất thường" 

@@ -105,18 +105,22 @@ export function AFibScreeningCard() {
       {aiAnalysisResult && !isAnalyzing && (
         <View className={`rounded-2xl p-4 mb-4 border flex-row items-center ${
           aiAnalysisResult.predictionLabel === 'NORMAL' 
-            ? 'bg-green-500/10 border-green-500/30' 
+            ? 'bg-status-normal/10 border-status-normal/30' 
             : aiAnalysisResult.predictionLabel === 'AFIB'
-            ? 'bg-destructive/10 border-destructive/30'
-            : 'bg-orange-500/10 border-orange-500/30'
+            ? 'bg-status-afib/10 border-status-afib/30'
+            : aiAnalysisResult.predictionLabel === 'AFIB_SUSPECTED'
+            ? 'bg-status-afib-suspected/10 border-status-afib-suspected/30'
+            : 'bg-status-uncertain/10 border-status-uncertain/30'
         }`}>
           <CheckCircle2 
             color={
               aiAnalysisResult.predictionLabel === 'NORMAL' 
-                ? '#22c55e' 
+                ? '#6EC522' 
                 : aiAnalysisResult.predictionLabel === 'AFIB'
-                ? '#ef4444'
-                : '#f97316'
+                ? '#DA1E2E'
+                : aiAnalysisResult.predictionLabel === 'AFIB_SUSPECTED'
+                ? '#D97706'
+                : '#9EA7B8'
             } 
             size={24} 
             className="mr-3" 
@@ -124,12 +128,19 @@ export function AFibScreeningCard() {
           <View className="flex-1">
             <Text className={`text-sm font-bold mb-1 ${
               aiAnalysisResult.predictionLabel === 'NORMAL' 
-                ? 'text-green-600' 
+                ? 'text-status-normal' 
                 : aiAnalysisResult.predictionLabel === 'AFIB'
-                ? 'text-red-600'
-                : 'text-orange-600'
+                ? 'text-status-afib'
+                : aiAnalysisResult.predictionLabel === 'AFIB_SUSPECTED'
+                ? 'text-status-afib-suspected'
+                : 'text-status-uncertain'
             }`}>
-              Phân tích hoàn tất: {aiAnalysisResult.predictionLabel === 'NORMAL' ? 'Bình thường' : aiAnalysisResult.predictionLabel === 'AFIB' ? 'Rung nhĩ (AFib)' : 'Không xác định'}
+              Phân tích hoàn tất: {
+                aiAnalysisResult.predictionLabel === 'NORMAL' ? 'Bình thường' : 
+                aiAnalysisResult.predictionLabel === 'AFIB' ? 'Rung nhĩ (AFib)' : 
+                aiAnalysisResult.predictionLabel === 'AFIB_SUSPECTED' ? 'Nghi ngờ Rung nhĩ' : 
+                'Không rõ ràng'
+              }
             </Text>
             <Text className="text-xs text-muted-foreground">
               Độ tin cậy: {Math.round((aiAnalysisResult.confidence ?? 0) * 100)}%
