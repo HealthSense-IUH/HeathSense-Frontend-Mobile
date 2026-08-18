@@ -6,44 +6,91 @@
 /* Asklepios Design System V1.3 Colors */
 @layer theme {
   :root {
-    --primary: 15 103 254; /* Therapeia Blue 60 */
+    --primary: 15 103 254;
+    /* Therapeia Blue 60 */
     --primary-foreground: 255 255 255;
-    --card: 255 255 255; /* White */
-    --secondary: 217 251 251; /* Panacea Teal 10 */
-    --secondary-foreground: 0 60 68; /* Panacea Teal 80 */
-    --background: 242 245 249; /* Asklepios Gray 10 */
+    --card: 255 255 255;
+    /* White */
+    --secondary: 217 251 251;
+    /* Panacea Teal 10 */
+    --secondary-foreground: 0 60 68;
+    /* Panacea Teal 80 */
+    --background: 242 245 249;
+    /* Asklepios Gray 10 */
     --popover: 255 255 255;
-    --popover-foreground: 20 27 49; /* Asklepios Gray 90 */
-    --muted: 220 225 232; /* Asklepios Gray 20 */
-    --muted-foreground: 93 106 133; /* Asklepios Gray 60 */
-    --destructive: 218 30 46; /* Hygieia Red 60 */
-    --foreground: 9 14 29; /* Asklepios Gray 100 */
-    --border: 190 197 210; /* Asklepios Gray 30 */
+    --popover-foreground: 20 27 49;
+    /* Asklepios Gray 90 */
+    --muted: 220 225 232;
+    /* Asklepios Gray 20 */
+    --muted-foreground: 93 106 133;
+    /* Asklepios Gray 60 */
+    --destructive: 218 30 46;
+    /* Hygieia Red 60 */
+    --foreground: 9 14 29;
+    /* Asklepios Gray 100 */
+    --border: 190 197 210;
+    /* Asklepios Gray 30 */
     --input: 190 197 210;
-    --ring: 15 103 254; /* Therapeia Blue 60 */
-    --accent: 110 197 34; /* Zoi Green 50 */
+    --ring: 15 103 254;
+    /* Therapeia Blue 60 */
+    --accent: 110 197 34;
+    /* Zoi Green 50 */
     --accent-foreground: 255 255 255;
+
+    --status-normal: 110 197 34;
+    /* Zoi Green 50 */
+    --status-uncertain: 158 167 184;
+    /* Asklepios Gray 40 */
+    --status-afib-suspected: 217 119 6;
+    /* Helios 60 */
+    --status-afib: 117 14 19;
+    /* Hygieia 80 */
   }
 
   @media (prefers-color-scheme: dark) {
     :root {
-      --primary: 69 140 255; /* Therapeia Blue 50 */
-      --primary-foreground: 0 17 65; /* Therapeia Blue 100 */
-      --card: 20 27 49; /* Asklepios Gray 90 */
-      --secondary: 0 84 93; /* Panacea Teal 70 */
-      --secondary-foreground: 217 251 251; /* Panacea Teal 10 */
-      --background: 9 14 29; /* Asklepios Gray 100 */
-      --popover: 20 27 49; /* Asklepios Gray 90 */
-      --popover-foreground: 242 245 249; /* Asklepios Gray 10 */
-      --muted: 36 46 73; /* Asklepios Gray 80 */
-      --muted-foreground: 158 167 184; /* Asklepios Gray 40 */
-      --destructive: 250 77 94; /* Hygieia Red 50 */
-      --foreground: 242 245 249; /* Asklepios Gray 10 */
-      --border: 61 73 102; /* Asklepios Gray 70 */
+      --primary: 69 140 255;
+      /* Therapeia Blue 50 */
+      --primary-foreground: 0 17 65;
+      /* Therapeia Blue 100 */
+      --card: 20 27 49;
+      /* Asklepios Gray 90 */
+      --secondary: 0 84 93;
+      /* Panacea Teal 70 */
+      --secondary-foreground: 217 251 251;
+      /* Panacea Teal 10 */
+      --background: 9 14 29;
+      /* Asklepios Gray 100 */
+      --popover: 20 27 49;
+      /* Asklepios Gray 90 */
+      --popover-foreground: 242 245 249;
+      /* Asklepios Gray 10 */
+      --muted: 36 46 73;
+      /* Asklepios Gray 80 */
+      --muted-foreground: 158 167 184;
+      /* Asklepios Gray 40 */
+      --destructive: 250 77 94;
+      /* Hygieia Red 50 */
+      --foreground: 242 245 249;
+      /* Asklepios Gray 10 */
+      --border: 61 73 102;
+      /* Asklepios Gray 70 */
       --input: 61 73 102;
-      --accent: 110 197 34; /* Zoi Green 50 */
-      --accent-foreground: 21 46 5; /* Zoi Green 100 */
-      --ring: 69 140 255; /* Therapeia Blue 50 */
+      --accent: 110 197 34;
+      /* Zoi Green 50 */
+      --accent-foreground: 21 46 5;
+      /* Zoi Green 100 */
+      --ring: 69 140 255;
+      /* Therapeia Blue 50 */
+
+      --status-normal: 110 197 34;
+      /* Zoi Green 50 */
+      --status-uncertain: 158 167 184;
+      /* Asklepios Gray 40 */
+      --status-afib-suspected: 217 119 6;
+      /* Helios 60 */
+      --status-afib: 218 30 46;
+      /* Hygieia 60 */
     }
   }
 
@@ -65,6 +112,10 @@
     --accent: 110 197 34;
     --accent-foreground: 21 46 5;
     --ring: 69 140 255;
+    --status-normal: 110 197 34;
+    --status-uncertain: 158 167 184;
+    --status-afib-suspected: 217 119 6;
+    --status-afib: 218 30 46;
   }
 
   :root.light {
@@ -85,6 +136,10 @@
     --ring: 15 103 254;
     --accent: 110 197 34;
     --accent-foreground: 255 255 255;
+    --status-normal: 110 197 34;
+    --status-uncertain: 158 167 184;
+    --status-afib-suspected: 217 119 6;
+    --status-afib: 117 14 19;
   }
 }
 
@@ -195,4 +250,9 @@
   --color-ring: rgb(var(--ring));
   --color-accent: rgb(var(--accent));
   --color-accent-foreground: rgb(var(--accent-foreground));
+
+  --color-status-normal: rgb(var(--status-normal));
+  --color-status-uncertain: rgb(var(--status-uncertain));
+  --color-status-afib-suspected: rgb(var(--status-afib-suspected));
+  --color-status-afib: rgb(var(--status-afib));
 }
