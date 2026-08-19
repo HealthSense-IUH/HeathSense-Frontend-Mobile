@@ -61,6 +61,7 @@ class PpgRecorder {
       lastRecordingFileUri: null,
       lastRecordingFileName: null,
       recordingError: null,
+      aiAnalysisResult: null, // Xóa kết quả cũ khi đo lại
     });
   }
 

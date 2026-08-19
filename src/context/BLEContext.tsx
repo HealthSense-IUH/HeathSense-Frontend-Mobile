@@ -37,6 +37,7 @@ interface BLEContextType {
   startPpgRecording: () => void;
   stopPpgRecording: () => Promise<PpgRecordingResult>;
   stopExportAndUploadPpgRecording: () => Promise<{ recording: PpgRecordingResult; record?: HealthRecordResponse }>;
+  sendCommand: (cmd: string) => Promise<void>;
 }
 
 const BLEContext = createContext<BLEContextType | undefined>(undefined);
@@ -118,6 +119,7 @@ export const BLEProvider: React.FC<{ children: React.ReactNode }> = ({
       startPpgRecording: () => ppgRecorder.start(),
       stopPpgRecording: () => ppgRecorder.stopAndExport(),
       stopExportAndUploadPpgRecording: () => ppgRecorder.stopExportAndUpload(),
+      sendCommand: (cmd: string) => bleService.sendCommand(cmd),
     }),
     [
       knownDevice,

@@ -255,6 +255,35 @@ class HuyWatchBleService {
     return null;
   }
 
+  async sendCommand(command: string) {
+    const store = useBleStore.getState();
+    const deviceId = store.connectedDeviceId;
+    if (!deviceId) throw new Error("Chưa kết nối thiết bị");
+
+    try {
+      // Characteristic WRITE: beb5483e-36e1-4688-b7f5-ea07361b26a9
+      const RX_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a9";
+      
+      const buffer = [];
+      for (let i = 0; i < command.length; i++) {
+        buffer.push(command.charCodeAt(i));
+      }
+      buffer.push(10); // Thêm ký tự newline (\n)
+
+      await BleManager.write(
+        deviceId,
+        HUY_WATCH_SERVICE_UUID,
+        RX_UUID,
+        buffer,
+        32 // max byte size per write is usually 20, but react-native-ble-manager handles chunks or we can set it higher
+      );
+      console.log(`[BLE-TX] Đã gửi lệnh: ${command}`);
+    } catch (error) {
+      console.warn("Lỗi khi gửi lệnh BLE:", error);
+      throw error;
+    }
+  }
+
   private startBatteryPeriodicRead() {
     this.stopBatteryPeriodicRead();
     this.batteryTimer = setInterval(() => {
@@ -434,7 +463,10 @@ class HuyWatchBleService {
         if (line.includes("MOTION") || line.includes("NOT_WEARING")) {
           // Phát hiện chuyển động hoặc tháo thiết bị trong khi đo Pha 1 -> HỦY ngay phiên ghi PPG
           if (store.isRecordingPpg) {
-            ppgRecorder.cancelRecording("Phát hiện chuyển động/tháo thiết bị khi đang đo Pha 1. Hủy phiên ghi PPG.");
+            const reason = line.includes("MOTION") 
+              ? "Quá trình đo Rung nhĩ bị gián đoạn do cử động tay." 
+              : "Quá trình đo bị gián đoạn do tháo thiết bị.";
+            ppgRecorder.cancelRecording(reason);
           }
         }
       } else {

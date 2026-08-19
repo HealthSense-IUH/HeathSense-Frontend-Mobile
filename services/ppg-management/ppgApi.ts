@@ -23,23 +23,22 @@ export const getPresignedUrl = async (file: PresignedUrlRequest): Promise<Presig
 
 /**
  * Tải trực tiếp nội dung file CSV lên AWS S3 sử dụng Presigned URL (HTTP PUT)
- * Lưu ý: Dùng fetch thuần để không bị tự động gắn Header Authorization Bearer của Backend vào S3
+ * Lưu ý: Sử dụng native file.upload() thay vì fetch để tránh bị React Native can thiệp Header gây lỗi 403 S3
  */
 export const uploadFileToS3 = async (uploadUrl: string, fileUri: string): Promise<void> => {
     try {
         const file = new File(fileUri);
-        const csvContent = await file.text();
-
-        const response = await fetch(uploadUrl, {
-            method: 'PUT',
+        
+        // Native upload, uploadType: BINARY_CONTENT
+        const response = await file.upload(uploadUrl, {
+            httpMethod: 'PUT',
             headers: {
                 'Content-Type': 'text/csv',
             },
-            body: csvContent,
         });
 
-        if (!response.ok) {
-            throw new Error(`Upload file lên S3 thất bại với mã HTTP: ${response.status}`);
+        if (response.status < 200 || response.status >= 300) {
+            throw new Error(`Upload file lên S3 thất bại với mã HTTP: ${response.status}. Chi tiết: ${response.body}`);
         }
     } catch (err) {
         console.error('Lỗi khi upload file CSV lên S3:', err);
