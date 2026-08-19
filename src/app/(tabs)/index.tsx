@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { Heart, Activity, Footprints, Flame, Bell, Bluetooth, Radio, Battery } from 'lucide-react-native';
 import { useBleStore } from '@/services/ble-management/bleStore';
 import { useAuthStore } from '@/services/authentication/authStore';
+import { AFibScreeningCard } from '@/components/features/health/AFibScreeningCard';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -17,7 +18,10 @@ export default function HomeScreen() {
   const isConnected = Boolean(connectedDevice);
 
   return (
-    <ScrollView className="flex-1 bg-background">
+    <ScrollView 
+      className="flex-1 bg-background"
+      contentContainerStyle={{ paddingBottom: 100 }}
+    >
       {/* Header */}
       <View className="px-6 pt-16 pb-6 flex-row justify-between items-center bg-card rounded-b-3xl shadow-sm">
         <View className="flex-row items-center">
@@ -149,6 +153,11 @@ export default function HomeScreen() {
             <Text className="text-xs text-muted-foreground mt-1">Calo tiêu thụ</Text>
           </View>
         </View>
+        
+        {/* AFib Screening Section */}
+        <Text className="text-lg font-bold text-foreground mb-4 mt-2">Tầm soát Rung nhĩ (AFib)</Text>
+        <AFibScreeningCard />
+        <View className="h-6" />
       </View>
     </ScrollView>
   );

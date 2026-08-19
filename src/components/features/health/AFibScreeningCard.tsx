@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 import { HeartPulse, UploadCloud, CheckCircle2, AlertCircle } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 import { useBLE } from '@/context/BLEContext';
 import { useBleStore } from '@/services/ble-management/bleStore';
 
 export function AFibScreeningCard() {
-  const { stopExportAndUploadPpgRecording } = useBLE();
+  const { stopExportAndUploadPpgRecording, sendCommand } = useBLE();
   const isRecordingPpg = useBleStore(state => state.isRecordingPpg);
   const recordingSampleCount = useBleStore(state => state.recordingSampleCount);
   const isExportingRecording = useBleStore(state => state.isExportingRecording);
   const recordingError = useBleStore(state => state.recordingError);
   const isAnalyzing = useBleStore(state => state.isAnalyzing);
   const aiAnalysisResult = useBleStore(state => state.aiAnalysisResult);
+  const currentBPM = useBleStore(state => state.currentBPM);
+  const currentSpO2 = useBleStore(state => state.currentSpO2);
 
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStatusMsg, setUploadStatusMsg] = useState<string | null>(null);
@@ -33,6 +36,13 @@ export function AFibScreeningCard() {
     } finally {
       setIsUploading(false);
     }
+  };
+
+  const router = useRouter();
+
+  const handleStartManualScreening = () => {
+    // Navigate to the dedicated AFib measure screen
+    router.push("/afib-measure" as any);
   };
 
   return (
@@ -60,12 +70,12 @@ export function AFibScreeningCard() {
             <View className="flex-row items-center">
               <View className="h-2.5 w-2.5 rounded-full bg-primary animate-pulse mr-2" />
               <Text className="text-sm font-bold text-primary">
-                Đang đo Pha 1: {recordingSampleCount} mẫu PPG
+                Đang đo Rung nhĩ (Pha 1)
               </Text>
             </View>
           </View>
           <Text className="text-xs text-muted-foreground mb-3">
-            Hệ thống sẽ tự động xuất file CSV & upload S3 khi kết thúc Pha 1 (60s).
+            Hệ thống đang thu thập tín hiệu. Quá trình đo kéo dài khoảng 60s.
           </Text>
 
           <TouchableOpacity
@@ -141,7 +151,7 @@ export function AFibScreeningCard() {
                 'Không rõ ràng'
               }
             </Text>
-            <Text className="text-xs text-muted-foreground">
+            <Text className="text-xs text-muted-foreground mt-0.5">
               Độ tin cậy: {Math.round((aiAnalysisResult.confidence ?? 0) * 100)}%
             </Text>
           </View>
@@ -160,21 +170,42 @@ export function AFibScreeningCard() {
 
       {/* Recording Error */}
       {recordingError && (
-        <View className="bg-destructive/10 border border-destructive/20 rounded-2xl p-3.5 mb-4 flex-row items-center">
-          <AlertCircle color="#DA1E2E" size={18} className="mr-2" />
-          <Text className="text-xs font-semibold text-destructive flex-1">
-            {recordingError}
-          </Text>
+        <View className="bg-destructive/10 border border-destructive/20 rounded-2xl p-3.5 mb-4">
+          <View className="flex-row items-center mb-2">
+            <AlertCircle color="#DA1E2E" size={18} className="mr-2" />
+            <Text className="text-xs font-semibold text-destructive flex-1">
+              {recordingError}
+            </Text>
+          </View>
+          {currentBPM > 0 && currentSpO2 > 0 && (
+            <Text className="text-xs text-destructive/80 font-medium ml-6">
+              Đã vớt vát nhịp tim: {currentBPM} BPM | SpO2: {currentSpO2}%
+            </Text>
+          )}
+          <TouchableOpacity
+            onPress={handleStartManualScreening}
+            className="mt-3 bg-destructive py-2 rounded-xl items-center"
+          >
+            <Text className="text-xs font-bold text-white">Đo lại ngay</Text>
+          </TouchableOpacity>
         </View>
       )}
 
-      {/* Normal Status Badge */}
-      {!isRecordingPpg && !uploadStatusMsg && !isAnalyzing && !aiAnalysisResult && !recordingError && (
-        <View className="bg-accent/10 border border-accent/20 rounded-2xl p-4 flex-row items-center">
-          <View className="h-2.5 w-2.5 rounded-full bg-accent mr-2.5" />
-          <Text className="text-xs font-semibold text-foreground">
-            Sẵn sàng nhận tín hiệu PPG Pha 1 từ thiết bị BLE
-          </Text>
+      {/* Action Area (Always visible when not recording/analyzing/error) */}
+      {!isRecordingPpg && !isAnalyzing && !isUploading && !recordingError && (
+        <View className="bg-accent/10 border border-accent/20 rounded-2xl p-4">
+          <View className="flex-row items-center mb-3">
+            <View className="h-2.5 w-2.5 rounded-full bg-accent mr-2.5" />
+            <Text className="text-xs font-semibold text-foreground">
+              Thiết bị đang đo Rung nhĩ tự động ngầm mỗi 10 phút.
+            </Text>
+          </View>
+          <TouchableOpacity
+            onPress={handleStartManualScreening}
+            className="bg-accent py-3 rounded-xl items-center shadow-sm"
+          >
+            <Text className="text-sm font-bold text-primary-foreground">Đo Rung nhĩ Chủ động</Text>
+          </TouchableOpacity>
         </View>
       )}
     </View>
