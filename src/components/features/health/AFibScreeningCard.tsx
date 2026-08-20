@@ -41,8 +41,10 @@ export function AFibScreeningCard() {
   const router = useRouter();
 
   const handleStartManualScreening = () => {
-    // Navigate to the dedicated AFib measure screen
-    router.push("/afib-measure" as any);
+    // Navigate to the dedicated AFib measure screen after letting the button ripple effect finish
+    setTimeout(() => {
+      router.push("/afib-measure" as any);
+    }, 50);
   };
 
   return (
