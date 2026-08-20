@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { View, StatusBar } from 'react-native';
 import { Stack } from 'expo-router';
 import { BLEProvider } from '@/context/BLEContext';
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
@@ -19,10 +20,18 @@ export default function RootLayout() {
     <QueryClientProvider client={queryClient}>
       <GluestackUIProvider mode="system">
         <BLEProvider>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="(public)" />
-          </Stack>
+          <View style={{ flex: 1, backgroundColor: '#F2F5F9' }}>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: '#F2F5F9' },
+                animation: 'slide_from_bottom' // Native smooth slide transition
+              }}
+            >
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="(public)" />
+            </Stack>
+          </View>
         </BLEProvider>
       </GluestackUIProvider>
     </QueryClientProvider>

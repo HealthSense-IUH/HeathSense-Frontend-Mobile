@@ -1,10 +1,12 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Heart, Activity, Footprints, Flame, Bell, Bluetooth, Radio, Battery } from 'lucide-react-native';
+import { Bluetooth, ChevronRight, Activity, Moon, Clock, Flame, Footprints, Droplets, Heart, Bell, Radio, Battery } from 'lucide-react-native';
+import { BackgroundGradient } from '@/components/ui/BackgroundGradient';
 import { useBleStore } from '@/services/ble-management/bleStore';
 import { useAuthStore } from '@/services/authentication/authStore';
 import { AFibScreeningCard } from '@/components/features/health/AFibScreeningCard';
+import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
+import React from 'react';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -18,51 +20,43 @@ export default function HomeScreen() {
   const isConnected = Boolean(connectedDevice);
 
   return (
-    <ScrollView 
-      className="flex-1 bg-background"
-      contentContainerStyle={{ paddingBottom: 100 }}
-    >
-      {/* Header */}
-      <View className="px-6 pt-16 pb-6 flex-row justify-between items-center bg-card rounded-b-3xl shadow-sm">
-        <View className="flex-row items-center">
-          <View className="h-12 w-12 rounded-full bg-primary/10 items-center justify-center mr-4">
-            <Text className="text-primary font-extrabold text-lg">
-              {user?.fullName?.charAt(0).toUpperCase() || 'H'}
-            </Text>
-          </View>
-          <View>
-            <Text className="text-xs font-semibold text-primary">HealthSense Mobile</Text>
-            <Text className="text-lg font-bold text-foreground">
-              {user?.fullName ? `Xin chào, ${user.fullName}` : 'Chào mừng trở lại'}
-            </Text>
-          </View>
-        </View>
+    <ScreenWrapper
+      title="HealthSense"
+      statusBarStyle="light"
+      backgroundComponent={<BackgroundGradient />}
+      headerRight={
         <TouchableOpacity
-          onPress={() => router.push("/(public)/scan" as any)}
+          onPress={() => {
+            setTimeout(() => {
+              router.push("/(public)/scan" as any);
+            }, 50);
+          }}
           className="h-10 w-10 rounded-full bg-primary/10 items-center justify-center"
         >
           <Bluetooth color="#0F67FE" size={20} />
         </TouchableOpacity>
-      </View>
-
+      }
+    >
       <View className="px-6 mt-6">
         {/* Interactive BLE Connection Status Card */}
         <TouchableOpacity
-          onPress={() => router.push("/(public)/scan" as any)}
+          onPress={() => {
+            setTimeout(() => {
+              router.push("/(public)/scan" as any);
+            }, 50);
+          }}
           activeOpacity={0.85}
-          className={`rounded-3xl p-5 border shadow-sm flex-row items-center justify-between mb-6 ${
-            isConnected
-              ? 'bg-accent/10 border-accent/30'
-              : knownDevice
+          className={`rounded-3xl p-5 border shadow-sm flex-row items-center justify-between mb-6 ${isConnected
+            ? 'bg-accent/10 border-accent/30'
+            : knownDevice
               ? 'bg-primary/10 border-primary/20'
               : 'bg-destructive/10 border-destructive/20'
-          }`}
+            }`}
         >
           <View className="flex-row items-center flex-1 mr-3">
             <View
-              className={`h-12 w-12 rounded-2xl items-center justify-center mr-3.5 ${
-                isConnected ? 'bg-accent/20' : 'bg-primary/20'
-              }`}
+              className={`h-12 w-12 rounded-2xl items-center justify-center mr-3.5 ${isConnected ? 'bg-accent/20' : 'bg-primary/20'
+                }`}
             >
               <Bluetooth color={isConnected ? '#55A316' : '#0F67FE'} size={24} />
             </View>
@@ -82,8 +76,8 @@ export default function HomeScreen() {
                 {isConnected
                   ? `HuyWatch: Đã kết nối`
                   : knownDevice
-                  ? `Đang kết nối lại...`
-                  : `Chưa ghép đôi thiết bị`}
+                    ? `Đang kết nối lại...`
+                    : `Chưa ghép đôi thiết bị`}
               </Text>
               <Text className="text-xs text-muted-foreground mt-0.5" numberOfLines={1}>
                 {isConnected
@@ -153,12 +147,12 @@ export default function HomeScreen() {
             <Text className="text-xs text-muted-foreground mt-1">Calo tiêu thụ</Text>
           </View>
         </View>
-        
+
         {/* AFib Screening Section */}
         <Text className="text-lg font-bold text-foreground mb-4 mt-2">Tầm soát Rung nhĩ (AFib)</Text>
         <AFibScreeningCard />
         <View className="h-6" />
       </View>
-    </ScrollView>
+    </ScreenWrapper>
   );
 }

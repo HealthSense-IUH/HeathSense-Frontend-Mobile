@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { getHealthStatisticsApi } from '@/services/health-records';
 import { HealthStatisticsResponse } from '@/types/health-records';
 import { QUERY_KEYS } from '@/constants/queryKeys';
@@ -30,11 +30,13 @@ export const useHealthStatistics = (filter: FilterType, referenceDate: Date) => 
   const query = useQuery<HealthStatisticsResponse, Error>({
     queryKey: [QUERY_KEYS.HEALTH_STATS, period, dateKey],
     queryFn: () => getHealthStatisticsApi(period, formattedDate, timezone),
+    placeholderData: keepPreviousData, // <--- Giữ data cũ trong lúc fetch data mới để chống giật UI
   });
 
   return {
     data: query.data,
-    loading: query.isLoading,
+    loading: query.isLoading, // Chỉ true ở lần đầu tiên hoàn toàn chưa có data
+    isFetching: query.isFetching, // True mỗi khi đang call API (kể cả lúc đang hiện data cũ)
     error: query.error?.message || null,
   };
 };

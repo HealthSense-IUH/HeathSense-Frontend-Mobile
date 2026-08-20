@@ -8,7 +8,7 @@ import { PpgRecordingResult } from './ppgRecorder';
 /**
  * Lấy Presigned URL từ Backend (POST /api/health-records/presigned-url)
  */
-export const getPresignedUrl = async (file: PresignedUrlRequest): Promise<PresignedUrlResponse> => {
+const getPresignedUrl = async (file: PresignedUrlRequest): Promise<PresignedUrlResponse> => {
     try {
         const presignedResponse = await axiosClient.post<ApiResponse<PresignedUrlResponse>>(
             '/api/health-records/presigned-url',
@@ -23,33 +23,42 @@ export const getPresignedUrl = async (file: PresignedUrlRequest): Promise<Presig
 
 /**
  * Tải trực tiếp nội dung file CSV lên AWS S3 sử dụng Presigned URL (HTTP PUT)
- * Lưu ý: Sử dụng native file.upload() thay vì fetch để tránh bị React Native can thiệp Header gây lỗi 403 S3
+ * Có tích hợp cơ chế tự động thử lại (Retry) khi mạng chập chờn
  */
-export const uploadFileToS3 = async (uploadUrl: string, fileUri: string): Promise<void> => {
-    try {
-        const file = new File(fileUri);
-        
-        // Native upload, uploadType: BINARY_CONTENT
-        const response = await file.upload(uploadUrl, {
-            httpMethod: 'PUT',
-            headers: {
-                'Content-Type': 'text/csv',
-            },
-        });
+const uploadFileToS3 = async (uploadUrl: string, fileUri: string, maxRetries = 2): Promise<void> => {
+    let attempt = 0;
+    while (attempt <= maxRetries) {
+        try {
+            const file = new File(fileUri);
+            
+            // Native upload, uploadType: BINARY_CONTENT
+            const response = await file.upload(uploadUrl, {
+                httpMethod: 'PUT',
+                headers: {
+                    'Content-Type': 'text/csv',
+                },
+            });
 
-        if (response.status < 200 || response.status >= 300) {
-            throw new Error(`Upload file lên S3 thất bại với mã HTTP: ${response.status}. Chi tiết: ${response.body}`);
+            if (response.status < 200 || response.status >= 300) {
+                throw new Error(`Upload file lên S3 thất bại với mã HTTP: ${response.status}. Chi tiết: ${response.body}`);
+            }
+            return; // Thành công thì thoát hàm
+        } catch (err) {
+            attempt++;
+            console.warn(`[Retry] Lỗi khi upload file CSV lên S3 (Lần ${attempt}/${maxRetries + 1}):`, err);
+            if (attempt > maxRetries) {
+                throw err; // Hết số lần retry thì báo lỗi ra ngoài
+            }
+            // Nghỉ 1.5 giây trước khi thử lại
+            await new Promise(resolve => setTimeout(resolve, 1500));
         }
-    } catch (err) {
-        console.error('Lỗi khi upload file CSV lên S3:', err);
-        throw err;
     }
 };
 
 /**
  * Xác nhận hoàn tất upload với Backend để kích hoạt xử lý AI (POST /api/health-records/{id}/confirm)
  */
-export const confirmUpload = async (id: string | number): Promise<HealthRecordResponse> => {
+const confirmUpload = async (id: string | number): Promise<HealthRecordResponse> => {
     try {
         const response = await axiosClient.post<ApiResponse<HealthRecordResponse>>(
             `/api/health-records/${id}/confirm`
@@ -64,7 +73,7 @@ export const confirmUpload = async (id: string | number): Promise<HealthRecordRe
 /**
  * Lấy thông tin chi tiết một bản ghi sức khỏe (GET /api/health-records/{id})
  */
-export const getHealthRecord = async (id: string | number): Promise<HealthRecordResponse> => {
+const getHealthRecord = async (id: string | number): Promise<HealthRecordResponse> => {
     try {
         const response = await axiosClient.get<ApiResponse<HealthRecordResponse>>(
             `/api/health-records/${id}`
