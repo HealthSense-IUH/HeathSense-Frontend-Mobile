@@ -13,3 +13,18 @@ export interface HealthStatisticsResponse {
   totalUncertain: number;
   totalAfibSuspected: number;
 }
+
+export interface HealthRecordResponse {
+  id: number;
+  userId: number;
+  fileName: string;
+  s3FileKey: string;
+  fileSize: number;
+  status: string;
+  predictionLabel: string;
+  confidence: number;
+  hrvFeaturesJson?: string;
+  errorMessage?: string;
+  createdAt: string;
+  updatedAt: string;
+}

@@ -20,3 +20,24 @@ export const getHealthStatisticsApi = async (
   const result = response.data?.data || response.data?.result || (response.data as any);
   return result;
 };
+
+export const getAvailableHistoryDatesApi = async (
+  timezone?: string
+): Promise<string[]> => {
+  const response = await axiosClient.get<ApiResponse<string[]>>(
+    '/api/health-records/history/available-dates',
+    { params: { timezone } }
+  );
+  return response.data?.data || response.data?.result || (response.data as any);
+};
+
+export const getRecordsByDateApi = async (
+  date: string,
+  timezone?: string
+): Promise<import('@/types/health-records').HealthRecordResponse[]> => {
+  const response = await axiosClient.get<ApiResponse<import('@/types/health-records').HealthRecordResponse[]>>(
+    '/api/health-records/history/by-date',
+    { params: { date, timezone } }
+  );
+  return response.data?.data || response.data?.result || (response.data as any);
+};
