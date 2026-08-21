@@ -53,6 +53,21 @@ export default function SmartHealthScreen() {
             </Text>
           </LinearGradient>
         </TouchableOpacity>
+
+        {/* View History Button */}
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => router.push("/history")}
+          className="bg-card rounded-3xl p-5 flex-row items-center shadow-sm mb-6 border border-border"
+        >
+          <View className="h-12 w-12 bg-primary/10 rounded-full items-center justify-center mr-4">
+            <HeartPulse color="#0F67FE" size={24} />
+          </View>
+          <View className="flex-1">
+            <Text className="text-foreground font-bold text-base mb-1">Lịch sử đo</Text>
+            <Text className="text-muted-foreground text-sm">Xem lại các kết quả đo theo thời gian</Text>
+          </View>
+        </TouchableOpacity>
       </ScrollView>
     </ScreenWrapper>
   );
