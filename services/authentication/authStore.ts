@@ -16,6 +16,9 @@ type AuthState = {
   isLoading: boolean;
   error: string | null;
   initializeAuth: () => Promise<void>;
+  login: (data: LoginRequest) => Promise<void>;
+  register: (data: RegisterRequest) => Promise<void>;
+  logout: () => Promise<void>;
   setUser: (user: UserSession) => void;
   clearUser: () => void;
   clearError: () => void;
@@ -27,6 +30,49 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isInitialized: false,
   isLoading: false,
   error: null,
+
+  login: async (data: LoginRequest) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await loginApi(data);
+      set({ 
+        user: response.userSession || null, 
+        isAuthenticated: true, 
+        isLoading: false 
+      });
+    } catch (error: any) {
+      set({ 
+        error: error.message || 'Đăng nhập không thành công', 
+        isLoading: false 
+      });
+      throw error;
+    }
+  },
+
+  register: async (data: RegisterRequest) => {
+    set({ isLoading: true, error: null });
+    try {
+      await registerApi(data);
+      set({ isLoading: false });
+    } catch (error: any) {
+      set({ 
+        error: error.message || 'Đăng ký không thành công', 
+        isLoading: false 
+      });
+      throw error;
+    }
+  },
+
+  logout: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      await logoutApi();
+      set({ user: null, isAuthenticated: false, isLoading: false });
+    } catch (error: any) {
+      set({ user: null, isAuthenticated: false, isLoading: false });
+      console.warn('[authStore] Logout error:', error);
+    }
+  },
 
   initializeAuth: async () => {
     try {

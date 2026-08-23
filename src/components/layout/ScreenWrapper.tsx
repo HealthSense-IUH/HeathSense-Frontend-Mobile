@@ -12,7 +12,7 @@ interface ScreenWrapperProps {
   headerRight?: React.ReactNode; // Custom component for the top-right corner
   contentContainerStyle?: StyleProp<ViewStyle>;
   stickyHeaderHeight?: number; // Pre-calculated height for scroll offset
-  
+
   // Customization props for Background & Status Bar
   statusBarStyle?: 'light' | 'dark' | 'auto';
   backgroundComponent?: React.ReactNode;
@@ -72,8 +72,8 @@ export function ScreenWrapper({
 
   return (
     <View style={{ flex: 1, backgroundColor: 'transparent' }}>
-      <StatusBar style={statusBarStyle} animated translucent backgroundColor="transparent" />
-      
+      <StatusBar style={statusBarStyle} animated />
+
       {/* Dynamic Background Layer (Rendered below everything) */}
       {backgroundComponent && (
         <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: -1 }}>
