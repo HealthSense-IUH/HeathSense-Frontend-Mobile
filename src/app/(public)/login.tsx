@@ -1,23 +1,19 @@
-import React, { useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
+import React from 'react';
+import { KeyboardAvoidingView, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '@/services/authentication/authStore';
 import { useBleStore } from '@/services/ble-management/bleStore';
-import { useLoginMutation } from '@/hooks/mutations/useAuthMutations';
 import { LoginForm } from '@/components/features/auth/LoginForm';
 import { LoginRequest } from '@/types/authentication';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const clearError = useAuthStore((state) => state.clearError);
-  const loginMutation = useLoginMutation();
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const { login, isLoading, error, clearError } = useAuthStore();
 
   const handleLogin = async (data: LoginRequest) => {
     clearError();
-    setSuccessMessage(null);
     try {
-      await loginMutation.mutateAsync(data);
+      await login(data);
       // Kiểm tra nếu thiết bị BLE đã ghép đôi thì vào Tabs, chưa ghép đôi thì chuyển sang trang Dò tìm BLE Scan
       const knownDevice = useBleStore.getState().knownDevice;
       if (knownDevice) {
@@ -56,8 +52,8 @@ export default function LoginScreen() {
           {/* LoginForm component */}
           <LoginForm
             onSubmit={handleLogin}
-            isLoading={loginMutation.isPending}
-            error={loginMutation.error?.message || useAuthStore.getState().error}
+            isLoading={isLoading}
+            error={error}
             onNavigateToRegister={() => router.push('/(public)/register' as any)}
           />
         </View>

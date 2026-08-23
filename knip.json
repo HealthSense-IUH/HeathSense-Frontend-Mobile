@@ -1,0 +1,33 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "src/app/**/*.{ts,tsx}",
+    "services/authentication/index.ts",
+    "src/hooks/mutations/**/*.{ts,tsx}"
+  ],
+  "project": [
+    "src/**/*.{ts,tsx}",
+    "services/**/*.{ts,tsx}",
+    "types/**/*.{ts,tsx}",
+    "utils/**/*.{ts,tsx}"
+  ],
+  "ignore": [
+    "src/components/features/health/AFibScreeningCard.tsx",
+    "src/components/features/health/ConsultationBanner.tsx",
+    "src/components/features/health/SleepAnalysisCard.tsx",
+    "src/components/ui/BackgroundGradient.tsx"
+  ],
+  "ignoreDependencies": [
+    "@react-aria/ssr",
+    "@react-aria/utils",
+    "react-aria",
+    "react-stately",
+    "expo-device",
+    "expo-font",
+    "expo-image",
+    "expo-web-browser",
+    "tailwind-variants",
+    "expo-updates"
+  ],
+  "ignoreExportsUsedInFile": true
+}

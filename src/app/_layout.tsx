@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { View, StatusBar } from 'react-native';
+import { View } from 'react-native';
 import { Stack } from 'expo-router';
 import { BLEProvider } from '@/context/BLEContext';
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';

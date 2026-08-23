@@ -21,18 +21,20 @@ import axiosClient, {
  */
 export const saveAuthData = async (authData: MobileLoginResponse): Promise<void> => {
   try {
+    const promises: Promise<void>[] = [];
     if (authData.accessToken) {
-      await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, authData.accessToken);
+      promises.push(SecureStore.setItemAsync(ACCESS_TOKEN_KEY, authData.accessToken));
     }
     if (authData.refreshToken) {
-      await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, authData.refreshToken);
+      promises.push(SecureStore.setItemAsync(REFRESH_TOKEN_KEY, authData.refreshToken));
     }
     if (authData.sessionId) {
-      await SecureStore.setItemAsync(SESSION_ID_KEY, authData.sessionId);
+      promises.push(SecureStore.setItemAsync(SESSION_ID_KEY, authData.sessionId));
     }
     if (authData.userSession) {
-      await SecureStore.setItemAsync(USER_SESSION_KEY, JSON.stringify(authData.userSession));
+      promises.push(SecureStore.setItemAsync(USER_SESSION_KEY, JSON.stringify(authData.userSession)));
     }
+    await Promise.all(promises);
   } catch (error) {
     console.error('[authService] Error saving auth data:', error);
   }
@@ -57,9 +59,11 @@ export const getStoredUser = async (): Promise<UserSession | null> => {
  */
 export const getStoredTokens = async () => {
   try {
-    const accessToken = await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
-    const refreshToken = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
-    const sessionId = await SecureStore.getItemAsync(SESSION_ID_KEY);
+    const [accessToken, refreshToken, sessionId] = await Promise.all([
+      SecureStore.getItemAsync(ACCESS_TOKEN_KEY),
+      SecureStore.getItemAsync(REFRESH_TOKEN_KEY),
+      SecureStore.getItemAsync(SESSION_ID_KEY),
+    ]);
     return { accessToken, refreshToken, sessionId };
   } catch (error) {
     console.error('[authService] Error reading stored tokens:', error);
@@ -107,8 +111,10 @@ export const registerApi = async (data: RegisterRequest): Promise<UserSession> =
  */
 export const logoutApi = async (): Promise<void> => {
   try {
-    const refreshToken = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
-    const sessionId = await SecureStore.getItemAsync(SESSION_ID_KEY);
+    const [refreshToken, sessionId] = await Promise.all([
+      SecureStore.getItemAsync(REFRESH_TOKEN_KEY),
+      SecureStore.getItemAsync(SESSION_ID_KEY),
+    ]);
 
     if (refreshToken && sessionId) {
       const payload: MobileLogoutRequest = { refreshToken, sessionId };

@@ -519,7 +519,10 @@ class HuyWatchBleService {
     const lines = text.split(/\r?\n/);
     this.ppgLineBuffer =
       text.endsWith("\n") || text.endsWith("\r\n") ? "" : (lines.pop() ?? "");
-    return lines.map((l) => l.trim()).filter(Boolean);
+    return lines.flatMap((l) => {
+      const trimmed = l.trim();
+      return trimmed ? [trimmed] : [];
+    });
   }
 
   // Parse 1 dòng PPG: 5 cột (millis,red,ir,bpm,spo2) hoặc 3 cột legacy (millis,red,ir)

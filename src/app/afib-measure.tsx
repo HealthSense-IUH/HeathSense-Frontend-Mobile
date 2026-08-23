@@ -1,21 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, Pressable, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, Activity, CheckCircle2, AlertCircle, HeartPulse, ShieldAlert, Heart } from 'lucide-react-native';
+import { ArrowLeft, Activity, AlertCircle, HeartPulse, ShieldAlert, Heart } from 'lucide-react-native';
 import { useBleStore } from '@/services/ble-management/bleStore';
 import { useBLE } from '@/context/BLEContext';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
 
 export default function AFibMeasureScreen() {
   const router = useRouter();
   const { sendCommand, stopExportAndUploadPpgRecording } = useBLE();
   const store = useBleStore();
-  const insets = useSafeAreaInsets();
   
   const [countdown, setCountdown] = useState<number | null>(null);
   const [timeLeft, setTimeLeft] = useState(60);
   const [localUploadMsg, setLocalUploadMsg] = useState<string | null>(null);
+
+  const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Sync with global state
   const isRecording = store.isRecordingPpg;
@@ -27,36 +27,25 @@ export default function AFibMeasureScreen() {
 
   // Timer logic for measuring
   useEffect(() => {
-    if (isRecording && startedAt) {
-      const interval = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - startedAt) / 1000);
-        const remaining = Math.max(0, 60 - elapsed);
-        setTimeLeft(remaining);
-      }, 1000);
-      return () => clearInterval(interval);
-    } else {
-      setTimeLeft(60);
+    if (!isRecording || !startedAt) {
+      return;
     }
+    const interval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+      const remaining = Math.max(0, 60 - elapsed);
+      setTimeLeft(remaining);
+    }, 1000);
+    return () => clearInterval(interval);
   }, [isRecording, startedAt]);
 
-  const startCountdown = () => {
-    if (!isConnected) return;
-    setLocalUploadMsg(null);
-    store.setRecordingState({ aiAnalysisResult: null, recordingError: null });
-    setCountdown(3);
-    
-    let counter = 3;
-    const interval = setInterval(() => {
-      counter -= 1;
-      if (counter > 0) {
-        setCountdown(counter);
-      } else {
-        clearInterval(interval);
-        setCountdown(null);
-        startMeasurement();
+  // Clean up countdown on unmount
+  useEffect(() => {
+    return () => {
+      if (countdownIntervalRef.current) {
+        clearInterval(countdownIntervalRef.current);
       }
-    }, 1000);
-  };
+    };
+  }, []);
 
   const startMeasurement = async () => {
     try {
@@ -64,6 +53,32 @@ export default function AFibMeasureScreen() {
     } catch (err) {
       console.warn("Lỗi gửi lệnh đo:", err);
     }
+  };
+
+  const startCountdown = () => {
+    if (!isConnected) return;
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+    }
+    setLocalUploadMsg(null);
+    setTimeLeft(60);
+    store.setRecordingState({ aiAnalysisResult: null, recordingError: null });
+    setCountdown(3);
+    
+    let counter = 3;
+    countdownIntervalRef.current = setInterval(() => {
+      counter -= 1;
+      if (counter > 0) {
+        setCountdown(counter);
+      } else {
+        if (countdownIntervalRef.current) {
+          clearInterval(countdownIntervalRef.current);
+          countdownIntervalRef.current = null;
+        }
+        setCountdown(null);
+        void startMeasurement();
+      }
+    }, 1000);
   };
 
   const handleManualUpload = async () => {
@@ -80,159 +95,112 @@ export default function AFibMeasureScreen() {
     <ScreenWrapper
       title="Tầm soát Rung nhĩ"
       headerLeft={
-        <TouchableOpacity 
+        <Pressable 
           onPress={() => router.back()} 
-          className="h-10 w-10 rounded-full bg-primary/10 items-center justify-center"
+          className="h-10 w-10 rounded-full bg-primary/10 items-center justify-center active:opacity-75"
         >
           <ArrowLeft color="#0F67FE" size={24} />
-        </TouchableOpacity>
+        </Pressable>
       }
     >
-      <View className="flex-1 px-6 mt-2 flex-col justify-between">
-        {/* 2. MAIN CONTENT (Centered Circle) */}
-        <View className="flex-1 items-center justify-center">
-          {/* Decorative background rings */}
-          <View className="absolute w-[320px] h-[320px] rounded-full border border-primary/5" />
-          <View className="absolute w-[260px] h-[260px] rounded-full border border-primary/10" />
+      <View className="px-6 flex-1 justify-between pb-8">
+        {/* Top Info & Guide */}
+        <View className="items-center mt-4">
+          <Text className="text-sm font-semibold text-muted-foreground text-center px-4">
+            Đảm bảo giữ yên cánh tay và dây đeo vừa vặn với cổ tay trong suốt 60 giây đo.
+          </Text>
 
-          <View className={`w-[220px] h-[220px] rounded-full items-center justify-center shadow-sm ${
-            countdown !== null ? 'bg-primary/10' :
-            isRecording ? 'bg-accent/10' :
-            isAnalyzing ? 'bg-blue-50' :
-            result?.predictionLabel === 'NORMAL' ? 'bg-emerald-50' :
-            result?.predictionLabel === 'AFIB' ? 'bg-rose-50' :
-            result?.predictionLabel === 'AFIB_SUSPECTED' ? 'bg-amber-50' :
-            error ? 'bg-rose-50' : 'bg-primary/5'
-          }`}>
-            
-            {/* STATE: COUNTDOWN */}
-            {countdown !== null && (
-              <>
-                <Text className="text-8xl font-light text-primary">{countdown}</Text>
-              </>
-            )}
-
-            {/* STATE: RECORDING */}
-            {countdown === null && isRecording && (
-              <>
-                <Activity color="#55A316" size={32} className="mb-2 animate-pulse opacity-80" />
-                <Text className="text-7xl font-light text-accent tracking-tighter">{timeLeft}</Text>
-                <Text className="text-sm font-medium text-accent/80 uppercase tracking-widest mt-1">Giây</Text>
-              </>
-            )}
-
-            {/* STATE: ANALYZING */}
-            {countdown === null && isAnalyzing && (
-              <>
-                <ActivityIndicator size="large" color="#0F67FE" className="mb-4" />
-                <Text className="text-base font-semibold text-primary">Đang phân tích</Text>
-              </>
-            )}
-
-            {/* STATE: RESULT */}
-            {countdown === null && result && !isAnalyzing && (
-              <>
+          {/* Large Visual Pulse Indicator */}
+          <View className="my-10 items-center justify-center">
+            {countdown !== null ? (
+              <View className="h-44 w-44 rounded-full bg-primary/20 items-center justify-center border-4 border-primary animate-pulse">
+                <Text className="text-6xl font-extrabold text-primary">{countdown}</Text>
+              </View>
+            ) : isRecording ? (
+              <View className="relative items-center justify-center">
+                <View className="h-48 w-48 rounded-full bg-destructive/10 items-center justify-center animate-ping" />
+                <View className="absolute h-40 w-40 rounded-full bg-destructive/20 items-center justify-center border-4 border-destructive">
+                  <HeartPulse color="#DA1E2E" size={64} />
+                  <Text className="text-2xl font-extrabold text-destructive mt-2">{timeLeft}s</Text>
+                </View>
+              </View>
+            ) : isAnalyzing ? (
+              <View className="h-44 w-44 rounded-full bg-[#E6F4FE] items-center justify-center border-4 border-[#208AEF]">
+                <ActivityIndicator size="large" color="#208AEF" />
+                <Text className="text-sm font-bold text-[#00349C] mt-3">Đang phân tích...</Text>
+              </View>
+            ) : result ? (
+              <View className={`h-44 w-44 rounded-full items-center justify-center border-4 ${
+                result.predictionLabel === 'NORMAL' 
+                  ? 'bg-green-500/10 border-green-500' 
+                  : result.predictionLabel === 'AFIB'
+                  ? 'bg-destructive/10 border-destructive'
+                  : 'bg-orange-500/10 border-orange-500'
+              }`}>
                 {result.predictionLabel === 'NORMAL' ? (
-                  <Heart color="#10B981" size={48} className="mb-3" />
-                ) : result.predictionLabel === 'AFIB' ? (
-                  <ShieldAlert color="#E11D48" size={48} className="mb-3" />
+                  <Heart color="#22c55e" size={56} />
                 ) : (
-                  <AlertCircle color="#D97706" size={48} className="mb-3" />
+                  <ShieldAlert color="#ef4444" size={56} />
                 )}
-                <Text className={`text-xl font-bold text-center px-4 ${
-                  result.predictionLabel === 'NORMAL' ? 'text-emerald-600' : 
-                  result.predictionLabel === 'AFIB' ? 'text-rose-600' : 'text-amber-600'
+                <Text className={`text-base font-bold mt-2 ${
+                  result.predictionLabel === 'NORMAL' ? 'text-green-600' : 'text-red-600'
                 }`}>
-                  {result.predictionLabel === 'NORMAL' ? 'Bình thường' : 
-                   result.predictionLabel === 'AFIB' ? 'Phát hiện AFib' : 'Nghi ngờ AFib'}
+                  {result.predictionLabel === 'NORMAL' ? 'Bình thường' : 'Rung nhĩ (AFib)'}
                 </Text>
-              </>
-            )}
-
-            {/* STATE: ERROR */}
-            {countdown === null && error && (
-              <>
-                <AlertCircle color="#E11D48" size={48} className="mb-3" />
-                <Text className="text-lg font-bold text-rose-600">Lỗi đo lường</Text>
-              </>
-            )}
-
-            {/* STATE: IDLE (Ready) */}
-            {countdown === null && !isRecording && !isAnalyzing && !result && !error && (
-              <>
-                <HeartPulse color="#0F67FE" size={56} className="mb-3 opacity-90" />
-                <Text className="text-base font-semibold text-primary">Sẵn sàng</Text>
-              </>
+              </View>
+            ) : (
+              <View className="h-44 w-44 rounded-full bg-card border-4 border-dashed border-border items-center justify-center">
+                <HeartPulse color="#94A3B8" size={56} />
+                <Text className="text-xs font-semibold text-muted-foreground mt-2">Sẵn sàng đo</Text>
+              </View>
             )}
           </View>
+
+          {/* Status Message */}
+          {error ? (
+            <View className="bg-destructive/10 border border-destructive/20 rounded-2xl p-4 flex-row items-center mb-4">
+              <AlertCircle color="#DA1E2E" size={20} className="mr-2" />
+              <Text className="text-xs font-semibold text-destructive flex-1">{error}</Text>
+            </View>
+          ) : localUploadMsg ? (
+            <Text className="text-xs text-muted-foreground text-center mb-4">{localUploadMsg}</Text>
+          ) : isRecording ? (
+            <Text className="text-sm font-bold text-destructive text-center mb-4">
+              Đang thu thập dữ liệu PPG Pha 1... Vui lòng không di chuyển!
+            </Text>
+          ) : null}
         </View>
 
-        {/* 3. BOTTOM ACTIONS (Anchored to bottom) */}
-        <View className="pb-4">
-          {/* Status Text / Instructions */}
-          <View className="min-h-[60px] justify-center mb-6">
-            {!isConnected && (
-              <Text className="text-center text-sm font-medium text-rose-500">
-                Chưa kết nối đồng hồ. Vui lòng quay lại màn hình chính để kết nối.
-              </Text>
-            )}
-            
-            {isConnected && countdown !== null && (
-              <Text className="text-center text-base text-muted-foreground">
-                Chuẩn bị tư thế tĩnh tâm...
-              </Text>
-            )}
-
-            {isConnected && isRecording && (
-              <Text className="text-center text-base text-muted-foreground px-4 leading-6">
-                Vui lòng ngồi im, hít thở đều và <Text className="font-bold text-foreground">không cử động tay</Text>.
-              </Text>
-            )}
-
-            {isConnected && result && (
-              <Text className="text-center text-base text-muted-foreground px-4">
-                Độ tin cậy của mô hình AI: <Text className="font-bold text-foreground">{Math.round((result.confidence ?? 0) * 100)}%</Text>
-              </Text>
-            )}
-
-            {isConnected && error && (
-              <Text className="text-center text-sm text-rose-500 px-4">
-                {error}
-              </Text>
-            )}
-
-            {isConnected && !isRecording && !isAnalyzing && !result && !error && countdown === null && (
-              <Text className="text-center text-base text-muted-foreground px-4 leading-6">
-                Đảm bảo đeo đồng hồ chặt vừa phải. Quá trình đo sẽ diễn ra trong <Text className="font-bold text-foreground">60 giây</Text>.
-              </Text>
-            )}
-          </View>
-
-          {/* Action Button */}
+        {/* Action Buttons */}
+        <View className="w-full">
           {isRecording ? (
-            <TouchableOpacity
+            <Pressable
               onPress={handleManualUpload}
-              className="w-full bg-secondary py-4 rounded-2xl items-center border border-border"
+              className="w-full bg-destructive py-4 rounded-2xl items-center justify-center shadow-md active:opacity-90 mb-3"
             >
-              <Text className="text-foreground font-semibold text-base">Hủy / Kết thúc sớm</Text>
-            </TouchableOpacity>
+              <Text className="text-base font-bold text-white">Dừng & Phân tích ngay</Text>
+            </Pressable>
           ) : (
-            <TouchableOpacity 
+            <Pressable
               onPress={startCountdown}
-              disabled={!isConnected || isAnalyzing}
-              className={`w-full py-4 rounded-2xl items-center shadow-sm ${
-                isConnected && !isAnalyzing ? 'bg-primary' : 'bg-muted'
+              disabled={!isConnected || countdown !== null || isAnalyzing}
+              className={`w-full bg-primary py-4 rounded-2xl items-center justify-center shadow-md active:opacity-90 mb-3 ${
+                !isConnected || countdown !== null || isAnalyzing ? 'opacity-50' : ''
               }`}
             >
-              <Text className={`font-bold text-base ${isConnected && !isAnalyzing ? 'text-white' : 'text-muted-foreground'}`}>
-                {result || error ? 'ĐO LẠI LẦN NỮA' : 'BẮT ĐẦU ĐO'}
-              </Text>
-            </TouchableOpacity>
+              <View className="flex-row items-center">
+                <Activity color="#FFFFFF" size={20} className="mr-2" />
+                <Text className="text-base font-bold text-white">
+                  {isAnalyzing ? "Đang xử lý kết quả..." : "Bắt đầu đo 60 giây"}
+                </Text>
+              </View>
+            </Pressable>
           )}
 
-          {/* Extra upload message (if any) */}
-          {localUploadMsg && (
-            <Text className="text-center text-xs text-muted-foreground mt-4">{localUploadMsg}</Text>
+          {!isConnected && (
+            <Text className="text-xs text-center text-destructive font-semibold">
+              Vui lòng kết nối đồng hồ BLE trong mục Cài đặt trước khi đo.
+            </Text>
           )}
         </View>
       </View>

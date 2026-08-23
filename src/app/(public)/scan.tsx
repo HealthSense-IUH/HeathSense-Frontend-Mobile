@@ -1,14 +1,13 @@
 import { useRouter } from "expo-router";
-import { AlertCircle, ChevronRight, Radio, RefreshCw, Watch } from "lucide-react-native";
-import { useEffect, useRef, useState } from "react";
+import { AlertCircle, RefreshCw, Watch } from "lucide-react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
+  FlatList,
   Linking,
   Pressable,
-  ScrollView,
   Text,
-  View
+  View,
 } from "react-native";
 import BleManager from "react-native-ble-manager";
 import {
@@ -17,18 +16,11 @@ import {
 } from "@/services/ble-management/bleConstants";
 import { useBLE } from "@/context/BLEContext";
 import { requestBluetoothPermissions } from "@/utils/blePermissions";
-
-type BlePeripheral = {
-  id: string;
-  name?: string | null;
-  advertising?: {
-    localName?: string | null;
-    isConnectable?: boolean;
-    rssi?: number;
-    serviceUUIDs?: string[];
-  };
-  rssi?: number;
-};
+import {
+  BlePeripheral,
+  DiscoveredDeviceCard,
+} from "@/components/features/ble/DiscoveredDeviceCard";
+import { BleRadarStatus } from "@/components/features/ble/BleRadarStatus";
 
 export default function BleScanScreen() {
   const router = useRouter();
@@ -39,8 +31,12 @@ export default function BleScanScreen() {
 
   const [isScanning, setIsScanning] = useState(false);
   const [devices, setDevices] = useState<BlePeripheral[]>([]);
-  const [scanStatusMessage, setScanStatusMessage] = useState("Đang khởi tạo Bluetooth...");
-  const [connectingDeviceId, setConnectingDeviceId] = useState<string | null>(null);
+  const [scanStatusMessage, setScanStatusMessage] = useState(
+    "Đang khởi tạo Bluetooth..."
+  );
+  const [connectingDeviceId, setConnectingDeviceId] = useState<string | null>(
+    null
+  );
 
   const discoverListenerRef = useRef<{ remove: () => void } | null>(null);
   const stopScanListenerRef = useRef<{ remove: () => void } | null>(null);
@@ -48,7 +44,7 @@ export default function BleScanScreen() {
   const lastSeenRef = useRef<Map<string, number>>(new Map());
 
   // Bắt đầu quét tự động
-  const startAutoScan = async () => {
+  const startAutoScan = useCallback(async () => {
     setIsScanning(true);
     setScanStatusMessage("Đang kiểm tra quyền Bluetooth...");
 
@@ -61,7 +57,7 @@ export default function BleScanScreen() {
         "Ứng dụng cần quyền Bluetooth để tìm và kết nối với đồng hồ. Vui lòng cho phép quyền Bluetooth trong Cài đặt ứng dụng.",
         [
           { text: "Hủy", style: "cancel" },
-          { text: "Mở Cài đặt", onPress: () => void Linking.openSettings() }
+          { text: "Mở Cài đặt", onPress: () => void Linking.openSettings() },
         ]
       );
       return;
@@ -82,7 +78,7 @@ export default function BleScanScreen() {
       setIsScanning(false);
       setScanStatusMessage("Không thể kích hoạt Bluetooth. Thử quét lại.");
     }
-  };
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -117,7 +113,7 @@ export default function BleScanScreen() {
           serviceUUIDs.some(
             (uuid) =>
               uuid.replace(/-/g, "").toLowerCase() ===
-              HUY_WATCH_SERVICE_UUID.replace(/-/g, "").toLowerCase(),
+              HUY_WATCH_SERVICE_UUID.replace(/-/g, "").toLowerCase()
           );
 
         if (!isTarget) {
@@ -128,18 +124,18 @@ export default function BleScanScreen() {
 
         setDevices((currentDevices) => {
           const alreadyExists = currentDevices.some(
-            (item) => item.id === peripheral.id,
+            (item) => item.id === peripheral.id
           );
 
           if (alreadyExists) {
             return currentDevices.map((item) =>
-              item.id === peripheral.id ? { ...item, ...peripheral } : item,
+              item.id === peripheral.id ? { ...item, ...peripheral } : item
             );
           }
 
           return [peripheral, ...currentDevices];
         });
-      },
+      }
     );
 
     stopScanListenerRef.current = BleManager.onStopScan(() => {
@@ -166,7 +162,7 @@ export default function BleScanScreen() {
         currentDevices.filter((device) => {
           const lastSeen = lastSeenRef.current.get(device.id);
           return lastSeen !== undefined && now - lastSeen <= staleDeviceMs;
-        }),
+        })
       );
     }, cleanupIntervalMs);
 
@@ -181,32 +177,49 @@ export default function BleScanScreen() {
       stateListenerRef.current = null;
       void BleManager.stopScan();
     };
-  }, []);
+  }, [startAutoScan, targetDeviceName]);
 
-  const handleConnectDevice = async (device: BlePeripheral): Promise<void> => {
-    const displayName =
-      device.name || device.advertising?.localName || "Thiết bị HealthSense";
+  const handleConnectDevice = useCallback(
+    async (device: BlePeripheral): Promise<void> => {
+      const displayName =
+        device.name || device.advertising?.localName || "Thiết bị HealthSense";
 
-    try {
-      setConnectingDeviceId(device.id);
-      setScanStatusMessage(`Đang kết nối tới ${displayName}...`);
-      await BleManager.stopScan();
-      await connectToDevice(device.id, displayName);
-      router.replace("/(tabs)");
-    } catch (error) {
-      console.error("Lỗi khi kết nối thiết bị:", error);
-      setConnectingDeviceId(null);
-      setScanStatusMessage("Kết nối thất bại. Thử lại...");
-      Alert.alert("Kết nối thất bại", "Vui lòng đảm bảo thiết bị đang ở gần và chưa kết nối với điện thoại khác.");
-      void startAutoScan();
-    }
-  };
+      try {
+        setConnectingDeviceId(device.id);
+        setScanStatusMessage(`Đang kết nối tới ${displayName}...`);
+        await BleManager.stopScan();
+        await connectToDevice(device.id, displayName);
+        router.replace("/(tabs)" as any);
+      } catch (error) {
+        console.error("Lỗi khi kết nối thiết bị:", error);
+        setConnectingDeviceId(null);
+        setScanStatusMessage("Kết nối thất bại. Thử lại...");
+        Alert.alert(
+          "Kết nối thất bại",
+          "Vui lòng đảm bảo thiết bị đang ở gần và chưa kết nối với điện thoại khác."
+        );
+        void startAutoScan();
+      }
+    },
+    [connectToDevice, router, startAutoScan]
+  );
 
   useEffect(() => {
     if (isPaired) {
-      router.replace("/(tabs)");
+      router.replace("/(tabs)" as any);
     }
-  }, [isPaired]);
+  }, [isPaired, router]);
+
+  const renderDeviceItem = useCallback(
+    ({ item: device }: { item: BlePeripheral }) => (
+      <DiscoveredDeviceCard
+        device={device}
+        isConnecting={connectingDeviceId === device.id || isConnecting}
+        onConnect={handleConnectDevice}
+      />
+    ),
+    [connectingDeviceId, isConnecting, handleConnectDevice]
+  );
 
   return (
     <View className="flex-1 bg-background px-6 pt-16 pb-8 justify-between">
@@ -219,14 +232,17 @@ export default function BleScanScreen() {
             </View>
             <Text className="text-xl font-bold text-foreground">HealthSense</Text>
           </View>
-          
+
           <View className="flex-row items-center gap-2">
-            <Pressable 
-              onPress={() => void startAutoScan()} 
+            <Pressable
+              onPress={() => void startAutoScan()}
               disabled={isScanning}
               className="h-10 w-10 rounded-full bg-card border border-border items-center justify-center active:opacity-70"
             >
-              <RefreshCw color={isScanning ? "#0F67FE" : "#64748B"} size={18} className={isScanning ? "animate-spin" : ""} />
+              <RefreshCw
+                color={isScanning ? "#0F67FE" : "#64748B"}
+                size={18}
+              />
             </Pressable>
 
             <Pressable
@@ -246,25 +262,10 @@ export default function BleScanScreen() {
         </Text>
 
         {/* Status Radar Box */}
-        <View className="mt-8 bg-card rounded-3xl p-6 border border-border shadow-sm items-center justify-center">
-          <View className="relative items-center justify-center my-4">
-            <View className={`h-24 w-24 rounded-full bg-primary/10 items-center justify-center ${isScanning ? "opacity-80" : "opacity-30"}`} />
-            <View className="absolute h-16 w-16 rounded-full bg-primary/20 items-center justify-center">
-              <Radio color="#0F67FE" size={32} />
-            </View>
-          </View>
-
-          <Text className="text-base font-bold text-foreground mt-2 text-center">
-            {scanStatusMessage}
-          </Text>
-          
-          {isScanning && (
-            <View className="flex-row items-center gap-2 mt-2">
-              <ActivityIndicator size="small" color="#0F67FE" />
-              <Text className="text-xs font-semibold text-primary">Đang tự động quét BLE...</Text>
-            </View>
-          )}
-        </View>
+        <BleRadarStatus
+          isScanning={isScanning}
+          scanStatusMessage={scanStatusMessage}
+        />
       </View>
 
       {/* Discovered Devices List Section */}
@@ -286,53 +287,13 @@ export default function BleScanScreen() {
             </Text>
           </View>
         ) : (
-          <ScrollView className="max-h-[260px]" showsVerticalScrollIndicator={false}>
-            {devices.map((device) => {
-              const displayName =
-                device.name ||
-                device.advertising?.localName ||
-                "HuyWatch Device";
-              const isConnectingThis = connectingDeviceId === device.id || isConnecting;
-
-              return (
-                <View 
-                  key={device.id} 
-                  className="bg-card rounded-2xl p-4 border border-border mb-3 flex-row items-center justify-between shadow-sm"
-                >
-                  <View className="flex-row items-center gap-3 flex-1">
-                    <View className="h-12 w-12 rounded-2xl bg-zoi-10 border border-zoi-20 items-center justify-center">
-                      <Watch color="#55A316" size={24} />
-                    </View>
-                    <View className="flex-1">
-                      <Text className="text-base font-bold text-foreground" numberOfLines={1}>
-                        {displayName}
-                      </Text>
-                      <Text className="text-xs text-muted-foreground mt-0.5" numberOfLines={1}>
-                        {device.id}
-                      </Text>
-                    </View>
-                  </View>
-
-                  <Pressable
-                    className={`ml-3 px-5 py-3 rounded-xl bg-primary flex-row items-center gap-1 active:opacity-80 ${
-                      isConnectingThis ? "opacity-70" : ""
-                    }`}
-                    onPress={() => void handleConnectDevice(device)}
-                    disabled={isConnectingThis}
-                  >
-                    {isConnectingThis ? (
-                      <ActivityIndicator color="#ffffff" size="small" />
-                    ) : (
-                      <>
-                        <Text className="text-white font-bold text-sm">Kết nối</Text>
-                        <ChevronRight color="#ffffff" size={16} />
-                      </>
-                    )}
-                  </Pressable>
-                </View>
-              );
-            })}
-          </ScrollView>
+          <FlatList
+            data={devices}
+            keyExtractor={(item) => item.id}
+            renderItem={renderDeviceItem}
+            style={{ maxHeight: 260 }}
+            showsVerticalScrollIndicator={false}
+          />
         )}
       </View>
     </View>

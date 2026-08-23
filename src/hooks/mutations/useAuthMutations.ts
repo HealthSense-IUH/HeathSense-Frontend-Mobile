@@ -5,19 +5,25 @@ import { LoginRequest, RegisterRequest } from '@/types/authentication';
 
 export const useLoginMutation = () => {
   const setUser = useAuthStore((state) => state.setUser);
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: LoginRequest) => loginApi(data),
     onSuccess: (res) => {
       if (res.userSession) {
         setUser(res.userSession);
       }
+      void queryClient.invalidateQueries();
     },
   });
 };
 
 export const useRegisterMutation = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: RegisterRequest) => registerApi(data),
+    onSuccess: () => {
+      void queryClient.invalidateQueries();
+    },
   });
 };
 

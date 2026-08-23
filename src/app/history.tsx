@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, Pressable, ScrollView, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ArrowLeft, ChevronDown, ChevronRight, Calendar } from 'lucide-react-native';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
@@ -7,9 +7,9 @@ import { useAvailableHistoryDates } from '@/hooks/useHealthHistory';
 
 // Helper to group dates
 const groupDates = (dates: string[]) => {
-  const tree: Record<string, Record<string, string[]>> = {};
+  const tree: Record<string, Record<string, Set<string>>> = {};
   
-  dates.forEach(dateStr => {
+  dates.forEach((dateStr) => {
     // dateStr is 'YYYY-MM-DD'
     const [year, month, day] = dateStr.split('-');
     if (!year || !month || !day) return;
@@ -18,14 +18,20 @@ const groupDates = (dates: string[]) => {
       tree[year] = {};
     }
     if (!tree[year][month]) {
-      tree[year][month] = [];
+      tree[year][month] = new Set<string>();
     }
-    if (!tree[year][month].includes(day)) {
-      tree[year][month].push(day);
-    }
+    tree[year][month].add(day);
   });
 
-  return tree;
+  const result: Record<string, Record<string, string[]>> = {};
+  Object.keys(tree).forEach((year) => {
+    result[year] = {};
+    Object.keys(tree[year]).forEach((month) => {
+      result[year][month] = Array.from(tree[year][month]);
+    });
+  });
+
+  return result;
 };
 
 export default function HistoryScreen() {
@@ -38,11 +44,11 @@ export default function HistoryScreen() {
   const [expandedMonths, setExpandedMonths] = useState<Record<string, boolean>>({});
 
   const toggleYear = (year: string) => {
-    setExpandedYears(prev => ({ ...prev, [year]: !prev[year] }));
+    setExpandedYears((prev) => ({ ...prev, [year]: !prev[year] }));
   };
 
   const toggleMonth = (yearMonth: string) => {
-    setExpandedMonths(prev => ({ ...prev, [yearMonth]: !prev[yearMonth] }));
+    setExpandedMonths((prev) => ({ ...prev, [yearMonth]: !prev[yearMonth] }));
   };
 
   const tree = useMemo(() => {
@@ -81,16 +87,15 @@ export default function HistoryScreen() {
 
     return (
       <View className="pb-8">
-        {years.map(year => {
+        {years.map((year) => {
           const isYearExpanded = expandedYears[year];
           const months = Object.keys(tree[year]).sort((a, b) => Number(b) - Number(a));
 
           return (
             <View key={year} className="mb-3 bg-card rounded-2xl overflow-hidden border border-border shadow-sm">
-              <TouchableOpacity
+              <Pressable
                 onPress={() => toggleYear(year)}
-                className="flex-row items-center justify-between p-4 bg-primary/5"
-                activeOpacity={0.7}
+                className="flex-row items-center justify-between p-4 bg-primary/5 active:opacity-70"
               >
                 <Text className="font-bold text-lg text-primary">Năm {year}</Text>
                 {isYearExpanded ? (
@@ -98,21 +103,20 @@ export default function HistoryScreen() {
                 ) : (
                   <ChevronRight color="#0F67FE" size={20} />
                 )}
-              </TouchableOpacity>
+              </Pressable>
 
               {isYearExpanded && (
                 <View className="px-4 py-2">
-                  {months.map(month => {
+                  {months.map((month) => {
                     const yearMonth = `${year}-${month}`;
                     const isMonthExpanded = expandedMonths[yearMonth];
-                    const days = tree[year][month].sort((a, b) => Number(b) - Number(a));
+                    const days = [...tree[year][month]].sort((a, b) => Number(b) - Number(a));
 
                     return (
                       <View key={yearMonth} className="mt-2 border-b border-border/50 pb-2">
-                        <TouchableOpacity
+                        <Pressable
                           onPress={() => toggleMonth(yearMonth)}
-                          className="flex-row items-center justify-between py-2"
-                          activeOpacity={0.7}
+                          className="flex-row items-center justify-between py-2 active:opacity-70"
                         >
                           <Text className="font-semibold text-base text-foreground">Tháng {Number(month)}</Text>
                           {isMonthExpanded ? (
@@ -120,12 +124,12 @@ export default function HistoryScreen() {
                           ) : (
                             <ChevronRight color="#64748B" size={18} />
                           )}
-                        </TouchableOpacity>
+                        </Pressable>
 
                         {isMonthExpanded && (
                           <View className="flex-row flex-wrap mt-2 mb-1 gap-2">
-                            {days.map(day => (
-                              <TouchableOpacity
+                            {days.map((day) => (
+                              <Pressable
                                 key={`${yearMonth}-${day}`}
                                 onPress={() => {
                                   router.push({
@@ -133,11 +137,10 @@ export default function HistoryScreen() {
                                     params: { date: `${year}-${month}-${day}` }
                                   } as any);
                                 }}
-                                className="bg-secondary/80 px-4 py-2 rounded-full border border-border"
-                                activeOpacity={0.7}
+                                className="bg-secondary/80 px-4 py-2 rounded-full border border-border active:opacity-70"
                               >
                                 <Text className="text-foreground font-medium text-sm">Ngày {Number(day)}</Text>
-                              </TouchableOpacity>
+                              </Pressable>
                             ))}
                           </View>
                         )}
@@ -157,12 +160,12 @@ export default function HistoryScreen() {
     <ScreenWrapper
       title="Lịch sử đo"
       headerLeft={
-        <TouchableOpacity
+        <Pressable
           onPress={() => router.back()}
-          className="h-10 w-10 bg-white rounded-full items-center justify-center shadow-sm border border-gray-100"
+          className="h-10 w-10 bg-white rounded-full items-center justify-center shadow-sm border border-gray-100 active:opacity-75"
         >
           <ArrowLeft color="#171717" size={20} />
-        </TouchableOpacity>
+        </Pressable>
       }
     >
       <ScrollView className="flex-1 px-6 pt-4" showsVerticalScrollIndicator={false}>

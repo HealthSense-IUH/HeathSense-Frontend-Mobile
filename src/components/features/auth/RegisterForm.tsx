@@ -58,7 +58,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         email: email.trim(),
         password,
       });
-    } catch (err: any) {
+    } catch {
       // Error handled by parent
     }
   };

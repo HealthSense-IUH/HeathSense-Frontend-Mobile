@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, Pressable, ScrollView, ActivityIndicator } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ArrowLeft, Clock, Activity, ShieldAlert, AlertCircle, Heart } from 'lucide-react-native';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
@@ -10,6 +10,11 @@ const STATUS_COLORS = {
   AFIB: { bg: 'bg-rose-50', text: 'text-rose-600', icon: ShieldAlert, iconColor: '#E11D48', label: 'Phát hiện AFib' },
   AFIB_SUSPECTED: { bg: 'bg-amber-50', text: 'text-amber-600', icon: AlertCircle, iconColor: '#D97706', label: 'Nghi ngờ AFib' },
   UNCERTAIN: { bg: 'bg-gray-100', text: 'text-gray-600', icon: Activity, iconColor: '#6B7280', label: 'Không chắc chắn' },
+};
+
+const formatTime = (isoString: string) => {
+  const d = new Date(isoString);
+  return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
 };
 
 export default function HistoryRecordsScreen() {
@@ -23,11 +28,6 @@ export default function HistoryRecordsScreen() {
 
   // Format date for display: YYYY-MM-DD to DD/MM/YYYY
   const displayDate = queryDate.split('-').reverse().join('/');
-
-  const formatTime = (isoString: string) => {
-    const d = new Date(isoString);
-    return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-  };
 
   const renderContent = () => {
     if (isLoading) {
@@ -60,7 +60,7 @@ export default function HistoryRecordsScreen() {
       <View className="pb-8">
         <Text className="text-lg font-bold text-foreground mb-4">Kết quả đo ngày {displayDate}</Text>
         
-        {records.map((record, index) => {
+        {records.map((record) => {
           const statusInfo = STATUS_COLORS[record.predictionLabel as keyof typeof STATUS_COLORS] || STATUS_COLORS.UNCERTAIN;
           const Icon = statusInfo.icon;
           const confidencePercent = record.confidence ? Math.round(record.confidence * 100) : 0;
@@ -113,12 +113,12 @@ export default function HistoryRecordsScreen() {
     <ScreenWrapper
       title="Chi tiết theo ngày"
       headerLeft={
-        <TouchableOpacity
+        <Pressable
           onPress={() => router.back()}
-          className="h-10 w-10 bg-white rounded-full items-center justify-center shadow-sm border border-gray-100"
+          className="h-10 w-10 bg-white rounded-full items-center justify-center shadow-sm border border-gray-100 active:opacity-75"
         >
           <ArrowLeft color="#171717" size={20} />
-        </TouchableOpacity>
+        </Pressable>
       }
     >
       <ScrollView className="flex-1 px-6 pt-4" showsVerticalScrollIndicator={false}>

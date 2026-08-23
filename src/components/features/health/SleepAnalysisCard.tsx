@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { Moon, ChevronRight } from 'lucide-react-native';
 
 export function SleepAnalysisCard() {
@@ -11,9 +11,9 @@ export function SleepAnalysisCard() {
           </View>
           <Text className="text-lg font-bold text-foreground">Phân tích Giấc ngủ</Text>
         </View>
-        <TouchableOpacity>
+        <Pressable hitSlop={8} className="active:opacity-70">
           <ChevronRight color="#9EA7B8" size={24} />
-        </TouchableOpacity>
+        </Pressable>
       </View>
       
       <View className="flex-row justify-between mb-4">

@@ -1,20 +1,18 @@
 import React from 'react';
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '@/services/authentication/authStore';
-import { useRegisterMutation } from '@/hooks/mutations/useAuthMutations';
 import { RegisterForm } from '@/components/features/auth/RegisterForm';
 import { RegisterRequest } from '@/types/authentication';
 
 export default function RegisterScreen() {
   const router = useRouter();
-  const clearError = useAuthStore((state) => state.clearError);
-  const registerMutation = useRegisterMutation();
+  const { register, isLoading, error, clearError } = useAuthStore();
 
   const handleRegister = async (data: RegisterRequest) => {
     clearError();
     try {
-      await registerMutation.mutateAsync(data);
+      await register(data);
       Alert.alert(
         'Đăng ký thành công!',
         'Tài khoản của bạn đã được khởi tạo. Vui lòng đăng nhập để bắt đầu trải nghiệm.',
@@ -56,8 +54,8 @@ export default function RegisterScreen() {
           {/* RegisterForm component */}
           <RegisterForm
             onSubmit={handleRegister}
-            isLoading={registerMutation.isPending}
-            error={registerMutation.error?.message || useAuthStore.getState().error}
+            isLoading={isLoading}
+            error={error}
             onNavigateToLogin={() => router.replace('/(public)/login' as any)}
           />
         </View>

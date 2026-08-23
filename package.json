@@ -55,6 +55,8 @@
     "babel-plugin-module-resolver": "^5.0.0",
     "eslint": "^9.0.0",
     "eslint-config-expo": "~57.0.1",
+    "knip": "^6.32.2",
+    "react-doctor": "^0.9.12",
     "tailwindcss": "^4.2.0",
     "typescript": "~6.0.3"
   },
@@ -63,7 +65,10 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "knip": "knip",
+    "doctor": "react-doctor .",
+    "doctor:verbose": "react-doctor . --verbose"
   },
   "private": true,
   "overrides": {

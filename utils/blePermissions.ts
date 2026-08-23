@@ -1,4 +1,4 @@
-import * as RN from "react-native";
+import { Platform, PermissionsAndroid, Permission } from "react-native";
 
 let hasGrantedPermissionsCache = false;
 
@@ -14,52 +14,55 @@ export const requestBluetoothPermissions = async (): Promise<{
         return { ok: true };
     }
 
-    if(RN.Platform.OS != "android"){
-        return {ok: true};
+    if (Platform.OS !== "android") {
+        return { ok: true };
     }
 
-    const sdk=
-        typeof RN.Platform.Version === "string"
-            ? parseInt(RN.Platform.Version, 10)
-            : (RN.Platform.Version as number);
+    const sdk =
+        typeof Platform.Version === "string"
+            ? parseInt(Platform.Version, 10)
+            : (Platform.Version as number);
     console.log(
         "[blePermissions] Android SDK version: ",
-        RN.Platform.Version,
+        Platform.Version,
         "normalized sdk:",
         sdk,
     );
 
-    const permissions: string[] = [];
-    if(sdk >= 23 && sdk <= 28){
-        permissions.push(RN.PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION);
+    const permissions: Permission[] = [];
+    if (sdk >= 23 && sdk <= 28) {
+        permissions.push(PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION);
     }
-    if (sdk >= 29 && sdk <= 30){
-        permissions.push(RN.PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+    if (sdk >= 29 && sdk <= 30) {
+        permissions.push(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
     }
-    if (sdk >= 31){
+    if (sdk >= 31) {
         permissions.push(
-            RN.PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
-            RN.PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
-            RN.PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+            PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
+            PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
+            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
         );
     }
 
-    if(permissions.length === 0){
+    if (permissions.length === 0) {
         console.log(
             "[blePermissions] No runtime permissions required for this SDK level"
         );
-        return {ok: true};
+        return { ok: true };
     }
 
-    const toRequest: string[] = [];
-    for(const p of permissions){
-        try{
-            const already = await (RN.PermissionsAndroid as any).check?.(p);
-            if(!already) toRequest.push(p);
-        }catch(err){
-            toRequest.push(p);
-        }
-    }
+    const checkResults = await Promise.all(
+        permissions.map(async (p) => {
+            try {
+                const already = await PermissionsAndroid.check(p);
+                return already ? null : p;
+            } catch {
+                return p;
+            }
+        })
+    );
+
+    const toRequest = checkResults.flatMap((p) => (p ? [p] : []));
 
     console.log(
         "[blePermissions] permissions to request:",
@@ -68,21 +71,21 @@ export const requestBluetoothPermissions = async (): Promise<{
         permissions
     );
 
-    if (toRequest.length === 0){
+    if (toRequest.length === 0) {
         console.log("[blePermissions] All permissions already granted");
         hasGrantedPermissionsCache = true;
-        return {ok: true};
+        return { ok: true };
     }
 
-    const granted = await RN.PermissionsAndroid.requestMultiple(toRequest as any);
+    const granted = await PermissionsAndroid.requestMultiple(toRequest);
     console.log("[blePermissions] requestMultiple result:", granted);
 
     const results: Record<string, string> = {};
     let allGranted = true;
-    for (const p of toRequest){
-        const value = (granted as any)[p] as string;
+    for (const p of toRequest) {
+        const value = granted[p];
         results[p] = value;
-        if(value !== RN.PermissionsAndroid.RESULTS.GRANTED){
+        if (value !== PermissionsAndroid.RESULTS.GRANTED) {
             allGranted = false;
             console.warn(`[blePermissions] Permission denied: ${p} -> ${value}`);
         }
@@ -92,5 +95,5 @@ export const requestBluetoothPermissions = async (): Promise<{
         hasGrantedPermissionsCache = true;
     }
 
-    return {ok: allGranted, results};
-}
+    return { ok: allGranted, results };
+};

@@ -1,9 +1,9 @@
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { Stethoscope, ChevronRight } from 'lucide-react-native';
 
 export function ConsultationBanner() {
   return (
-    <TouchableOpacity className="bg-primary rounded-2xl p-5 flex-row items-center justify-between shadow-sm mb-10">
+    <Pressable className="bg-primary rounded-2xl p-5 flex-row items-center justify-between shadow-sm mb-10 active:opacity-90">
       <View className="flex-row items-center">
         <View className="h-10 w-10 rounded-full bg-therapeia-40 items-center justify-center mr-4">
           <Stethoscope color="#FFFFFF" size={20} />
@@ -14,6 +14,6 @@ export function ConsultationBanner() {
         </View>
       </View>
       <ChevronRight color="#FFFFFF" size={20} />
-    </TouchableOpacity>
+    </Pressable>
   );
 }

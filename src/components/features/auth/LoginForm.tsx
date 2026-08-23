@@ -42,7 +42,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
     try {
       await onSubmit({ email: email.trim(), password });
-    } catch (err: any) {
+    } catch {
       // Error handled by parent
     }
   };

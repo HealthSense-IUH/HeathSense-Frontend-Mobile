@@ -1,8 +1,7 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
-import { ChevronUp } from 'lucide-react-native';
+import { View, Text } from 'react-native';
 import { PieChart } from 'react-native-gifted-charts';
-import { STATUS_COLORS } from './ChartLegend';
+import { STATUS_COLORS } from '@/constants/statusColors';
 
 interface SummaryStats {
   normal: number;

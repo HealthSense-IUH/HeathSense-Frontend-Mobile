@@ -31,7 +31,7 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
   return (
     <HStack className="absolute bottom-0 w-full" style={{ height: tabHeight, paddingBottom: Platform.OS === 'ios' ? 20 : 0 }}>
       {/* Background SVG - Explicitly setting fill to White (#FFFFFF) to prevent black default rendering */}
-      <Box className="absolute top-0 left-0 right-0 bottom-0 shadow-sm" style={{ shadowColor: '#000', shadowOffset: { width: 0, height: -2 }, shadowOpacity: 0.1, shadowRadius: 3 }}>
+      <Box className="absolute top-0 left-0 right-0 bottom-0 shadow-sm" style={{ boxShadow: '0 -2px 3px rgba(0, 0, 0, 0.1)' }}>
         <Svg width={width} height={tabHeight} viewBox={`0 0 ${width} ${tabHeight}`}>
           <Path d={path} fill="#FFFFFF" />
         </Svg>

@@ -1,35 +1,96 @@
-name: Build Mobile App (EAS Cloud)
+name: CI/CD
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
+  lint:
+    name: ESLint Validation
+    runs-on: ubuntu-latest
+    steps:
+    - name: 🏗 Checkout repository
+      uses: actions/checkout@v4
+
+    - name: 🟢 Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: 📦 Install dependencies
+      run: npm ci || npm install
+
+    - name: 🔍 Run ESLint
+      run: npm run lint
+
+  knip:
+    name: Knip Dead Code Scan
+    runs-on: ubuntu-latest
+    steps:
+    - name: 🏗 Checkout repository
+      uses: actions/checkout@v4
+
+    - name: 🟢 Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: 📦 Install dependencies
+      run: npm ci || npm install
+
+    - name: ✂️ Run Knip Scan
+      run: npm run knip || true
+
+  doctor:
+    name: React Doctor Audit
+    runs-on: ubuntu-latest
+    steps:
+    - name: 🏗 Checkout repository
+      uses: actions/checkout@v4
+
+    - name: 🟢 Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: 📦 Install dependencies
+      run: npm ci || npm install
+
+    - name: 🩺 Run React Doctor
+      run: npm run doctor
+
   build:
     name: Build Android APK via EAS
     runs-on: ubuntu-latest
+    needs: [lint, knip, doctor]
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
 
     steps:
-      - name: 🏗 Checkout repository
-        uses: actions/checkout@v4
+    - name: 🏗 Checkout repository
+      uses: actions/checkout@v4
 
-      - name: 🟢 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
+    - name: 🟢 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'npm'
 
-      - name: 🚀 Setup Expo & EAS CLI
-        uses: expo/expo-github-action@v8
-        with:
-          eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
+    - name: 🚀 Setup Expo & EAS CLI
+      uses: expo/expo-github-action@v8
+      with:
+        eas-version: latest
+        token: ${{ secrets.EXPO_TOKEN }}
 
-      - name: 📦 Install dependencies
-        run: npm ci
+    - name: 📦 Install dependencies
+      run: npm ci || npm install
 
-      - name: 🛠 Build Android APK via EAS
-        env:
-          EXPO_PUBLIC_API_URL: ${{ secrets.EXPO_PUBLIC_API_URL }}
-        run: eas build --platform android --profile preview --non-interactive
+    - name: 🛠 Build Android APK via EAS
+      env:
+        EXPO_PUBLIC_API_URL: ${{ secrets.EXPO_PUBLIC_API_URL }}
+      run: eas build --platform android --profile preview --non-interactive

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, Pressable, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Bluetooth, HeartPulse } from 'lucide-react-native';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
@@ -12,24 +12,23 @@ export default function SmartHealthScreen() {
     <ScreenWrapper
       title="Phân tích nhịp tim"
       headerRight={
-        <TouchableOpacity
+        <Pressable
           onPress={() => router.push("/(public)/scan" as any)}
-          className="h-10 w-10 rounded-full bg-primary/10 items-center justify-center"
+          className="h-10 w-10 rounded-full bg-primary/10 items-center justify-center active:opacity-75"
         >
           <Bluetooth color="#0F67FE" size={20} />
-        </TouchableOpacity>
+        </Pressable>
       }
     >
       <ScrollView className="flex-1 px-6 pt-4" showsVerticalScrollIndicator={false}>
         {/* Banner Card - Styled like the user's "Energy Score" illustration */}
-        <TouchableOpacity 
-          activeOpacity={0.8}
+        <Pressable 
           onPress={() => {
             setTimeout(() => {
-              router.push("/afib-analysis-details");
+              router.push("/afib-analysis-details" as any);
             }, 50);
           }}
-          className="shadow-sm mb-6"
+          className="shadow-sm mb-6 active:opacity-90"
           style={{ borderRadius: 24 }}
         >
           <LinearGradient
@@ -52,13 +51,12 @@ export default function SmartHealthScreen() {
               Tìm hiểu và theo dõi rủi ro rung tâm nhĩ (AFib) thông qua các phép đo nhịp tim hàng ngày để bảo vệ tim mạch của bạn.
             </Text>
           </LinearGradient>
-        </TouchableOpacity>
+        </Pressable>
 
         {/* View History Button */}
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => router.push("/history")}
-          className="bg-card rounded-3xl p-5 flex-row items-center shadow-sm mb-6 border border-border"
+        <Pressable
+          onPress={() => router.push("/history" as any)}
+          className="bg-card rounded-3xl p-5 flex-row items-center shadow-sm mb-6 border border-border active:opacity-85"
         >
           <View className="h-12 w-12 bg-primary/10 rounded-full items-center justify-center mr-4">
             <HeartPulse color="#0F67FE" size={24} />
@@ -67,7 +65,7 @@ export default function SmartHealthScreen() {
             <Text className="text-foreground font-bold text-base mb-1">Lịch sử đo</Text>
             <Text className="text-muted-foreground text-sm">Xem lại các kết quả đo theo thời gian</Text>
           </View>
-        </TouchableOpacity>
+        </Pressable>
       </ScrollView>
     </ScreenWrapper>
   );

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://unpkg.com/react-doctor/schema.json",
+  "ignore": {
+    "files": [
+      ".expo/**",
+      "dist/**",
+      "node_modules/**",
+      "src/components/ui/**"
+    ]
+  },
+  "rules": {
+    "deslop/unused-dependency": "off",
+    "react-doctor/rn-prefer-reanimated": "off"
+  }
+}

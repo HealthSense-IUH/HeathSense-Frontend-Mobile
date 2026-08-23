@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, Animated, StyleProp, ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -30,8 +30,8 @@ export function ScreenWrapper({
   statusBarStyle = 'dark',
   backgroundComponent,
 }: ScreenWrapperProps) {
-  const fadeAnim = React.useRef(new Animated.Value(1)).current;
-  const scrollY = React.useRef(new Animated.Value(0)).current;
+  const [fadeAnim] = useState(() => new Animated.Value(1));
+  const [scrollY] = useState(() => new Animated.Value(0));
   const insets = useSafeAreaInsets();
 
   // Dynamic heights based on device safe area
@@ -84,7 +84,7 @@ export function ScreenWrapper({
       {/* Floating Header Left Action */}
       {headerLeft && (
         <Animated.View
-          style={{ opacity: fadeAnim, zIndex: 100, elevation: 100, top: TITLE_PT }}
+          style={{ opacity: fadeAnim, zIndex: 100, top: TITLE_PT }}
           className="absolute left-6"
         >
           {headerLeft}
@@ -94,7 +94,7 @@ export function ScreenWrapper({
       {/* Floating Header Right Action */}
       {headerRight && (
         <Animated.View
-          style={{ opacity: fadeAnim, zIndex: 100, elevation: 100, top: TITLE_PT }}
+          style={{ opacity: fadeAnim, zIndex: 100, top: TITLE_PT }}
           className="absolute right-6"
         >
           {headerRight}
@@ -120,7 +120,7 @@ export function ScreenWrapper({
       {/* Sticky Tabs (if provided) slide UP into the space left by the fading Title */}
       {stickyHeader && (
         <Animated.View
-          className="absolute left-0 right-0 z-50 elevation-50"
+          className="absolute left-0 right-0 z-50"
           style={{
             top: HEADER_BASE_HEIGHT,
             transform: [{ translateY: tabsTranslateY }],

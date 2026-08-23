@@ -1,12 +1,13 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { View, Text, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, ActivityIndicator, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ArrowLeft } from 'lucide-react-native';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
 import { BarChart } from 'react-native-gifted-charts';
 import { TimeFilterTabs } from '@/components/features/health/statistics/TimeFilterTabs';
 import { PeriodSelector } from '@/components/features/health/statistics/PeriodSelector';
-import { ChartLegend, STATUS_COLORS } from '@/components/features/health/statistics/ChartLegend';
+import { ChartLegend } from '@/components/features/health/statistics/ChartLegend';
+import { STATUS_COLORS } from '@/constants/statusColors';
 import { SummaryDonutChart } from '@/components/features/health/statistics/SummaryDonutChart';
 import { useHealthStatistics } from '@/hooks/useHealthStatistics';
 
@@ -26,7 +27,7 @@ export default function AFibAnalysisDetailsScreen() {
     return () => clearTimeout(timer);
   }, []);
 
-  const { data, loading, isFetching, error } = useHealthStatistics(activeFilter, referenceDate);
+  const { data, loading, error } = useHealthStatistics(activeFilter, referenceDate);
 
   const handlePrev = () => {
     const newDate = new Date(referenceDate);
@@ -57,7 +58,7 @@ export default function AFibAnalysisDetailsScreen() {
     if (!data?.chartData || data.chartData.length === 0) return { chartData: [], maxValue: 10 };
 
     let max = 0;
-    const mapped = data.chartData.map(item => {
+    const mapped = data.chartData.map((item) => {
       const stacks = [];
       let stackSum = 0;
       if (item.normalCount > 0) {
@@ -85,7 +86,7 @@ export default function AFibAnalysisDetailsScreen() {
 
       let displayLabel = item.label;
       if (activeFilter === 'Tháng') {
-        const day = parseInt(item.label);
+        const day = parseInt(item.label, 10);
         if (day !== 1 && day % 5 !== 0) {
           displayLabel = '';
         }
@@ -99,7 +100,7 @@ export default function AFibAnalysisDetailsScreen() {
 
     let calcMax = Math.max(10, Math.ceil((max * 1.2) / 4) * 4);
     return { chartData: mapped, maxValue: calcMax };
-  }, [data]);
+  }, [data, activeFilter]);
 
   const totalResults = (data?.totalNormal || 0) + (data?.totalAfibRisk || 0) + (data?.totalAfibSuspected || 0) + (data?.totalUncertain || 0);
 
@@ -198,12 +199,12 @@ export default function AFibAnalysisDetailsScreen() {
     <ScreenWrapper 
       title="Chi tiết phân tích"
       headerLeft={
-        <TouchableOpacity 
+        <Pressable 
           onPress={() => router.back()}
-          className="h-10 w-10 bg-white rounded-full items-center justify-center shadow-sm border border-gray-100"
+          className="h-10 w-10 bg-white rounded-full items-center justify-center shadow-sm border border-gray-100 active:opacity-75"
         >
           <ArrowLeft color="#171717" size={20} />
-        </TouchableOpacity>
+        </Pressable>
       }
       stickyHeaderHeight={130}
       stickyHeader={
