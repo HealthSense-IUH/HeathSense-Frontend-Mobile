@@ -6,6 +6,7 @@ import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
 import { useAuthStore } from '@/services/authentication/authStore';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/utils/queryClient';
+import { THEME } from '@/constants/theme';
 import '@/services/notifee-management/notifeeForegroundService';
 import '@/global.css';
 
@@ -20,11 +21,11 @@ export default function RootLayout() {
     <QueryClientProvider client={queryClient}>
       <GluestackUIProvider mode="system">
         <BLEProvider>
-          <View style={{ flex: 1, backgroundColor: '#F2F5F9' }}>
+          <View style={{ flex: 1, backgroundColor: THEME.colors.canvas }}>
             <Stack
               screenOptions={{
                 headerShown: false,
-                contentStyle: { backgroundColor: '#F2F5F9' },
+                contentStyle: { backgroundColor: THEME.colors.canvas },
                 animation: 'slide_from_bottom' // Native smooth slide transition
               }}
             >

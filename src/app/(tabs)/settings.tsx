@@ -7,6 +7,7 @@ import { useLogoutMutation } from '@/hooks/mutations/useAuthMutations';
 import { useBLE } from '@/context/BLEContext';
 import { LogoutButton } from '@/components/features/auth/LogoutButton';
 import { Activity, Battery, Info, Radio, Shield, Trash2, Watch } from 'lucide-react-native';
+import { THEME } from '@/constants/theme';
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -24,7 +25,7 @@ export default function SettingsScreen() {
       title="Cài đặt" 
       description="Quản lý tài khoản, kết nối"
     >
-      <View className="px-6 mt-6">
+      <View className="px-5 mt-4">
         {/* Bluetooth Device Management Section */}
         <View className="bg-card border border-border rounded-3xl p-5 shadow-sm mb-6">
           <Text className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-4">
@@ -34,7 +35,7 @@ export default function SettingsScreen() {
           <View className="flex-row items-center justify-between mb-4 bg-background p-4 rounded-2xl border border-border">
             <View className="flex-row items-center flex-1 mr-2">
               <View className="w-11 h-11 bg-primary/10 rounded-xl items-center justify-center mr-3">
-                <Watch size={22} color="#0F67FE" />
+                <Watch size={22} color={THEME.colors.primary} />
               </View>
               <View className="flex-1">
                 <Text className="text-sm font-bold text-foreground" numberOfLines={1}>
@@ -69,7 +70,7 @@ export default function SettingsScreen() {
                 onPress={() => void forgetDevice()}
                 className="bg-destructive/10 border border-destructive/20 py-3 px-4 rounded-2xl flex-row items-center justify-center active:opacity-80"
               >
-                <Trash2 color="#DA1E2E" size={16} className="mr-1.5" />
+                <Trash2 color={THEME.colors.error} size={16} className="mr-1.5" />
                 <Text className="text-xs font-bold text-destructive">Hủy ghép đôi</Text>
               </TouchableOpacity>
             )}
@@ -84,7 +85,7 @@ export default function SettingsScreen() {
 
           <View className="flex-row items-center py-2 border-b border-border/40">
             <View className="w-9 h-9 bg-primary/10 rounded-xl items-center justify-center mr-3">
-              <Activity size={18} color="#0F67FE" />
+              <Activity size={18} color={THEME.colors.primary} />
             </View>
             <View className="flex-1">
               <Text className="text-sm font-semibold text-foreground">Ứng dụng HealthSense</Text>
@@ -94,7 +95,7 @@ export default function SettingsScreen() {
 
           <View className="flex-row items-center py-2 border-b border-border/40">
             <View className="w-9 h-9 bg-secondary/60 rounded-xl items-center justify-center mr-3">
-              <Shield size={18} color="#0048CE" />
+              <Shield size={18} color={THEME.colors.primaryM3} />
             </View>
             <View className="flex-1">
               <Text className="text-sm font-semibold text-foreground">Bảo mật Token</Text>
@@ -104,7 +105,7 @@ export default function SettingsScreen() {
 
           <View className="flex-row items-center py-2">
             <View className="w-9 h-9 bg-accent/20 rounded-xl items-center justify-center mr-3">
-              <Info size={18} color="#6EC522" />
+              <Info size={18} color={THEME.colors.statusNormal} />
             </View>
             <View className="flex-1">
               <Text className="text-sm font-semibold text-foreground">Core Service Backend</Text>

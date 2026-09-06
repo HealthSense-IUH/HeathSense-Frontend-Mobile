@@ -1,23 +1,33 @@
 import React, { useState } from 'react';
-import { View, Text, Animated, StyleProp, ViewStyle, RefreshControlProps } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  View,
+  Text,
+  Animated,
+  StyleProp,
+  ViewStyle,
+  RefreshControlProps,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import { THEME } from '@/constants/theme';
 
-interface ScreenWrapperProps {
-  title: string;
-  description?: string; // Text below the title
+export interface ScreenWrapperProps {
+  title?: string;
+  description?: string;
   children: React.ReactNode;
   stickyHeader?: React.ReactNode;
-  headerLeft?: React.ReactNode; // Custom component for the top-left corner
-  headerRight?: React.ReactNode; // Custom component for the top-right corner
+  headerLeft?: React.ReactNode;
+  headerRight?: React.ReactNode;
   contentContainerStyle?: StyleProp<ViewStyle>;
-  stickyHeaderHeight?: number; // Pre-calculated height for scroll offset
-
-  // Customization props for Background & Status Bar
+  stickyHeaderHeight?: number;
   statusBarStyle?: 'light' | 'dark' | 'auto';
   backgroundComponent?: React.ReactNode;
-  
   refreshControl?: React.ReactElement<RefreshControlProps>;
+  className?: string;
+  withKeyboardHandling?: boolean;
+  withBottomNav?: boolean;
 }
 
 export function ScreenWrapper({
@@ -32,29 +42,62 @@ export function ScreenWrapper({
   statusBarStyle = 'dark',
   backgroundComponent,
   refreshControl,
+  className = '',
+  withKeyboardHandling = false,
+  withBottomNav = false,
 }: ScreenWrapperProps) {
   const [fadeAnim] = useState(() => new Animated.Value(1));
   const [scrollY] = useState(() => new Animated.Value(0));
   const insets = useSafeAreaInsets();
 
-  // Dynamic heights based on device safe area
-  const TITLE_PT = insets.top + 12; // 12px padding below status bar
+  // If no title provided (e.g. Auth, Simple Screen), render clean safe-area container
+  if (!title) {
+    const staticContent = (
+      <View style={{ flex: 1, backgroundColor: THEME.colors.canvas }} className={className}>
+        <StatusBar style={statusBarStyle} animated />
+        {backgroundComponent && (
+          <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: -1 }}>
+            {backgroundComponent}
+          </View>
+        )}
+        <SafeAreaView style={{ flex: 1 }} edges={['top', 'left', 'right', 'bottom']}>
+          {children}
+          {withBottomNav && <View style={{ height: THEME.layout.dockHeight }} />}
+        </SafeAreaView>
+      </View>
+    );
+
+    if (withKeyboardHandling) {
+      return (
+        <KeyboardAvoidingView
+          style={{ flex: 1, backgroundColor: THEME.colors.canvas }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        >
+          {staticContent}
+        </KeyboardAvoidingView>
+      );
+    }
+
+    return staticContent;
+  }
+
+  // Dynamic heights based on device safe area for Header Title screen
+  const TITLE_PT = insets.top + 12;
   const TITLE_PB = 16;
-  const HEADER_BASE_HEIGHT = TITLE_PT + 40 + TITLE_PB; // ~40px for text height
+  const HEADER_BASE_HEIGHT = TITLE_PT + 40 + TITLE_PB;
   const CLAMP_Y = Math.max(0, HEADER_BASE_HEIGHT - insets.top);
 
-  // Translate the Tabs UP as the user scrolls
   const tabsTranslateY = scrollY.interpolate({
     inputRange: [0, CLAMP_Y],
     outputRange: [0, -CLAMP_Y],
-    extrapolate: 'clamp'
+    extrapolate: 'clamp',
   });
 
-  // Fade out the Title as the user scrolls (Samsung Health effect)
   const titleOpacity = scrollY.interpolate({
     inputRange: [0, CLAMP_Y * 0.8],
     outputRange: [1, 0],
-    extrapolate: 'clamp'
+    extrapolate: 'clamp',
   });
 
   const handleScrollBeginDrag = () => {
@@ -73,11 +116,11 @@ export function ScreenWrapper({
     }).start();
   };
 
-  return (
-    <View style={{ flex: 1, backgroundColor: 'transparent' }}>
+  const scrollableContent = (
+    <View style={{ flex: 1, backgroundColor: THEME.colors.canvas }} className={className}>
       <StatusBar style={statusBarStyle} animated />
 
-      {/* Dynamic Background Layer (Rendered below everything) */}
+      {/* Dynamic Background Layer */}
       {backgroundComponent && (
         <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: -1 }}>
           {backgroundComponent}
@@ -88,7 +131,7 @@ export function ScreenWrapper({
       {headerLeft && (
         <Animated.View
           style={{ opacity: fadeAnim, zIndex: 100, top: TITLE_PT }}
-          className="absolute left-6"
+          className="absolute left-5"
         >
           {headerLeft}
         </Animated.View>
@@ -98,29 +141,27 @@ export function ScreenWrapper({
       {headerRight && (
         <Animated.View
           style={{ opacity: fadeAnim, zIndex: 100, top: TITLE_PT }}
-          className="absolute right-6"
+          className="absolute right-5"
         >
           {headerRight}
         </Animated.View>
       )}
 
-      {/* Title is ALWAYS FIXED, and FADES OUT (opacity) without moving */}
+      {/* Fixed Title with Fade-out animation */}
       <Animated.View className="absolute left-0 right-0 z-40" style={{ top: 0, opacity: titleOpacity }}>
-        <View className="px-6 flex-row justify-between items-center" style={{ paddingTop: TITLE_PT, paddingBottom: TITLE_PB }}>
+        <View className="px-5 flex-row justify-between items-center" style={{ paddingTop: TITLE_PT, paddingBottom: TITLE_PB }}>
           <View className="flex-row items-center">
-            {/* If headerLeft exists, it is absolute. We need a spacer so the Title doesn't overlap it */}
-            {headerLeft && <View className="w-14" />}
+            {headerLeft && <View className="w-12" />}
             <View>
               <Text className="text-[26px] font-extrabold text-foreground tracking-tight">{title}</Text>
-              {description && <Text className="text-xs text-muted-foreground mt-1">{description}</Text>}
+              {description && <Text className="text-xs text-muted-foreground mt-0.5">{description}</Text>}
             </View>
           </View>
-          {/* Spacer for headerRight */}
           <View className="h-10 w-10" />
         </View>
       </Animated.View>
 
-      {/* Sticky Tabs (if provided) slide UP into the space left by the fading Title */}
+      {/* Sticky Header / Tabs */}
       {stickyHeader && (
         <Animated.View
           className="absolute left-0 right-0 z-50"
@@ -135,11 +176,11 @@ export function ScreenWrapper({
         </Animated.View>
       )}
 
-      {/* Main Scrollable Content clipped EXACTLY below the notch */}
+      {/* Main Scrollable Content */}
       <View style={{ flex: 1, marginTop: insets.top, overflow: 'hidden' }}>
         <Animated.ScrollView
           contentContainerStyle={[
-            { flexGrow: 1, paddingBottom: 120 },
+            { flexGrow: 1, paddingBottom: withBottomNav ? 120 : 60 },
             { paddingTop: stickyHeader ? (HEADER_BASE_HEIGHT + stickyHeaderHeight - insets.top) : (HEADER_BASE_HEIGHT - insets.top) },
             contentContainerStyle,
           ]}
@@ -159,4 +200,18 @@ export function ScreenWrapper({
       </View>
     </View>
   );
+
+  if (withKeyboardHandling) {
+    return (
+      <KeyboardAvoidingView
+        style={{ flex: 1, backgroundColor: THEME.colors.canvas }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      >
+        {scrollableContent}
+      </KeyboardAvoidingView>
+    );
+  }
+
+  return scrollableContent;
 }

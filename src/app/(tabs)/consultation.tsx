@@ -23,7 +23,7 @@ export default function ConsultationScreen() {
       description="Kết nối trực tiếp với bác sĩ"
       refreshControl={<RefreshControl refreshing={loading} onRefresh={loadData} />}
     >
-      <Box className="px-6 mt-6 flex-1">
+      <Box className="px-5 mt-4 flex-1">
         {/* Custom Segmented Tabs */}
         <HStack className="bg-muted p-1 rounded-xl w-full justify-between mb-4">
           <Pressable 

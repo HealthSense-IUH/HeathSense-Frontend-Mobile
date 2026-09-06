@@ -1,6 +1,11 @@
+import { THEME } from './theme';
+
 export const STATUS_COLORS = {
-  NORMAL: '#6EC522', // status-normal
-  UNCERTAIN: '#9EA7B8', // status-uncertain
-  AFIB_SUSPECTED: '#D97706', // status-afib-suspected
-  AFIB_RISK: '#750E13', // status-afib
+  NORMAL: THEME.status.NORMAL.color,
+  UNCERTAIN: THEME.status.UNCERTAIN.color,
+  AFIB_SUSPECTED: THEME.status.AFIB_SUSPECTED.color,
+  AFIB_RISK: THEME.status.AFIB_RISK.color,
 };
+
+export const STATUS_CONFIG = THEME.status;
+
