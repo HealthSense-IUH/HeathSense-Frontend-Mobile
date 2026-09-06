@@ -11,14 +11,14 @@ const LEGEND_ITEMS = [
 
 export function ChartLegend() {
   return (
-    <View className="flex-row flex-wrap px-4 py-4">
+    <View className="mt-6 pt-4 border-t border-slate-100 flex-row flex-wrap justify-between">
       {LEGEND_ITEMS.map((item) => (
-        <View key={item.label} className="flex-row items-center w-[48%] mb-3">
+        <View key={item.label} className="flex-row items-center w-[48%] mb-2.5">
           <View
-            className="w-2 h-2 rounded-full mr-2"
-            style={{ backgroundColor: item.color }}
+            className="w-2.5 h-2.5 rounded-full mr-2 border-2"
+            style={{ backgroundColor: item.color, borderColor: `${item.color}33` }}
           />
-          <Text className="text-xs text-muted-foreground flex-1">{item.label}</Text>
+          <Text className="text-[12px] font-medium text-slate-700">{item.label}</Text>
         </View>
       ))}
     </View>

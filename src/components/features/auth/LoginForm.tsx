@@ -6,8 +6,10 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { AlertCircle, Eye, EyeOff, Lock, Mail } from 'lucide-react-native';
+import { AlertCircle, Eye, EyeOff, Lock, Mail, LogIn } from 'lucide-react-native';
 import { LoginRequest } from '@/types/authentication';
+import { MedicalInput } from '@/components/ui/MedicalInput';
+import { GradientButton } from '@/components/ui/GradientButton';
 
 interface LoginFormProps {
   onSubmit: (data: LoginRequest) => Promise<void>;
@@ -50,114 +52,98 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   const displayError = localError || error;
 
   return (
-    <View className="w-full max-w-md bg-card border border-border rounded-3xl p-6 shadow-sm">
-      {/* Header */}
-      <View className="items-center mb-6">
-        <View className="w-14 h-14 bg-primary/10 rounded-2xl items-center justify-center mb-3">
-          <Lock size={28} color="#0F67FE" />
+    <View className="w-full bg-white rounded-3xl p-6 sm:p-7 shadow-sm border border-slate-100">
+      {/* Medical Lock Badge Icon */}
+      <View className="flex items-center -mt-1 justify-center mb-6">
+        <View className="w-14 h-14 rounded-2xl bg-medical-50 border border-blue-100/80 items-center justify-center shadow-sm">
+          <Lock size={28} color="#0D6EFD" />
         </View>
-        <Text className="text-2xl font-bold text-foreground text-center">
+      </View>
+      
+      {/* Card Heading */}
+      <View className="items-center mb-6">
+        <Text className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
           Chào mừng trở lại!
         </Text>
-        <Text className="text-sm text-muted-foreground text-center mt-1">
+        <Text className="text-xs sm:text-sm text-slate-500 mt-1">
           Đăng nhập vào tài khoản HealthSense của bạn
         </Text>
       </View>
 
       {/* Error Alert Banner */}
       {displayError ? (
-        <View className="flex-row items-center bg-destructive/10 border border-destructive/20 p-3.5 rounded-2xl mb-4">
-          <AlertCircle size={20} color="#DA1E2E" className="mr-2" />
-          <Text className="text-xs font-semibold text-destructive flex-1">
+        <View className="flex-row items-center bg-rose-50 border border-rose-200 p-3.5 rounded-xl mb-4">
+          <AlertCircle size={20} color="#E11D48" className="mr-2" />
+          <Text className="text-xs font-semibold text-rose-600 flex-1">
             {displayError}
           </Text>
         </View>
       ) : null}
 
       {/* Inputs */}
-      <View className="space-y-4">
-        {/* Email Input */}
-        <View className="space-y-1 mb-4">
-          <Text className="text-xs font-semibold text-muted-foreground mb-1">
-            EMAIL
-          </Text>
-          <View className="flex-row items-center bg-background border border-border rounded-2xl px-3.5 py-3">
-            <Mail size={18} color="#9EA7B8" className="mr-2.5" />
-            <TextInput
-              className="flex-1 text-sm text-foreground font-medium p-0"
-              placeholder="nhapemail@domain.com"
-              placeholderTextColor="#9EA7B8"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              value={email}
-              onChangeText={setEmail}
-              editable={!isLoading}
-              returnKeyType="next"
-              onSubmitEditing={() => passwordInputRef.current?.focus()}
-            />
-          </View>
-        </View>
+      <View className="space-y-4 w-full">
+        <MedicalInput
+          label="EMAIL"
+          icon={<Mail size={20} />}
+          placeholder="nhapemail@domain.com"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoCorrect={false}
+          value={email}
+          onChangeText={setEmail}
+          editable={!isLoading}
+          returnKeyType="next"
+          onSubmitEditing={() => passwordInputRef.current?.focus()}
+        />
 
-        {/* Password Input */}
-        <View className="space-y-1 mb-6">
-          <Text className="text-xs font-semibold text-muted-foreground mb-1">
-            MẬT KHẨU
-          </Text>
-          <View className="flex-row items-center bg-background border border-border rounded-2xl px-3.5 py-3">
-            <Lock size={18} color="#9EA7B8" className="mr-2.5" />
-            <TextInput
-              ref={passwordInputRef}
-              className="flex-1 text-sm text-foreground font-medium p-0"
-              placeholder="••••••••"
-              placeholderTextColor="#9EA7B8"
-              secureTextEntry={!showPassword}
-              value={password}
-              onChangeText={setPassword}
-              editable={!isLoading}
-              returnKeyType="done"
-              onSubmitEditing={handleSubmit}
-            />
-            <Pressable
-              onPress={() => setShowPassword(!showPassword)}
-              hitSlop={8}
-              className="ml-2"
-            >
-              {showPassword ? (
-                <EyeOff size={18} color="#9EA7B8" />
-              ) : (
-                <Eye size={18} color="#9EA7B8" />
-              )}
+        <View className="space-y-1.5 w-full">
+          <View className="flex-row items-center justify-between z-10 relative">
+            <Text className="text-[11px] font-bold tracking-wider text-slate-500 uppercase">MẬT KHẨU</Text>
+            <Pressable hitSlop={8}>
+              <Text className="text-[11px] font-semibold text-medical-500">Quên mật khẩu?</Text>
             </Pressable>
           </View>
+          <MedicalInput
+            ref={passwordInputRef}
+            icon={<Lock size={20} />}
+            placeholder="••••••••"
+            secureTextEntry={!showPassword}
+            value={password}
+            onChangeText={setPassword}
+            editable={!isLoading}
+            returnKeyType="done"
+            onSubmitEditing={handleSubmit}
+            rightElement={
+              <Pressable onPress={() => setShowPassword(!showPassword)} hitSlop={8}>
+                {showPassword ? (
+                  <EyeOff size={20} color="#94A3B8" />
+                ) : (
+                  <Eye size={20} color="#94A3B8" />
+                )}
+              </Pressable>
+            }
+          />
         </View>
 
         {/* Submit Button */}
-        <Pressable
-          onPress={handleSubmit}
-          disabled={isLoading}
-          className={`w-full bg-primary py-3.5 rounded-2xl items-center justify-center shadow-md active:opacity-90 ${
-            isLoading ? 'opacity-70' : ''
-          }`}
-        >
-          {isLoading ? (
-            <ActivityIndicator size="small" color="#FFFFFF" />
-          ) : (
-            <Text className="text-base font-bold text-primary-foreground">
-              Đăng nhập
-            </Text>
-          )}
-        </Pressable>
+        <View className="pt-2">
+          <GradientButton 
+            title={isLoading ? 'Đang xử lý...' : 'Đăng nhập'} 
+            onPress={handleSubmit} 
+            disabled={isLoading}
+            icon={!isLoading ? <LogIn size={16} color="white" /> : <ActivityIndicator size="small" color="white" />}
+          />
+        </View>
       </View>
 
-      {/* Switch to Register */}
+      {/* Divider & Sign Up Redirection */}
       {onNavigateToRegister && (
-        <View className="flex-row items-center justify-center mt-6 pt-4 border-t border-border/40">
-          <Text className="text-xs text-muted-foreground">
+        <View className="flex-row items-center justify-center mt-6 pt-5 border-t border-slate-100">
+          <Text className="text-xs sm:text-sm text-slate-500 font-normal">
             Chưa có tài khoản?{' '}
           </Text>
           <Pressable onPress={onNavigateToRegister} hitSlop={8}>
-            <Text className="text-xs font-bold text-primary">
+            <Text className="text-xs sm:text-sm font-bold text-medical-500 ml-1">
               Đăng ký ngay
             </Text>
           </Pressable>

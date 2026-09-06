@@ -11,19 +11,19 @@ interface PeriodSelectorProps {
 
 export function PeriodSelector({ monthText, onPrev, onNext }: PeriodSelectorProps) {
   return (
-    <View className="mt-6 mb-2 items-center">
-      <View className="flex-row items-center justify-between bg-card px-4 py-2 rounded-full shadow-sm border border-border min-w-[200px]">
-        <Pressable onPress={onPrev} className="p-1.5 bg-primary/10 rounded-full active:opacity-70">
-          <ChevronLeft color="#0F67FE" size={18} />
+    <View className="flex justify-center pt-3 pb-2 mx-5">
+      <View className="bg-white px-3 py-1.5 rounded-full shadow-sm flex-row items-center justify-center space-x-3 border border-slate-100 self-center">
+        <Pressable onPress={onPrev} className="w-8 h-8 rounded-full bg-medical-50 flex items-center justify-center active:opacity-80">
+          <ChevronLeft color="#0D6EFD" size={16} strokeWidth={2.5} />
         </Pressable>
         
-        <View className="items-center flex-row px-4">
-          <Text className="text-foreground text-sm font-bold mr-1">{monthText}</Text>
-          <ChevronDown color="#5D6A85" size={14} />
+        <View className="flex-row items-center space-x-1.5 px-2">
+          <Text className="text-sm font-bold text-slate-800 mr-1">{monthText}</Text>
+          <ChevronDown color="#64748B" size={14} strokeWidth={2.5} />
         </View>
 
-        <Pressable onPress={onNext} className="p-1.5 bg-primary/10 rounded-full active:opacity-70">
-          <ChevronRight color="#0F67FE" size={18} />
+        <Pressable onPress={onNext} className="w-8 h-8 rounded-full bg-medical-50 flex items-center justify-center active:opacity-80">
+          <ChevronRight color="#0D6EFD" size={16} strokeWidth={2.5} />
         </Pressable>
       </View>
     </View>

@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Home, Activity, Utensils, Settings } from 'lucide-react-native';
+import { Home, Activity, Settings, Stethoscope } from 'lucide-react-native';
 import { CustomTabBar } from '@/components/ui/CustomTabBar';
 
 export default function TabLayout() {
@@ -24,10 +24,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="diet"
+        name="consultation"
         options={{
-          title: 'Dinh dưỡng',
-          tabBarIcon: ({ color, size }) => <Utensils color={color} size={size} />,
+          title: 'Tư vấn',
+          tabBarIcon: ({ color, size }) => <Stethoscope color={color} size={size} />,
         }}
       />
       <Tabs.Screen

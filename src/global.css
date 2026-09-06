@@ -160,4 +160,19 @@
   --color-status-uncertain: rgb(var(--status-uncertain));
   --color-status-afib-suspected: rgb(var(--status-afib-suspected));
   --color-status-afib: rgb(var(--status-afib));
+
+  /* Clinical Clarity & Modern Pulse - Redesign Tokens */
+  --color-medical-50: #F0F6FF;
+  --color-medical-100: #E0EDFF;
+  --color-medical-200: #BAE6FD;
+  --color-medical-500: #0D6EFD;
+  --color-medical-600: #0284C7;
+  --color-medical-700: #0056B3;
+
+  --color-slate-850: #151F32;
+
+  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+
+  --shadow-medical-card: 0 12px 30px -5px rgba(13, 110, 253, 0.07), 0 8px 16px -6px rgba(15, 23, 42, 0.04);
+  --shadow-btn-glow: 0 8px 20px -3px rgba(13, 110, 253, 0.35);
 }
