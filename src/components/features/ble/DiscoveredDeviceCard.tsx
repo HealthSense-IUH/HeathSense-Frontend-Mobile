@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, Pressable, ActivityIndicator } from 'react-native';
-import { ChevronRight, Watch } from 'lucide-react-native';
+import { ChevronRight, Wifi } from 'lucide-react-native';
+import { StitchSmartwatchIcon } from '@/components/ui/icons/StitchIcons';
+import { THEME } from '@/constants/theme';
 
 export type BlePeripheral = {
   id: string;
@@ -26,28 +28,53 @@ export const DiscoveredDeviceCard: React.FC<DiscoveredDeviceCardProps> = ({
   onConnect,
 }) => {
   const displayName =
-    device.name || device.advertising?.localName || 'HuyWatch Device';
+    device.name || device.advertising?.localName || `Thiết bị BLE (${device.id.slice(-5)})`;
 
   return (
-    <View className="bg-card rounded-2xl p-4 border border-border mb-3 flex-row items-center justify-between shadow-sm">
-      <View className="flex-row items-center gap-3 flex-1">
-        <View className="h-12 w-12 rounded-2xl bg-accent/10 border border-accent/20 items-center justify-center">
-          <Watch color="#55A316" size={24} />
+    <View 
+      className="bg-white rounded-2xl p-4 border border-slate-100 mb-3 flex-row items-center justify-between"
+      style={{ ...THEME.shadows.card }}
+    >
+      <View className="flex-row items-center gap-3 flex-1 mr-2">
+        <View 
+          style={{
+            width: 48,
+            height: 48,
+            borderRadius: 16,
+            backgroundColor: '#EFF6FF',
+            borderWidth: 1,
+            borderColor: 'rgba(219, 234, 254, 0.8)',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <StitchSmartwatchIcon size={22} color={THEME.colors.primary} />
         </View>
         <View className="flex-1">
-          <Text className="text-base font-bold text-foreground" numberOfLines={1}>
+          <Text className="text-[15px] font-bold text-slate-900" numberOfLines={1}>
             {displayName}
           </Text>
-          <Text className="text-xs text-muted-foreground mt-0.5" numberOfLines={1}>
-            {device.id}
-          </Text>
+          <View className="flex-row items-center mt-0.5 space-x-2">
+            <Text className="text-xs text-slate-400 font-medium" numberOfLines={1}>
+              {device.id}
+            </Text>
+            {device.rssi ? (
+              <View className="flex-row items-center bg-slate-100 px-1.5 py-0.5 rounded-md ml-2">
+                <Wifi size={10} color={THEME.colors.primary} className="mr-1" />
+                <Text className="text-[10px] font-semibold text-slate-600">
+                  {device.rssi} dBm
+                </Text>
+              </View>
+            ) : null}
+          </View>
         </View>
       </View>
 
       <Pressable
-        className={`ml-3 px-5 py-3 rounded-xl bg-primary flex-row items-center gap-1 active:opacity-80 ${
+        className={`px-4 py-2.5 rounded-xl flex-row items-center justify-center active:opacity-80 ${
           isConnecting ? 'opacity-70' : ''
         }`}
+        style={{ backgroundColor: THEME.colors.primary }}
         onPress={() => onConnect(device)}
         disabled={isConnecting}
       >
@@ -55,8 +82,8 @@ export const DiscoveredDeviceCard: React.FC<DiscoveredDeviceCardProps> = ({
           <ActivityIndicator color="#ffffff" size="small" />
         ) : (
           <>
-            <Text className="text-white font-bold text-sm">Kết nối</Text>
-            <ChevronRight color="#ffffff" size={16} />
+            <Text className="text-white font-bold text-xs mr-1">Kết nối</Text>
+            <ChevronRight color="#ffffff" size={14} strokeWidth={2.5} />
           </>
         )}
       </Pressable>

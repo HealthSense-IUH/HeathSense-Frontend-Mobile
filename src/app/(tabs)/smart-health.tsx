@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { Bluetooth, HeartPulse } from 'lucide-react-native';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
 import { LinearGradient } from 'expo-linear-gradient';
+import { THEME } from '@/constants/theme';
 
 export default function SmartHealthScreen() {
   const router = useRouter();
@@ -16,11 +17,11 @@ export default function SmartHealthScreen() {
           onPress={() => router.push("/(public)/scan" as any)}
           className="h-10 w-10 rounded-full bg-primary/10 items-center justify-center active:opacity-75"
         >
-          <Bluetooth color="#0F67FE" size={20} />
+          <Bluetooth color={THEME.colors.primary} size={20} />
         </Pressable>
       }
     >
-      <ScrollView className="flex-1 px-6 pt-4" showsVerticalScrollIndicator={false}>
+      <ScrollView className="flex-1 px-5 pt-4" showsVerticalScrollIndicator={false}>
         {/* Banner Card - Styled like the user's "Energy Score" illustration */}
         <Pressable 
           onPress={() => {
@@ -32,7 +33,7 @@ export default function SmartHealthScreen() {
           style={{ borderRadius: 24 }}
         >
           <LinearGradient
-            colors={['#5A9EF2', '#2B7DF6']}
+            colors={[THEME.colors.primary, THEME.colors.primaryM3]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={{ borderRadius: 24 }}

@@ -1,12 +1,11 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import { STATUS_COLORS } from '@/constants/statusColors';
 
 const LEGEND_ITEMS = [
-  { label: 'Không có bất thường', color: STATUS_COLORS.NORMAL },
-  { label: 'Không rõ ràng', color: STATUS_COLORS.UNCERTAIN },
-  { label: 'Nghi ngờ rung tâm nhĩ', color: STATUS_COLORS.AFIB_SUSPECTED },
-  { label: 'Nguy cơ rung tâm nhĩ', color: STATUS_COLORS.AFIB_RISK },
+  { label: 'Không có bất thường', color: '#10B981', ringColor: '#D1FAE5' },
+  { label: 'Không rõ ràng', color: '#94A3B8', ringColor: '#E2E8F0' },
+  { label: 'Nghi ngờ rung tâm nhĩ', color: '#F59E0B', ringColor: '#FEF3C7' },
+  { label: 'Nguy cơ rung tâm nhĩ', color: '#EF4444', ringColor: '#FEE2E2' },
 ];
 
 export function ChartLegend() {
@@ -15,8 +14,11 @@ export function ChartLegend() {
       {LEGEND_ITEMS.map((item) => (
         <View key={item.label} className="flex-row items-center w-[48%] mb-2.5">
           <View
-            className="w-2.5 h-2.5 rounded-full mr-2 border-2"
-            style={{ backgroundColor: item.color, borderColor: `${item.color}33` }}
+            className="w-2.5 h-2.5 rounded-full mr-2 items-center justify-center border-2"
+            style={{
+              backgroundColor: item.color,
+              borderColor: item.ringColor,
+            }}
           />
           <Text className="text-[12px] font-medium text-slate-700">{item.label}</Text>
         </View>
@@ -24,3 +26,4 @@ export function ChartLegend() {
     </View>
   );
 }
+

@@ -1,15 +1,23 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { View, StyleSheet } from 'react-native';
 
 export function BackgroundGradient() {
   return (
-    <LinearGradient
-      colors={['#F0F6FF', '#F8FAFC', '#F1F5F9']}
-      locations={[0, 0.5, 1]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 0, y: 1 }}
-      style={StyleSheet.absoluteFill}
-    />
+    <View style={[StyleSheet.absoluteFill, { backgroundColor: '#F4F7FB', overflow: 'hidden' }]}>
+      {/* 3 Đốm sáng môi trường chuẩn Stitch Dashboard */}
+      <View
+        className="absolute -top-16 -left-16 w-72 h-72 rounded-full bg-blue-200/40 pointer-events-none"
+        style={{ opacity: 0.55 }}
+      />
+      <View
+        className="absolute top-1/3 -right-20 w-80 h-80 rounded-full bg-rose-100/35 pointer-events-none"
+        style={{ opacity: 0.45 }}
+      />
+      <View
+        className="absolute bottom-24 left-1/4 w-72 h-72 rounded-full bg-emerald-100/30 pointer-events-none"
+        style={{ opacity: 0.4 }}
+      />
+    </View>
   );
 }
+

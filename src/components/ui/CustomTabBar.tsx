@@ -6,16 +6,17 @@ import { Plus } from 'lucide-react-native';
 import { Box } from '@/components/ui/box';
 import { HStack } from '@/components/ui/hstack';
 import { Pressable } from '@/components/ui/pressable';
+import { THEME } from '@/constants/theme';
 
 const { width } = Dimensions.get('window');
 
 export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
-  const tabHeight = 70;
+  const tabHeight = THEME.layout.dockHeight;
   
   // Cutout shape calculations
   const center = width / 2;
-  const cw = 40; // half width of the cutout
-  const cd = 35; // depth of the cutout
+  const cw = 38; // half width of the cutout
+  const cd = 32; // depth of the cutout
   
   const path = `
     M 0 0
@@ -30,21 +31,27 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
 
   return (
     <HStack className="absolute bottom-0 w-full" style={{ height: tabHeight, paddingBottom: Platform.OS === 'ios' ? 20 : 0 }}>
-      {/* Background SVG - Explicitly setting fill to White (#FFFFFF) to prevent black default rendering */}
-      <Box className="absolute top-0 left-0 right-0 bottom-0 shadow-sm" style={{ boxShadow: '0 -2px 3px rgba(0, 0, 0, 0.1)' }}>
+      {/* Background SVG - Explicitly setting fill to White (#FFFFFF) with ambient shadow */}
+      <Box className="absolute top-0 left-0 right-0 bottom-0 shadow-sm" style={{ boxShadow: '0 -2px 10px rgba(15, 23, 42, 0.05)' }}>
         <Svg width={width} height={tabHeight} viewBox={`0 0 ${width} ${tabHeight}`}>
-          <Path d={path} fill="#FFFFFF" />
+          <Path d={path} fill={THEME.colors.card} />
         </Svg>
       </Box>
 
-      {/* FAB - Centered and pushed up */}
-      <Box className="absolute w-full items-center justify-center pointer-events-none" style={{ top: -30, zIndex: 10 }}>
+      {/* FAB - Centered and elevated: 56x56px circular as specified in DESIGN.md */}
+      <Box className="absolute w-full items-center justify-center pointer-events-none" style={{ top: -28, zIndex: 10 }}>
         <Pressable 
-          className="bg-primary items-center justify-center shadow-md shadow-primary/30 pointer-events-auto active:opacity-80"
-          style={{ width: 60, height: 60, borderRadius: 20 }} // Squircle shape
-          onPress={() => Alert.alert('Tính năng mới', 'Hiển thị menu thêm mới')}
+          className="items-center justify-center pointer-events-auto active:opacity-80"
+          style={{ 
+            width: THEME.layout.fabSize, 
+            height: THEME.layout.fabSize, 
+            borderRadius: 28,
+            backgroundColor: THEME.colors.primary,
+            ...THEME.shadows.fab,
+          }}
+          onPress={() => Alert.alert('HealthSense', 'Chọn thao tác nhanh hoặc đo lâm sàng')}
         >
-          <Plus color="#FFFFFF" size={32} />
+          <Plus color="#FFFFFF" size={28} />
         </Pressable>
       </Box>
 
@@ -53,7 +60,7 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
         {state.routes.slice(0, 2).map((route: any, index: number) => {
           const { options } = descriptors[route.key];
           const isFocused = state.index === index;
-          const color = isFocused ? '#0F67FE' : '#9EA7B8';
+          const color = isFocused ? THEME.colors.primary : THEME.colors.textMuted;
 
           return (
             <Pressable
@@ -70,14 +77,13 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
         })}
 
         {/* Spacer for FAB */}
-        <Box style={{ width: 60 }} />
+        <Box style={{ width: THEME.layout.fabSize }} />
 
         {state.routes.slice(2, 4).map((route: any, index: number) => {
           const { options } = descriptors[route.key];
-          // Notice: state.index needs to map against the real index (index + 2)
           const realIndex = index + 2;
           const isFocused = state.index === realIndex;
-          const color = isFocused ? '#0F67FE' : '#9EA7B8';
+          const color = isFocused ? THEME.colors.primary : THEME.colors.textMuted;
 
           return (
             <Pressable
