@@ -4,6 +4,7 @@ import { Bluetooth, Activity, Flame, Footprints, Heart, Radio, Battery } from 'l
 import { BackgroundGradient } from '@/components/ui/BackgroundGradient';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useBleStore } from '@/services/ble-management/bleStore';
+import { MetricCard } from '@/components/ui/MetricCard';
 import { useAuthStore } from '@/services/authentication/authStore';
 import { AFibScreeningCard } from '@/components/features/health/AFibScreeningCard';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
@@ -99,85 +100,57 @@ export default function HomeScreen() {
 
         {/* Quick Stats Grid */}
         <View className="flex-row flex-wrap justify-between">
-          {/* BPM */}
-          <TouchableOpacity activeOpacity={0.8} className="w-[48%] mb-4 shadow-sm" style={{ borderRadius: 20 }}>
-            <LinearGradient
-              colors={['#FF8A8A', '#E53E3E']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={{ borderRadius: 20 }}
-              className="p-4 overflow-hidden"
-            >
-              <View className="flex-row justify-between items-center mb-3">
-                <View className="h-10 w-10 rounded-full bg-white/20 items-center justify-center">
-                  <Heart color="#FFFFFF" size={20} />
-                </View>
-                <Text className="text-xs font-bold text-white/90">BPM</Text>
-              </View>
-              <Text className="text-2xl font-bold text-white">{currentBPM > 0 ? currentBPM : '--'}</Text>
-              <Text className="text-xs text-white/80 mt-1 font-medium">Nhịp tim trung bình</Text>
-            </LinearGradient>
-          </TouchableOpacity>
+          <View className="w-[48%] mb-4">
+            <MetricCard
+              title="Nhịp tim trung bình"
+              value={currentBPM > 0 ? currentBPM : '--'}
+              unit="BPM"
+              icon={<Heart color="#FFFFFF" size={20} />}
+              colors={['#F43F5E', '#E11D48']} // rose-500 to rose-600
+              unitBgColorClass="bg-rose-700/30"
+              unitTextColorClass="text-rose-100"
+              titleColorClass="text-rose-100"
+            />
+          </View>
 
-          {/* SpO2 */}
-          <TouchableOpacity activeOpacity={0.8} className="w-[48%] mb-4 shadow-sm" style={{ borderRadius: 20 }}>
-            <LinearGradient
-              colors={['#60A5FA', '#2563EB']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={{ borderRadius: 20 }}
-              className="p-4 overflow-hidden"
-            >
-              <View className="flex-row justify-between items-center mb-3">
-                <View className="h-10 w-10 rounded-full bg-white/20 items-center justify-center">
-                  <Activity color="#FFFFFF" size={20} />
-                </View>
-                <Text className="text-xs font-bold text-white/90">%</Text>
-              </View>
-              <Text className="text-2xl font-bold text-white">{currentSpO2 > 0 ? currentSpO2 : '--'}</Text>
-              <Text className="text-xs text-white/80 mt-1 font-medium">Nồng độ Oxy (SpO2)</Text>
-            </LinearGradient>
-          </TouchableOpacity>
+          <View className="w-[48%] mb-4">
+            <MetricCard
+              title="Nồng độ Oxy (SpO2)"
+              value={currentSpO2 > 0 ? currentSpO2 : '--'}
+              unit="%"
+              icon={<Activity color="#FFFFFF" size={20} />}
+              colors={['#0EA5E9', '#2563EB']} // sky-500 to blue-600
+              unitBgColorClass="bg-sky-700/30"
+              unitTextColorClass="text-sky-100"
+              titleColorClass="text-sky-100"
+            />
+          </View>
 
-          {/* Steps */}
-          <TouchableOpacity activeOpacity={0.8} className="w-[48%] mb-4 shadow-sm" style={{ borderRadius: 20 }}>
-            <LinearGradient
-              colors={['#4ADE80', '#16A34A']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={{ borderRadius: 20 }}
-              className="p-4 overflow-hidden"
-            >
-              <View className="flex-row justify-between items-center mb-3">
-                <View className="h-10 w-10 rounded-full bg-white/20 items-center justify-center">
-                  <Footprints color="#FFFFFF" size={20} />
-                </View>
-                <Text className="text-xs font-bold text-white/90">Bước</Text>
-              </View>
-              <Text className="text-2xl font-bold text-white">7,200</Text>
-              <Text className="text-xs text-white/80 mt-1 font-medium">Số bước chân</Text>
-            </LinearGradient>
-          </TouchableOpacity>
+          <View className="w-[48%] mb-4">
+            <MetricCard
+              title="Số bước chân"
+              value="7,200"
+              unit="Bước"
+              icon={<Footprints color="#FFFFFF" size={20} />}
+              colors={['#10B981', '#0D9488']} // emerald-500 to teal-600
+              unitBgColorClass="bg-emerald-700/30"
+              unitTextColorClass="text-emerald-100"
+              titleColorClass="text-emerald-100"
+            />
+          </View>
 
-          {/* Calories */}
-          <TouchableOpacity activeOpacity={0.8} className="w-[48%] mb-4 shadow-sm" style={{ borderRadius: 20 }}>
-            <LinearGradient
-              colors={['#FBBF24', '#D97706']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={{ borderRadius: 20 }}
-              className="p-4 overflow-hidden"
-            >
-              <View className="flex-row justify-between items-center mb-3">
-                <View className="h-10 w-10 rounded-full bg-white/20 items-center justify-center">
-                  <Flame color="#FFFFFF" size={20} />
-                </View>
-                <Text className="text-xs font-bold text-white/90">Kcal</Text>
-              </View>
-              <Text className="text-2xl font-bold text-white">450</Text>
-              <Text className="text-xs text-white/80 mt-1 font-medium">Calo tiêu thụ</Text>
-            </LinearGradient>
-          </TouchableOpacity>
+          <View className="w-[48%] mb-4">
+            <MetricCard
+              title="Calo tiêu thụ"
+              value="450"
+              unit="Kcal"
+              icon={<Flame color="#FFFFFF" size={20} />}
+              colors={['#F59E0B', '#EA580C']} // amber-500 to orange-600
+              unitBgColorClass="bg-amber-700/30"
+              unitTextColorClass="text-amber-100"
+              titleColorClass="text-amber-100"
+            />
+          </View>
         </View>
 
         {/* AFib Screening Section */}

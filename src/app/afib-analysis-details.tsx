@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, ActivityIndicator, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
-import { ArrowLeft } from 'lucide-react-native';
+import { ArrowLeft, Settings, Info, Activity } from 'lucide-react-native';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
 import { BarChart } from 'react-native-gifted-charts';
 import { TimeFilterTabs } from '@/components/features/health/statistics/TimeFilterTabs';
@@ -22,7 +22,7 @@ export default function AFibAnalysisDetailsScreen() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsReady(true);
-    }, 400); 
+    }, 400);
 
     return () => clearTimeout(timer);
   }, []);
@@ -113,11 +113,13 @@ export default function AFibAnalysisDetailsScreen() {
         </View>
       );
     }
-    
+
     if (error) {
       return (
-        <View className="py-20 justify-center items-center">
-          <Text className="text-destructive font-bold">{error}</Text>
+        <View className="py-20 justify-center items-center px-6">
+          <View className="bg-rose-50 border border-rose-200 rounded-2xl p-4 flex-row items-center">
+            <Text className="text-rose-700 font-semibold">{error}</Text>
+          </View>
         </View>
       );
     }
@@ -144,7 +146,7 @@ export default function AFibAnalysisDetailsScreen() {
           hideRules
           xAxisThickness={0}
           yAxisThickness={0}
-          yAxisTextStyle={{ color: '#9EA7B8', fontSize: 10 }} 
+          yAxisTextStyle={{ color: '#9EA7B8', fontSize: 10 }}
           xAxisLabelTextStyle={{ color: '#9EA7B8', fontSize: 10, textAlign: 'center' }}
           noOfSections={4}
           maxValue={maxValue}
@@ -163,18 +165,20 @@ export default function AFibAnalysisDetailsScreen() {
     return (
       <>
         {/* Summary Title */}
-        <View className="px-6 mt-4 mb-8">
-          <Text className="text-foreground text-center text-base">
-            <Text className="font-bold text-3xl">{totalResults} </Text>
-            kết quả, bao gồm {data?.totalAfibRisk || 0} có nguy cơ rung tâm nhĩ
-          </Text>
+        <View className="px-5 mt-2 mb-2">
+          <View className="flex-row items-baseline space-x-1.5 flex-wrap">
+            <Text className="text-3xl font-extrabold text-slate-900 leading-none tracking-tight">{totalResults}</Text>
+            <Text className="text-sm font-medium text-slate-700 mt-1">
+              kết quả, bao gồm <Text className="font-bold text-slate-900">{data?.totalAfibRisk || 0}</Text> có nguy cơ rung tâm nhĩ
+            </Text>
+          </View>
         </View>
 
         {/* Bar Chart Area */}
-        <View className="bg-card rounded-2xl p-4 shadow-sm border border-border mx-6 mt-4">
-          <View className="px-2 pr-4">
+        <View className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 mx-5 mt-2">
+          <View className="relative w-full pb-2">
             {chartAreaContent}
-            <Text className="text-muted-foreground font-semibold text-[10px] ml-4 -mt-2">{referenceDate.getFullYear()}</Text>
+            <Text className="absolute bottom-0 right-0 text-slate-400 font-semibold text-[10px] mt-2">{referenceDate.getFullYear()}</Text>
           </View>
 
           {/* Legend placed inside the chart card */}
@@ -191,28 +195,64 @@ export default function AFibAnalysisDetailsScreen() {
             afibRisk: data?.totalAfibRisk || 0
           }}
         />
+
+        {/* Clinical Note Card */}
+        <View className="mx-5 mb-8 bg-blue-50/70 border border-blue-100 rounded-2xl p-4 flex-row items-start space-x-3">
+          <View className="w-6 h-6 rounded-full bg-medical-500 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+            <Info color="#FFFFFF" size={14} strokeWidth={3} />
+          </View>
+          <Text className="flex-1 text-xs text-blue-900 leading-relaxed">
+            Thuật toán phân tích nhịp tim tự động qua cảm biến PPG. Khi phát hiện các dấu hiệu bất thường lặp lại, hãy liên hệ bác sĩ chuyên khoa tim mạch để được tư vấn đo ECG lâm sàng 12 đạo trình.
+          </Text>
+        </View>
+
+        {/* Floating Action Bar equivalent (in scroll or fixed) */}
+        <View className="px-5 pb-8">
+          <Pressable
+            onPress={() => router.push('/afib-measure' as any)}
+            className="w-full py-4 bg-medical-500 active:bg-medical-600 rounded-2xl flex-row items-center justify-center space-x-2 active:opacity-80"
+            style={{
+              shadowColor: 'rgba(13, 110, 253, 0.25)',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 1,
+              shadowRadius: 14,
+              elevation: 4,
+            }}
+          >
+            <Activity color="#FFFFFF" size={20} strokeWidth={2.5} />
+            <Text className="text-white font-bold text-sm tracking-wide ml-2">Tiến hành đo lâm sàng ngay</Text>
+          </Pressable>
+        </View>
       </>
     );
   };
-
   return (
-    <ScreenWrapper 
+    <ScreenWrapper
       title="Chi tiết phân tích"
+      statusBarStyle="dark"
+      contentContainerStyle={{ backgroundColor: '#F4F7FC' }}
       headerLeft={
-        <Pressable 
+        <Pressable
           onPress={() => router.back()}
-          className="h-10 w-10 bg-white rounded-full items-center justify-center shadow-sm border border-gray-100 active:opacity-75"
+          className="h-10 w-10 bg-white rounded-full items-center justify-center shadow-sm border border-slate-100 active:opacity-80"
         >
-          <ArrowLeft color="#171717" size={20} />
+          <ArrowLeft color="#334155" size={20} strokeWidth={2.2} />
+        </Pressable>
+      }
+      headerRight={
+        <Pressable
+          className="h-10 w-10 bg-white rounded-full items-center justify-center shadow-sm border border-slate-100 active:opacity-80"
+        >
+          <Settings color="#64748B" size={18} strokeWidth={2.2} />
         </Pressable>
       }
       stickyHeaderHeight={130}
       stickyHeader={
         <>
           <TimeFilterTabs activeFilter={activeFilter} onChange={setActiveFilter} />
-          <PeriodSelector 
-            year={referenceDate.getFullYear()} 
-            monthText={periodText} 
+          <PeriodSelector
+            year={referenceDate.getFullYear()}
+            monthText={periodText}
             onPrev={handlePrev}
             onNext={handleNext}
           />

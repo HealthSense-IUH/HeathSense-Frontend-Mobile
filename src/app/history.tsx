@@ -92,12 +92,12 @@ export default function HistoryScreen() {
           const months = Object.keys(tree[year]).sort((a, b) => Number(b) - Number(a));
 
           return (
-            <View key={year} className="mb-3 bg-card rounded-2xl overflow-hidden border border-border shadow-sm">
+            <View key={year} className="mb-4 bg-white rounded-3xl overflow-hidden border border-slate-200/70 shadow-sm p-5">
               <Pressable
                 onPress={() => toggleYear(year)}
-                className="flex-row items-center justify-between p-4 bg-primary/5 active:opacity-70"
+                className="flex-row items-center justify-between pb-4 border-b border-slate-100 cursor-pointer active:opacity-70"
               >
-                <Text className="font-bold text-lg text-primary">Năm {year}</Text>
+                <Text className="font-bold text-base text-brand-600 tracking-tight">Năm {year}</Text>
                 {isYearExpanded ? (
                   <ChevronDown color="#0F67FE" size={20} />
                 ) : (
@@ -113,21 +113,23 @@ export default function HistoryScreen() {
                     const days = [...tree[year][month]].sort((a, b) => Number(b) - Number(a));
 
                     return (
-                      <View key={yearMonth} className="mt-2 border-b border-border/50 pb-2">
+                      <View key={yearMonth} className="pt-4 pb-3 border-b border-slate-100 last:border-b-0">
                         <Pressable
                           onPress={() => toggleMonth(yearMonth)}
-                          className="flex-row items-center justify-between py-2 active:opacity-70"
+                          className="flex-row items-center justify-between mb-3 active:opacity-70"
                         >
-                          <Text className="font-semibold text-base text-foreground">Tháng {Number(month)}</Text>
+                          <View className="flex-row items-center gap-2">
+                            <Text className="font-bold text-sm text-slate-800">Tháng {Number(month)}</Text>
+                          </View>
                           {isMonthExpanded ? (
-                            <ChevronDown color="#64748B" size={18} />
+                            <ChevronDown color="#94A3B8" size={20} strokeWidth={2.2} />
                           ) : (
-                            <ChevronRight color="#64748B" size={18} />
+                            <ChevronRight color="#94A3B8" size={20} strokeWidth={2.2} />
                           )}
                         </Pressable>
 
                         {isMonthExpanded && (
-                          <View className="flex-row flex-wrap mt-2 mb-1 gap-2">
+                          <View className="flex flex-col space-y-2 mt-1">
                             {days.map((day) => (
                               <Pressable
                                 key={`${yearMonth}-${day}`}
@@ -137,9 +139,15 @@ export default function HistoryScreen() {
                                     params: { date: `${year}-${month}-${day}` }
                                   } as any);
                                 }}
-                                className="bg-secondary/80 px-4 py-2 rounded-full border border-border active:opacity-70"
+                                className="w-full p-3.5 rounded-2xl bg-brand-50/50 border border-brand-100 hover:border-brand-200 flex-row items-center justify-between transition-all active:scale-[0.98] shadow-sm mb-2"
                               >
-                                <Text className="text-foreground font-medium text-sm">Ngày {Number(day)}</Text>
+                                <View className="flex-row items-center gap-3">
+                                  <View className="w-9 h-9 rounded-xl bg-white border border-brand-100 flex items-center justify-center shrink-0">
+                                    <Calendar color="#0284C7" size={18} strokeWidth={2} />
+                                  </View>
+                                  <Text className="text-sm font-bold text-slate-900">Ngày {Number(day)}</Text>
+                                </View>
+                                <ChevronRight color="#0284C7" size={18} strokeWidth={2.2} />
                               </Pressable>
                             ))}
                           </View>
@@ -159,12 +167,14 @@ export default function HistoryScreen() {
   return (
     <ScreenWrapper
       title="Lịch sử đo"
+      statusBarStyle="dark"
+      contentContainerStyle={{ backgroundColor: '#F8FAFC' }}
       headerLeft={
         <Pressable
           onPress={() => router.back()}
-          className="h-10 w-10 bg-white rounded-full items-center justify-center shadow-sm border border-gray-100 active:opacity-75"
+          className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm border border-slate-100 active:opacity-80 transition-transform"
         >
-          <ArrowLeft color="#171717" size={20} />
+          <ArrowLeft color="#1e293b" size={20} strokeWidth={2.5} />
         </Pressable>
       }
     >

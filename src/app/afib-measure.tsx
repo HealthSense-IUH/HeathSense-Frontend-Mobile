@@ -103,80 +103,118 @@ export default function AFibMeasureScreen() {
         </Pressable>
       }
     >
-      <View className="px-6 flex-1 justify-between pb-8">
-        {/* Top Info & Guide */}
-        <View className="items-center mt-4">
-          <Text className="text-sm font-semibold text-muted-foreground text-center px-4">
-            Đảm bảo giữ yên cánh tay và dây đeo vừa vặn với cổ tay trong suốt 60 giây đo.
-          </Text>
-
-          {/* Large Visual Pulse Indicator */}
-          <View className="my-10 items-center justify-center">
-            {countdown !== null ? (
-              <View className="h-44 w-44 rounded-full bg-primary/20 items-center justify-center border-4 border-primary animate-pulse">
-                <Text className="text-6xl font-extrabold text-primary">{countdown}</Text>
-              </View>
-            ) : isRecording ? (
-              <View className="relative items-center justify-center">
-                <View className="h-48 w-48 rounded-full bg-destructive/10 items-center justify-center animate-ping" />
-                <View className="absolute h-40 w-40 rounded-full bg-destructive/20 items-center justify-center border-4 border-destructive">
-                  <HeartPulse color="#DA1E2E" size={64} />
-                  <Text className="text-2xl font-extrabold text-destructive mt-2">{timeLeft}s</Text>
-                </View>
-              </View>
-            ) : isAnalyzing ? (
-              <View className="h-44 w-44 rounded-full bg-[#E6F4FE] items-center justify-center border-4 border-[#208AEF]">
-                <ActivityIndicator size="large" color="#208AEF" />
-                <Text className="text-sm font-bold text-[#00349C] mt-3">Đang phân tích...</Text>
-              </View>
-            ) : result ? (
-              <View className={`h-44 w-44 rounded-full items-center justify-center border-4 ${
-                result.predictionLabel === 'NORMAL' 
-                  ? 'bg-green-500/10 border-green-500' 
-                  : result.predictionLabel === 'AFIB'
-                  ? 'bg-destructive/10 border-destructive'
-                  : 'bg-orange-500/10 border-orange-500'
-              }`}>
-                {result.predictionLabel === 'NORMAL' ? (
-                  <Heart color="#22c55e" size={56} />
-                ) : (
-                  <ShieldAlert color="#ef4444" size={56} />
-                )}
-                <Text className={`text-base font-bold mt-2 ${
-                  result.predictionLabel === 'NORMAL' ? 'text-green-600' : 'text-red-600'
-                }`}>
-                  {result.predictionLabel === 'NORMAL' ? 'Bình thường' : 'Rung nhĩ (AFib)'}
-                </Text>
-              </View>
-            ) : (
-              <View className="h-44 w-44 rounded-full bg-card border-4 border-dashed border-border items-center justify-center">
-                <HeartPulse color="#94A3B8" size={56} />
-                <Text className="text-xs font-semibold text-muted-foreground mt-2">Sẵn sàng đo</Text>
-              </View>
-            )}
+      <View className="px-6 flex-1 justify-between pb-8 pt-4">
+        {/* Instructional Guidance */}
+        <View className="items-center mt-2">
+          <View className="flex-row items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-100/70 border border-blue-200/70 mb-3">
+            <View className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-ping" />
+            <Text className="text-brand-700 text-xs font-semibold">Quy trình chuẩn y khoa AFib 60s</Text>
           </View>
-
-          {/* Status Message */}
-          {error ? (
-            <View className="bg-destructive/10 border border-destructive/20 rounded-2xl p-4 flex-row items-center mb-4">
-              <AlertCircle color="#DA1E2E" size={20} className="mr-2" />
-              <Text className="text-xs font-semibold text-destructive flex-1">{error}</Text>
-            </View>
-          ) : localUploadMsg ? (
-            <Text className="text-xs text-muted-foreground text-center mb-4">{localUploadMsg}</Text>
-          ) : isRecording ? (
-            <Text className="text-sm font-bold text-destructive text-center mb-4">
-              Đang thu thập dữ liệu PPG Pha 1... Vui lòng không di chuyển!
-            </Text>
-          ) : null}
+          <Text className="text-[14px] leading-relaxed text-slate-600 font-medium max-w-[310px] text-center">
+            Đảm bảo giữ yên cánh tay và dây đeo vừa vặn với cổ tay trong suốt <Text className="font-bold text-slate-800">60 giây đo</Text>.
+          </Text>
         </View>
+
+        {/* Pulse Radar Sensor */}
+        <View className="flex-1 items-center justify-center my-6">
+          {countdown !== null ? (
+            <View className="h-44 w-44 rounded-full bg-medical-100 items-center justify-center border-[6px] border-medical-500 shadow-xl shadow-medical-500/20 animate-pulse">
+              <Text className="text-6xl font-extrabold text-medical-600">{countdown}</Text>
+            </View>
+          ) : isRecording ? (
+            <View className="relative items-center justify-center w-64 h-64">
+              <View className="absolute inset-0 rounded-full border border-blue-300/40 animate-ping" style={{ animationDuration: '3s' }} />
+              <View className="absolute inset-4 rounded-full border border-blue-400/20 animate-pulse" />
+              <View className="relative z-10 w-48 h-48 rounded-full bg-white shadow-xl shadow-blue-500/10 border border-blue-50 flex items-center justify-center">
+                <HeartPulse color="#DA1E2E" size={64} className="mb-2" />
+                <Text className="text-3xl font-extrabold text-rose-600">{timeLeft}s</Text>
+                <Text className="text-[11px] font-bold text-rose-500 uppercase tracking-wider mt-1">Đang thu thập</Text>
+              </View>
+            </View>
+          ) : isAnalyzing ? (
+            <View className="h-44 w-44 rounded-full bg-[#E6F4FE] items-center justify-center border-4 border-[#208AEF]">
+              <ActivityIndicator size="large" color="#208AEF" />
+              <Text className="text-sm font-bold text-[#00349C] mt-3">Đang phân tích...</Text>
+            </View>
+          ) : result ? (
+            <View className={`h-48 w-48 rounded-full items-center justify-center border-4 shadow-xl ${
+              result.predictionLabel === 'NORMAL' 
+                ? 'bg-emerald-50 border-emerald-500 shadow-emerald-500/20' 
+                : result.predictionLabel === 'AFIB'
+                ? 'bg-rose-50 border-rose-500 shadow-rose-500/20'
+                : 'bg-amber-50 border-amber-500 shadow-amber-500/20'
+            }`}>
+              {result.predictionLabel === 'NORMAL' ? (
+                <Heart color="#10B981" size={64} />
+              ) : (
+                <ShieldAlert color="#E11D48" size={64} />
+              )}
+              <Text className={`text-lg font-bold mt-3 ${
+                result.predictionLabel === 'NORMAL' ? 'text-emerald-700' : 'text-rose-700'
+              }`}>
+                {result.predictionLabel === 'NORMAL' ? 'Bình thường' : 'Rung nhĩ (AFib)'}
+              </Text>
+            </View>
+          ) : (
+            <View className="relative items-center justify-center w-64 h-64">
+              <View className="absolute inset-4 rounded-full border-2 border-blue-100/80 bg-white/50 shadow-sm" />
+              <View className="relative z-10 w-44 h-44 rounded-full bg-white shadow-xl shadow-blue-500/10 border border-blue-50 flex items-center justify-center p-4">
+                <View className="w-16 h-16 rounded-full bg-blue-50/50 flex items-center justify-center mb-2">
+                  <HeartPulse color="#0D6EFD" size={40} />
+                </View>
+                <Text className="text-[14px] font-bold text-[#1E3A8A] tracking-tight">Sẵn sàng đo</Text>
+                <Text className="text-[11px] font-medium text-slate-400 mt-0.5">Cảm biến PPG sạch</Text>
+              </View>
+            </View>
+          )}
+
+          {/* Error & Upload Status */}
+          <View className="mt-6 w-full px-4">
+            {error ? (
+              <View className="bg-rose-50 border border-rose-200 rounded-2xl p-4 flex-row items-center">
+                <AlertCircle color="#E11D48" size={20} className="mr-2" />
+                <Text className="text-xs font-semibold text-rose-700 flex-1">{error}</Text>
+              </View>
+            ) : localUploadMsg ? (
+              <Text className="text-xs text-slate-500 font-medium text-center">{localUploadMsg}</Text>
+            ) : null}
+          </View>
+        </View>
+
+        {/* Clinical Guidelines / Bottom Action Section */}
+        <View className="w-full">
+          {/* Clinical Guidelines Card */}
+          {!isRecording && countdown === null && !isAnalyzing && !result && (
+            <View className="bg-white/80 rounded-2xl p-3.5 border border-white shadow-sm flex-row items-center justify-between mb-4">
+              <View className="flex-row items-center space-x-2">
+                <View className="w-7 h-7 rounded-xl bg-blue-100/90 items-center justify-center">
+                  <Text className="text-brand-700 text-xs font-bold">1</Text>
+                </View>
+                <Text className="text-xs font-semibold text-slate-700">Ngồi yên tĩnh</Text>
+              </View>
+              <View className="w-px h-6 bg-slate-200" />
+              <View className="flex-row items-center space-x-2">
+                <View className="w-7 h-7 rounded-xl bg-blue-100/90 items-center justify-center">
+                  <Text className="text-brand-700 text-xs font-bold">2</Text>
+                </View>
+                <Text className="text-xs font-semibold text-slate-700">Tay ngang tim</Text>
+              </View>
+              <View className="w-px h-6 bg-slate-200" />
+              <View className="flex-row items-center space-x-2">
+                <View className="w-7 h-7 rounded-xl bg-blue-100/90 items-center justify-center">
+                  <Text className="text-brand-700 text-xs font-bold">3</Text>
+                </View>
+                <Text className="text-xs font-semibold text-slate-700">Không nói</Text>
+              </View>
+            </View>
+          )}
 
         {/* Action Buttons */}
         <View className="w-full">
           {isRecording ? (
             <Pressable
               onPress={handleManualUpload}
-              className="w-full bg-destructive py-4 rounded-2xl items-center justify-center shadow-md active:opacity-90 mb-3"
+              className="w-full bg-rose-500 py-4 rounded-2xl flex-row items-center justify-center shadow-lg shadow-rose-500/30 active:opacity-80 mb-3"
             >
               <Text className="text-base font-bold text-white">Dừng & Phân tích ngay</Text>
             </Pressable>
@@ -184,24 +222,26 @@ export default function AFibMeasureScreen() {
             <Pressable
               onPress={startCountdown}
               disabled={!isConnected || countdown !== null || isAnalyzing}
-              className={`w-full bg-primary py-4 rounded-2xl items-center justify-center shadow-md active:opacity-90 mb-3 ${
-                !isConnected || countdown !== null || isAnalyzing ? 'opacity-50' : ''
+              className={`w-full bg-medical-500 py-4 rounded-2xl flex-row items-center justify-center shadow-lg shadow-medical-500/30 active:opacity-80 mb-3 ${
+                !isConnected || countdown !== null || isAnalyzing ? 'opacity-60' : ''
               }`}
             >
-              <View className="flex-row items-center">
-                <Activity color="#FFFFFF" size={20} className="mr-2" />
-                <Text className="text-base font-bold text-white">
-                  {isAnalyzing ? "Đang xử lý kết quả..." : "Bắt đầu đo 60 giây"}
-                </Text>
-              </View>
+              <Activity color="#FFFFFF" size={20} className="mr-2" />
+              <Text className="text-base font-bold text-white tracking-wide">
+                {isAnalyzing ? "Đang xử lý kết quả..." : "Bắt đầu đo 60 giây"}
+              </Text>
             </Pressable>
           )}
 
           {!isConnected && (
-            <Text className="text-xs text-center text-destructive font-semibold">
-              Vui lòng kết nối đồng hồ BLE trong mục Cài đặt trước khi đo.
-            </Text>
+            <View className="flex-row items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-rose-50/90 border border-rose-200/80 shadow-sm mt-1">
+              <AlertCircle color="#E11D48" size={16} />
+              <Text className="text-xs font-semibold text-rose-600 tracking-tight text-center">
+                Vui lòng kết nối đồng hồ BLE trong <Text className="underline">Cài đặt</Text> trước khi đo.
+              </Text>
+            </View>
           )}
+        </View>
         </View>
       </View>
     </ScreenWrapper>

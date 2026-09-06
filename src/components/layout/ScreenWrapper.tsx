@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Animated, StyleProp, ViewStyle } from 'react-native';
+import { View, Text, Animated, StyleProp, ViewStyle, RefreshControlProps } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 
@@ -16,6 +16,8 @@ interface ScreenWrapperProps {
   // Customization props for Background & Status Bar
   statusBarStyle?: 'light' | 'dark' | 'auto';
   backgroundComponent?: React.ReactNode;
+  
+  refreshControl?: React.ReactElement<RefreshControlProps>;
 }
 
 export function ScreenWrapper({
@@ -29,6 +31,7 @@ export function ScreenWrapper({
   stickyHeaderHeight = 110,
   statusBarStyle = 'dark',
   backgroundComponent,
+  refreshControl,
 }: ScreenWrapperProps) {
   const [fadeAnim] = useState(() => new Animated.Value(1));
   const [scrollY] = useState(() => new Animated.Value(0));
@@ -149,6 +152,7 @@ export function ScreenWrapper({
           onScrollEndDrag={handleScrollEnd}
           onMomentumScrollEnd={handleScrollEnd}
           scrollEventThrottle={16}
+          refreshControl={refreshControl}
         >
           {children}
         </Animated.ScrollView>

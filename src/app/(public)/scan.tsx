@@ -21,6 +21,7 @@ import {
   DiscoveredDeviceCard,
 } from "@/components/features/ble/DiscoveredDeviceCard";
 import { BleRadarStatus } from "@/components/features/ble/BleRadarStatus";
+import { ScreenWrapper } from "@/components/ui/ScreenWrapper";
 
 export default function BleScanScreen() {
   const router = useRouter();
@@ -222,42 +223,57 @@ export default function BleScanScreen() {
   );
 
   return (
-    <View className="flex-1 bg-background px-6 pt-16 pb-8 justify-between">
+    <ScreenWrapper className="px-6 pt-12 pb-8 justify-between">
       {/* Top Section */}
       <View>
         <View className="flex-row items-center justify-between mb-8">
           <View className="flex-row items-center gap-2">
-            <View className="h-10 w-10 rounded-2xl bg-primary/10 items-center justify-center">
-              <Watch color="#0F67FE" size={22} />
+            <View className="h-10 w-10 rounded-2xl bg-gradient-to-br from-medical-500 to-sky-400 items-center justify-center shadow-sm">
+              <Watch color="#FFFFFF" size={22} />
             </View>
-            <Text className="text-xl font-bold text-foreground">HealthSense</Text>
+            <Text className="text-xl font-extrabold tracking-tight text-slate-800">HealthSense</Text>
           </View>
 
-          <View className="flex-row items-center gap-2">
+          <View className="flex-row items-center gap-2.5">
             <Pressable
               onPress={() => void startAutoScan()}
               disabled={isScanning}
-              className="h-10 w-10 rounded-full bg-card border border-border items-center justify-center active:opacity-70"
+              className="w-9 h-9 rounded-full bg-white border border-slate-200/80 items-center justify-center active:opacity-80"
+              style={{
+                shadowColor: 'rgba(13, 110, 253, 0.06)',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 1,
+                shadowRadius: 8,
+                elevation: 2,
+              }}
             >
               <RefreshCw
-                color={isScanning ? "#0F67FE" : "#64748B"}
-                size={18}
+                color={isScanning ? "#0D6EFD" : "#64748B"}
+                size={16}
+                strokeWidth={2.3}
               />
             </Pressable>
 
             <Pressable
               onPress={() => router.replace("/(tabs)" as any)}
-              className="px-3.5 py-2 rounded-xl bg-card border border-border flex-row items-center active:opacity-70"
+              className="px-4 py-1.5 rounded-full bg-white border border-slate-300/80 active:opacity-80"
+              style={{
+                shadowColor: 'rgba(13, 110, 253, 0.06)',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 1,
+                shadowRadius: 8,
+                elevation: 2,
+              }}
             >
-              <Text className="text-xs font-bold text-foreground">Vào App</Text>
+              <Text className="text-xs font-bold text-slate-800">Vào App</Text>
             </Pressable>
           </View>
         </View>
 
-        <Text className="text-3xl font-extrabold text-foreground tracking-tight">
+        <Text className="text-2xl sm:text-[26px] font-extrabold text-slate-900 tracking-tight leading-snug">
           Thiết bị đeo
         </Text>
-        <Text className="text-sm text-muted-foreground mt-2 leading-relaxed">
+        <Text className="text-slate-500 text-[13.5px] leading-relaxed mt-1 font-medium">
           Đưa thiết bị đồng hồ sức khỏe lại gần điện thoại để tự động kết nối và đồng bộ dữ liệu.
         </Text>
 
@@ -271,20 +287,35 @@ export default function BleScanScreen() {
       {/* Discovered Devices List Section */}
       <View className="flex-1 mt-6 justify-end">
         <View className="flex-row justify-between items-center mb-3">
-          <Text className="text-sm font-bold text-muted-foreground uppercase tracking-wider">
-            Thiết bị khả dụng ({devices.length})
+          <Text className="text-[12px] font-bold text-slate-500 tracking-wider uppercase">
+            THIẾT BỊ KHẢ DỤNG ({devices.length})
           </Text>
+          <View className="flex-row items-center">
+            <View className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-ping" />
+            <Text className="text-[11px] font-medium text-slate-400">
+              Sẵn sàng ghép đôi
+            </Text>
+          </View>
         </View>
 
         {devices.length === 0 ? (
-          <View className="bg-card/50 rounded-2xl p-5 border border-dashed border-border items-center justify-center">
-            <AlertCircle color="#94A3B8" size={24} />
-            <Text className="text-sm font-medium text-muted-foreground mt-2 text-center">
+          <View className="flex-1 min-h-[140px] rounded-[24px] border-2 border-dashed border-blue-200/90 bg-blue-50/40 p-6 flex flex-col items-center justify-center text-center">
+            <View className="w-10 h-10 rounded-full bg-white border border-blue-200 flex items-center justify-center mb-3 shadow-sm">
+              <AlertCircle color="#94A3B8" size={20} strokeWidth={2} />
+            </View>
+            <Text className="text-[13.5px] font-bold text-slate-700">
               Chưa tìm thấy thiết bị đeo nào ở gần.
             </Text>
-            <Text className="text-xs text-muted-foreground/70 mt-1 text-center">
+            <Text className="text-[12px] text-slate-500 font-medium mt-1 max-w-[280px] leading-relaxed text-center">
               Hãy đảm bảo đồng hồ đã được bật nguồn và bật Bluetooth.
             </Text>
+
+            <View className="mt-4 pt-3 border-t border-blue-100/80 w-full flex-row items-center justify-center gap-1.5">
+              <AlertCircle color="#0D6EFD" size={14} strokeWidth={2} />
+              <Text className="text-[11.5px] text-medical-500 font-semibold">
+                Cách khắc phục nếu không tìm thấy
+              </Text>
+            </View>
           </View>
         ) : (
           <FlatList
@@ -296,6 +327,6 @@ export default function BleScanScreen() {
           />
         )}
       </View>
-    </View>
+    </ScreenWrapper>
   );
 }

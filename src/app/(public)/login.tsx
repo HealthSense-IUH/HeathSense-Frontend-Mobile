@@ -5,6 +5,7 @@ import { useAuthStore } from '@/services/authentication/authStore';
 import { useBleStore } from '@/services/ble-management/bleStore';
 import { LoginForm } from '@/components/features/auth/LoginForm';
 import { LoginRequest } from '@/types/authentication';
+import { ScreenWrapper } from '@/components/ui/ScreenWrapper';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -27,24 +28,20 @@ export default function LoginScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior="padding"
-      className="flex-1 bg-background"
-    >
+    <ScreenWrapper withKeyboardHandling>
       <ScrollView
         contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
-        className="flex-1"
+        className="flex-1 px-5"
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <View className="items-center px-4 py-6 w-full my-auto">
+        <View className="items-center py-6 w-full my-auto">
           {/* Brand Header */}
           <View className="items-center mb-8">
-            <Text className="text-3xl font-extrabold text-primary tracking-tight">
-              Health<Text className="text-foreground">Sense</Text>
+            <Text className="text-3xl font-extrabold tracking-tight text-medical-500">
+              HealthSense
             </Text>
-            <Text className="text-xs text-muted-foreground mt-1">
+            <Text className="text-sm font-medium text-slate-500 max-w-[280px] text-center mt-1 leading-snug">
               Hệ thống theo dõi và chăm sóc sức khỏe thông minh
             </Text>
           </View>
@@ -58,6 +55,6 @@ export default function LoginScreen() {
           />
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+    </ScreenWrapper>
   );
 }
