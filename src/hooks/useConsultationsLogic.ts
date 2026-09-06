@@ -22,7 +22,6 @@ export interface RequestFormData {
   selectedHealthRecordIds?: string[];
 }
 
-const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_CHAT_SIZE = 30;
 
 function readError(error: unknown, fallback: string) {
@@ -81,7 +80,10 @@ export function useConsultationsLogic() {
 
   useEffect(() => {
     let active = true;
-    if (active) loadData();
+    const fetchData = async () => {
+      if (active) await loadData();
+    };
+    void fetchData();
     return () => { active = false; };
   }, [loadData]);
 
@@ -132,11 +134,14 @@ export function useConsultationsLogic() {
 
   useEffect(() => {
     let active = true;
-    if (selectedSession && active) {
-      loadMessages(selectedSession.id);
-    } else {
-      setMessages([]);
-    }
+    const fetchMessages = async () => {
+      if (selectedSession && active) {
+        await loadMessages(selectedSession.id);
+      } else if (active) {
+        setMessages([]);
+      }
+    };
+    void fetchMessages();
     return () => { active = false; };
   }, [selectedSession, loadMessages]);
 

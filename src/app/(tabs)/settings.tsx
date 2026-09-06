@@ -1,12 +1,12 @@
 import React from 'react';
-import { ScrollView, Text, TouchableOpacity, View, Animated } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '@/services/authentication/authStore';
 import { useLogoutMutation } from '@/hooks/mutations/useAuthMutations';
 import { useBLE } from '@/context/BLEContext';
 import { LogoutButton } from '@/components/features/auth/LogoutButton';
-import { Activity, Battery, Bluetooth, Info, Radio, Shield, Trash2, Watch } from 'lucide-react-native';
+import { Activity, Battery, Info, Radio, Shield, Trash2, Watch } from 'lucide-react-native';
 
 export default function SettingsScreen() {
   const router = useRouter();

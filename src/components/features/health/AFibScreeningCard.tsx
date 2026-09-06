@@ -7,7 +7,7 @@ import { useBleStore } from '@/services/ble-management/bleStore';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export function AFibScreeningCard() {
-  const { stopExportAndUploadPpgRecording, sendCommand } = useBLE();
+  const { stopExportAndUploadPpgRecording } = useBLE();
   const isRecordingPpg = useBleStore(state => state.isRecordingPpg);
   const isExportingRecording = useBleStore(state => state.isExportingRecording);
   const recordingError = useBleStore(state => state.recordingError);

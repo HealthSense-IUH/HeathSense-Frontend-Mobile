@@ -8,7 +8,6 @@ export default function ChatScreen() {
   const { sessionId } = useLocalSearchParams();
   const { 
     sessions, 
-    selectedSession, 
     setSelectedSession, 
     messages, 
     messageDraft, 

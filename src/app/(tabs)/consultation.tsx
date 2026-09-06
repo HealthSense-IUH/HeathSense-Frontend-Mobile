@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, Pressable, RefreshControl } from 'react-native';
 import { router } from 'expo-router';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
 import { Box } from '@/components/ui/box';

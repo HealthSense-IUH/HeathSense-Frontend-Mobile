@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { Box } from '@/components/ui/box';
 import { ConsultationSessionItem } from '@/types/consultation';
-import { MessageCircle, Calendar } from 'lucide-react-native';
+import { MessageCircle } from 'lucide-react-native';
 
 interface Props {
   sessions: ConsultationSessionItem[];

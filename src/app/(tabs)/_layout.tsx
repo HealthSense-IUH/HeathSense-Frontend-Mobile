@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Home, Activity, Utensils, Settings, Stethoscope } from 'lucide-react-native';
+import { Home, Activity, Settings, Stethoscope } from 'lucide-react-native';
 import { CustomTabBar } from '@/components/ui/CustomTabBar';
 
 export default function TabLayout() {

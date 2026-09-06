@@ -73,3 +73,5 @@ export const MedicalInput = forwardRef<TextInput, MedicalInputProps>(({
     </View>
   );
 });
+
+MedicalInput.displayName = 'MedicalInput';

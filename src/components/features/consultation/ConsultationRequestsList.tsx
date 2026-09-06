@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Text, Pressable } from 'react-native';
+import { View, Text } from 'react-native';
 import { Box } from '@/components/ui/box';
 import { ConsultationRequestItem } from '@/types/consultation';
-import { Calendar, Clock, CheckCircle, XCircle } from 'lucide-react-native';
+import { Clock, CheckCircle, XCircle } from 'lucide-react-native';
 
 interface Props {
   requests: ConsultationRequestItem[];

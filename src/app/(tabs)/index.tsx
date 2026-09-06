@@ -2,7 +2,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Bluetooth, Activity, Flame, Footprints, Heart, Radio, Battery } from 'lucide-react-native';
 import { BackgroundGradient } from '@/components/ui/BackgroundGradient';
-import { LinearGradient } from 'expo-linear-gradient';
+
 import { useBleStore } from '@/services/ble-management/bleStore';
 import { MetricCard } from '@/components/ui/MetricCard';
 import { useAuthStore } from '@/services/authentication/authStore';
@@ -16,7 +16,7 @@ export default function HomeScreen() {
   const connectedDevice = useBleStore(state => state.connectedDeviceId);
   const knownDevice = useBleStore(state => state.knownDevice);
   const batteryLevel = useBleStore(state => state.batteryLevel);
-  const { user } = useAuthStore();
+  useAuthStore();
 
   const isConnected = Boolean(connectedDevice);
 

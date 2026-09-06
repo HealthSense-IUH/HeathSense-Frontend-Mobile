@@ -4,8 +4,6 @@ import {
   Platform,
   SafeAreaView,
   StatusBar,
-  TouchableWithoutFeedback,
-  Keyboard,
   View,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
