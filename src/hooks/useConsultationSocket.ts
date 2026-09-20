@@ -31,7 +31,6 @@ export function useConsultationSocket(
         void clientRef.current.deactivate();
         clientRef.current = null;
       }
-      setConnectionStatus('idle');
       return;
     }
 
@@ -139,5 +138,7 @@ export function useConsultationSocket(
     };
   }, [sessionId]);
 
-  return { status: connectionStatus };
+  const status: SocketStatus = !sessionId || sessionId === 'undefined' ? 'idle' : connectionStatus;
+
+  return { status };
 }

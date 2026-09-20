@@ -373,6 +373,7 @@ export function useConsultationsLogic(activeSessionId?: string | number) {
         loadSingleSession(activeSessionId),
         loadMessages(activeSessionId),
       ]);
+      if (!active) return;
       try {
         await consultationApi.markRead(activeSessionId, '');
       } catch {}
