@@ -1,48 +1,15 @@
-import { useState } from 'react';
-import { ActivityIndicator, Text, Pressable, View } from 'react-native';
-import { HeartPulse, UploadCloud, CheckCircle2, AlertCircle, Play } from 'lucide-react-native';
+import { Text, Pressable, View } from 'react-native';
+import { HeartPulse, CheckCircle2, AlertCircle, Play, ArrowRight } from 'lucide-react-native';
 import Svg, { Path } from 'react-native-svg';
 import { useRouter } from 'expo-router';
-import { useBLE } from '@/context/BLEContext';
 import { useBleStore } from '@/services/ble-management/bleStore';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export function AFibScreeningCard() {
-  const { stopExportAndUploadPpgRecording } = useBLE();
-  const isRecordingPpg = useBleStore(state => state.isRecordingPpg);
-  const isExportingRecording = useBleStore(state => state.isExportingRecording);
-  const recordingError = useBleStore(state => state.recordingError);
-  const isAnalyzing = useBleStore(state => state.isAnalyzing);
-  const aiAnalysisResult = useBleStore(state => state.aiAnalysisResult);
-  const currentBPM = useBleStore(state => state.currentBPM);
-  const currentSpO2 = useBleStore(state => state.currentSpO2);
-
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadStatusMsg, setUploadStatusMsg] = useState<string | null>(null);
-
-  const handleManualUpload = async () => {
-    if (!isRecordingPpg || isUploading || isExportingRecording || isAnalyzing) return;
-    setIsUploading(true);
-    setUploadStatusMsg("Đang đóng gói file CSV, tải lên S3 & gửi Backend...");
-
-    try {
-      const res = await stopExportAndUploadPpgRecording();
-      if (res.record) {
-        setUploadStatusMsg(`Tải lên S3 & confirm thành công! Record ID: ${res.record.id}`);
-      } else {
-        setUploadStatusMsg(`Đã xuất file CSV (${res.recording.fileName}), chờ xử lý.`);
-      }
-    } catch (err: any) {
-      setUploadStatusMsg(err?.message || "Lỗi khi upload PPG.");
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
   const router = useRouter();
+  const aiAnalysisResult = useBleStore(state => state.aiAnalysisResult);
 
   const handlePress = () => {
-    // Luôn cho phép bấm vào card để mở màn hình chi tiết đo
     setTimeout(() => {
       router.push("/afib-measure" as any);
     }, 50);
@@ -61,7 +28,7 @@ export function AFibScreeningCard() {
           shadowRadius: 20,
           elevation: 5,
         },
-        pressed && { opacity: 0.85 }
+        pressed && { opacity: 0.88, transform: [{ scale: 0.99 }] }
       ]}
     >
       <LinearGradient
@@ -73,9 +40,9 @@ export function AFibScreeningCard() {
       >
         {/* Background ECG Waveform Accent Decoration (Stitch Specs) */}
         <Svg
-          style={{ position: 'absolute', right: -18, bottom: -18, opacity: 0.1 }}
-          width={170}
-          height={170}
+          style={{ position: 'absolute', right: -18, bottom: -18, opacity: 0.12 }}
+          width={175}
+          height={175}
           viewBox="0 0 100 100"
         >
           <Path
@@ -93,7 +60,7 @@ export function AFibScreeningCard() {
           <View className="flex-1 pr-3">
             <View
               style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                backgroundColor: 'rgba(255, 255, 255, 0.22)',
                 paddingHorizontal: 8,
                 paddingVertical: 2.5,
                 borderRadius: 9999,
@@ -102,7 +69,7 @@ export function AFibScreeningCard() {
               }}
             >
               <Text className="text-[10px] font-bold text-white uppercase tracking-wider">
-                Chẩn đoán lâm sàng
+                Chẩn đoán lâm sàng 60s
               </Text>
             </View>
             <Text className="text-xl font-extrabold text-white tracking-tight leading-snug">
@@ -115,9 +82,9 @@ export function AFibScreeningCard() {
               width: 48,
               height: 48,
               borderRadius: 16,
-              backgroundColor: 'rgba(255, 255, 255, 0.16)',
+              backgroundColor: 'rgba(255, 255, 255, 0.18)',
               borderWidth: 1,
-              borderColor: 'rgba(255, 255, 255, 0.3)',
+              borderColor: 'rgba(255, 255, 255, 0.35)',
               alignItems: 'center',
               justifyContent: 'center',
             }}
@@ -126,107 +93,48 @@ export function AFibScreeningCard() {
           </View>
         </View>
 
-        {/* 1. Idle State (No active background tasks) */}
-        {!isRecordingPpg && !isAnalyzing && !recordingError && !aiAnalysisResult && !uploadStatusMsg && (
-          <>
-            <Text className="text-white/90 text-xs sm:text-[13px] leading-relaxed font-normal mb-4 pr-1">
-              Hệ thống tự động thu thập tín hiệu PPG ngầm mỗi 10 phút. Bấm vào đây để tiến hành đo lâm sàng ngay lập tức.
-            </Text>
-            <View className="flex-row items-center">
-              <View className="flex-row items-center justify-center px-4 py-2 rounded-xl bg-white shadow-md">
-                <Play color="#D92C44" size={13} fill="#D92C44" className="mr-1.5" />
-                <Text className="text-[#D92C44] font-bold text-xs">Bắt đầu đo</Text>
-              </View>
-            </View>
-          </>
-        )}
-
-        {/* 2. Recording Status */}
-        {isRecordingPpg && (
-          <View className="bg-white/20 rounded-2xl p-4">
-            <View className="flex-row items-center mb-2">
-              <View className="h-2.5 w-2.5 rounded-full bg-white animate-pulse mr-2" />
-              <Text className="text-sm font-bold text-white">Đang thu thập tín hiệu...</Text>
-            </View>
-            <Text className="text-xs text-white/80 mb-3">
-              Quá trình đo kéo dài khoảng 60s. Vui lòng giữ yên tay.
-            </Text>
-            <Pressable
-              onPress={(e) => {
-                e.stopPropagation(); // Ngăn chặn trigger handlePress của Card
-                handleManualUpload();
-              }}
-              disabled={isUploading || isExportingRecording || isAnalyzing}
-              className="bg-white py-2 px-4 rounded-xl flex-row items-center justify-center"
-              style={({ pressed }) => [
-                pressed && { opacity: 0.8 }
-              ]}
-            >
-              {isUploading || isExportingRecording || isAnalyzing ? (
-                <ActivityIndicator size="small" color="#D92D2D" className="mr-2" />
+        {/* Middle Section: Last result summary or descriptive prompt */}
+        {aiAnalysisResult ? (
+          <View className="bg-white/20 rounded-2xl p-3.5 mb-4 backdrop-blur-sm border border-white/20">
+            <View className="flex-row items-center mb-1">
+              {aiAnalysisResult.predictionLabel === 'NORMAL' ? (
+                <CheckCircle2 color="#FFFFFF" size={17} className="mr-2" />
               ) : (
-                <UploadCloud color="#D92D2D" size={16} className="mr-2" />
+                <AlertCircle color="#FFFFFF" size={17} className="mr-2" />
               )}
-              <Text className="text-xs font-bold text-[#D92D2D]">
-                {isUploading || isExportingRecording || isAnalyzing ? "Đang xử lý..." : "Xuất CSV & Gửi S3"}
-              </Text>
-            </Pressable>
-          </View>
-        )}
-
-        {/* 3. Analyzing Status */}
-        {isAnalyzing && (
-          <View className="bg-white/20 rounded-2xl p-4 flex-row items-center">
-            <ActivityIndicator size="small" color="#FFFFFF" className="mr-3" />
-            <View className="flex-1">
-              <Text className="text-sm font-bold text-white mb-1">AI đang phân tích...</Text>
-              <Text className="text-xs text-white/80">Mô hình học máy đang xử lý tín hiệu PPG để phát hiện Rung nhĩ.</Text>
-            </View>
-          </View>
-        )}
-
-        {/* 4. AI Result */}
-        {aiAnalysisResult && !isAnalyzing && (
-          <View className="bg-white/20 rounded-2xl p-4 flex-row items-center">
-            <CheckCircle2 color="#FFFFFF" size={24} className="mr-3" />
-            <View className="flex-1">
-              <Text className="text-sm font-bold text-white mb-1">
-                Kết quả: {
-                  aiAnalysisResult.predictionLabel === 'NORMAL' ? 'Bình thường' :
-                    aiAnalysisResult.predictionLabel === 'AFIB' ? 'Rung nhĩ (AFib)' :
+              <Text className="text-sm font-bold text-white flex-1">
+                Lần đo gần nhất: {
+                  aiAnalysisResult.predictionLabel === 'NORMAL' ? 'Nhịp xoang bình thường' :
+                    aiAnalysisResult.predictionLabel === 'AFIB' ? 'Cảnh báo: Rung nhĩ (AFib)' :
                       aiAnalysisResult.predictionLabel === 'AFIB_SUSPECTED' ? 'Nghi ngờ Rung nhĩ' :
-                        'Không rõ ràng'
+                        'Không xác định'
                 }
               </Text>
-              <Text className="text-xs text-white/80">
-                Độ tin cậy: {Math.round((aiAnalysisResult.confidence ?? 0) * 100)}%
-              </Text>
             </View>
+            <Text className="text-xs text-white/85 pl-6">
+              Độ tin cậy: {Math.round((aiAnalysisResult.confidence ?? 0) * 100)}% • Chạm để đo lại
+            </Text>
           </View>
+        ) : (
+          <Text className="text-white/90 text-xs sm:text-[13px] leading-relaxed font-normal mb-4 pr-1">
+            Chủ động ghi nhận tín hiệu quang học PPG 100Hz và phân tích AI để phát hiện sớm các dấu hiệu rung nhĩ và bất thường nhịp tim.
+          </Text>
         )}
 
-        {/* 5. Upload Message (If no AI Result) */}
-        {uploadStatusMsg && !isAnalyzing && !aiAnalysisResult && (
-          <View className="bg-white/20 rounded-2xl p-3.5 mt-2 flex-row items-center">
-            <CheckCircle2 color="#FFFFFF" size={18} className="mr-2" />
-            <Text className="text-xs font-medium text-white flex-1">{uploadStatusMsg}</Text>
+        {/* Bottom Section: Prominent Active CTA Button */}
+        <View className="flex-row items-center justify-between pt-1">
+          <View className="flex-row items-center justify-center px-4 py-2.5 rounded-xl bg-white shadow-md">
+            <Play color="#D92C44" size={13} fill="#D92C44" className="mr-2" />
+            <Text className="text-[#D92C44] font-bold text-xs tracking-wide">
+              {aiAnalysisResult ? "Thực hiện đo lại" : "Bắt đầu đo ngay"}
+            </Text>
           </View>
-        )}
 
-        {/* 6. Error State */}
-        {recordingError && (
-          <View className="bg-white/20 rounded-2xl p-3.5 mt-2">
-            <View className="flex-row items-center mb-1">
-              <AlertCircle color="#FFFFFF" size={18} className="mr-2" />
-              <Text className="text-xs font-bold text-white flex-1">{recordingError}</Text>
-            </View>
-            {currentBPM > 0 && currentSpO2 > 0 && (
-              <Text className="text-xs text-white/80 font-medium ml-6">
-                Nhịp tim: {currentBPM} BPM | SpO2: {currentSpO2}%
-              </Text>
-            )}
+          <View className="flex-row items-center pr-1 opacity-90">
+            <Text className="text-white/90 text-[11px] font-semibold mr-1">Quy trình 60s</Text>
+            <ArrowRight color="#FFFFFF" size={14} strokeWidth={2.4} />
           </View>
-        )}
+        </View>
 
       </LinearGradient>
     </Pressable>

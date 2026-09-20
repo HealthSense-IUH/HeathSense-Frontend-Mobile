@@ -349,6 +349,8 @@ export interface ConsultationSessionItem {
   id: string | number
   memberId: string | number
   doctorId: string | number
+  doctorDisplayName?: string | null
+  memberDisplayName?: string | null
   createdByAdminId?: string | number | null
   sourceType?: ConsultationSourceType
   status: ConsultationStatus

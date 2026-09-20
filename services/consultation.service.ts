@@ -51,11 +51,18 @@ type PageParams = {
   size?: number
 }
 
+function normalizePageParams(params: PageParams = {}): PageParams {
+  return {
+    ...params,
+    page: typeof params.page === 'number' ? Math.max(1, params.page) : 1,
+  }
+}
+
 export const consultationApi = {
   listMyHealthRecords(params: PageParams = {}) {
     return axiosClient.get<ApiResponse<HealthRecordPage>, ApiResponse<HealthRecordPage>>(
       "/api/health-records/my-records",
-      { params }
+      { params: normalizePageParams(params) }
     )
   },
   createRequest(payload: CreateConsultationRequestPayload) {
@@ -66,12 +73,15 @@ export const consultationApi = {
   },
   listMyRequests(params: PageParams = {}) {
     return axiosClient.get<ApiResponse<ConsultationRequestPage>, ApiResponse<ConsultationRequestPage>>("/api/consultation-requests", {
-      params,
+      params: normalizePageParams(params),
     })
   },
   listAdminRequests(params: AdminListRequestsParams = {}) {
     return axiosClient.get<ApiResponse<ConsultationRequestPage>, ApiResponse<ConsultationRequestPage>>("/api/admin/consultation-requests", {
-      params,
+      params: {
+        ...params,
+        page: typeof params.page === 'number' ? Math.max(1, params.page) : 1,
+      },
     })
   },
   getMyRequest(requestId: string | number) {
@@ -100,7 +110,7 @@ export const consultationApi = {
   listMySessions(params: PageParams = {}) {
     return axiosClient.get<ApiResponse<ConsultationSessionPage>, ApiResponse<ConsultationSessionPage>>(
       "/api/consultation-sessions",
-      { params }
+      { params: normalizePageParams(params) }
     )
   },
   getSession(sessionId: string | number) {
@@ -117,7 +127,7 @@ export const consultationApi = {
   listAdminSessions(params: PageParams = {}) {
     return axiosClient.get<ApiResponse<ConsultationSessionPage>, ApiResponse<ConsultationSessionPage>>(
       "/api/admin/consultation-sessions",
-      { params }
+      { params: normalizePageParams(params) }
     )
   },
   requestRenewal(sessionId: string | number, payload?: RequestConsultationRenewalPayload) {
@@ -197,13 +207,13 @@ export const consultationApi = {
   listMessages(sessionId: string | number, params: PageParams = {}) {
     return axiosClient.get<ApiResponse<ConsultationMessagePage>, ApiResponse<ConsultationMessagePage>>(
       `/api/consultation-sessions/${sessionId}/messages`,
-      { params }
+      { params: normalizePageParams(params) }
     )
   },
   listMessagesBefore(sessionId: string | number, beforeMessageId: string, params: PageParams = {}) {
     return axiosClient.get<ApiResponse<ConsultationMessagePage>, ApiResponse<ConsultationMessagePage>>(
       `/api/consultation-sessions/${sessionId}/messages/before/${beforeMessageId}`,
-      { params }
+      { params: normalizePageParams(params) }
     )
   },
   sendMessage(sessionId: string | number, payload: SendConsultationMessagePayload) {
@@ -221,7 +231,7 @@ export const consultationApi = {
   listCareServicePackages(params: PageParams = {}) {
     return axiosClient.get<ApiResponse<PageResponse<CareServicePackage>>, ApiResponse<PageResponse<CareServicePackage>>>(
       "/api/care-service-packages",
-      { params }
+      { params: normalizePageParams(params) }
     )
   },
   getCareServicePackage(packageId: string | number) {
@@ -346,7 +356,7 @@ export const consultationApi = {
   getDoctorScopedRecords(sessionId: string | number, params: PageParams = {}) {
     return axiosClient.get<ApiResponse<PageResponse<DoctorScopedHealthRecordResponse>>, ApiResponse<PageResponse<DoctorScopedHealthRecordResponse>>>(
       `/api/doctor/consultation-sessions/${sessionId}/health-records`,
-      { params }
+      { params: normalizePageParams(params) }
     )
   },
   getDoctorScopedRecordDetail(sessionId: string | number, recordId: string | number) {
@@ -407,10 +417,10 @@ export const consultationApi = {
       `/api/admin/consultation-sessions/${sessionId}/final-summary`
     )
   },
-  getCareHistory(params?: { page?: number; size?: number }) {
+  getCareHistory(params: PageParams = {}) {
     return axiosClient.get<ApiResponse<PageResponse<CareHistoryEpisodeResponse>>, ApiResponse<PageResponse<CareHistoryEpisodeResponse>>>(
       "/api/care-history",
-      { params }
+      { params: normalizePageParams(params) }
     )
   },
   getCareHistoryEpisode(sessionId: string | number) {
