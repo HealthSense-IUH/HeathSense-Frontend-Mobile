@@ -10,12 +10,29 @@ export const REFRESH_TOKEN_KEY = 'refresh_token';
 export const SESSION_ID_KEY = 'session_id';
 export const USER_SESSION_KEY = 'user_session';
 
+export function preserveUnsafeIntegers(json: string): string {
+  return json.replace(/([:\[,]\s*)(-?\d{16,})(?=\s*[,}\]])/g, '$1"$2"');
+}
+
+export function parseJsonPreservingUnsafeIntegers(data: unknown): unknown {
+  if (typeof data !== 'string' || !data.trim()) {
+    return data;
+  }
+
+  try {
+    return JSON.parse(preserveUnsafeIntegers(data));
+  } catch {
+    return data;
+  }
+}
+
 const axiosClient = axios.create({
   baseURL: API_BASE_URL,
+  timeout: 15000,
+  transformResponse: [parseJsonPreservingUnsafeIntegers],
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 15000,
 });
 
 // Race Condition control variables
@@ -102,6 +119,7 @@ axiosClient.interceptors.response.use(
           {
             headers: { 'Content-Type': 'application/json' },
             timeout: 10000,
+            transformResponse: [parseJsonPreservingUnsafeIntegers],
           }
         );
 
