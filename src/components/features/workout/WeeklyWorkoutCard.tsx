@@ -9,7 +9,7 @@ export function WeeklyWorkoutCard() {
   const syncSessionsWithBackend = useWorkoutCatalogStore(
     (state) => state.syncSessionsWithBackend
   );
-  const sessions = useWorkoutCatalogStore((state) => state.sessions);
+  useWorkoutCatalogStore((state) => state.sessions);
 
   // Sync latest sessions from backend on mount
   useEffect(() => {

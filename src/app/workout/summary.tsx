@@ -39,7 +39,7 @@ export default function WorkoutSummaryScreen() {
     Math.max(caloriesBurned, Math.round(caloriesBurned + (durationSeconds * 1560) / 86400));
   const distanceKm = Number(params.distanceKm) || lastSession?.distanceKm;
   const avgHeartRate = Number(params.avgHeartRate) || lastSession?.avgHeartRate;
-  const startedAt = Number(params.startedAt) || lastSession?.startedAt || Date.now();
+  const [startedAt] = useState(() => Number(params.startedAt) || lastSession?.startedAt || Date.now());
 
   const saveSession = useWorkoutCatalogStore((state) => state.saveSession);
   const [note, setNote] = useState<string>(lastSession?.note || (params.note as string) || '');

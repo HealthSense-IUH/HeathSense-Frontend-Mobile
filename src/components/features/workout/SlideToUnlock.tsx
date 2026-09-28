@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   View,
   Animated,
@@ -13,45 +13,47 @@ interface SlideToUnlockProps {
 }
 
 export function SlideToUnlock({ onUnlock, sliderWidth = 260 }: SlideToUnlockProps) {
-  const pan = useRef(new Animated.Value(0)).current;
+  const [pan] = useState(() => new Animated.Value(0));
   const buttonSize = 48;
   const maxSlide = sliderWidth - buttonSize - 12;
 
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderMove: (_, gestureState) => {
-        if (gestureState.dx > 0) {
-          pan.setValue(Math.min(maxSlide, gestureState.dx));
-        }
-      },
-      onPanResponderRelease: (_, gestureState) => {
-        if (gestureState.dx >= maxSlide * 0.65) {
-          // Completed slide to unlock
-          Animated.timing(pan, {
-            toValue: maxSlide,
-            duration: 90,
-            useNativeDriver: true,
-          }).start(() => {
-            try {
-              Vibration.vibrate(60);
-            } catch {}
-            onUnlock();
-            pan.setValue(0);
-          });
-        } else {
-          // Spring back to start
-          Animated.spring(pan, {
-            toValue: 0,
-            friction: 6,
-            tension: 50,
-            useNativeDriver: true,
-          }).start();
-        }
-      },
-    })
-  ).current;
+  const panResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponder: () => true,
+        onPanResponderMove: (_, gestureState) => {
+          if (gestureState.dx > 0) {
+            pan.setValue(Math.min(maxSlide, gestureState.dx));
+          }
+        },
+        onPanResponderRelease: (_, gestureState) => {
+          if (gestureState.dx >= maxSlide * 0.65) {
+            // Completed slide to unlock
+            Animated.timing(pan, {
+              toValue: maxSlide,
+              duration: 90,
+              useNativeDriver: true,
+            }).start(() => {
+              try {
+                Vibration.vibrate(60);
+              } catch {}
+              onUnlock();
+              pan.setValue(0);
+            });
+          } else {
+            // Spring back to start
+            Animated.spring(pan, {
+              toValue: 0,
+              friction: 6,
+              tension: 50,
+              useNativeDriver: true,
+            }).start();
+          }
+        },
+      }),
+    [maxSlide, onUnlock, pan]
+  );
 
   return (
     <View

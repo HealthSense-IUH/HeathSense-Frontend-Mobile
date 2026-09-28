@@ -16,13 +16,18 @@ export function AFibScreeningCard() {
   const [availability, setAvailability] = useState(() => getAFibScreeningAvailability());
 
   useEffect(() => {
-    setAvailability(getAFibScreeningAvailability());
+    const immediateTimer = setTimeout(() => {
+      setAvailability(getAFibScreeningAvailability());
+    }, 0);
 
     const timer = setInterval(() => {
       setAvailability(getAFibScreeningAvailability());
     }, 1000);
 
-    return () => clearInterval(timer);
+    return () => {
+      clearTimeout(immediateTimer);
+      clearInterval(timer);
+    };
   }, [workoutStatus, lastWorkoutEndedAt]);
 
   const handlePress = () => {

@@ -16,7 +16,6 @@ import {
   TRACKING_TYPE_LABELS,
 } from '@/services/workout/workoutTypes';
 import { useWorkoutCatalogStore } from '@/services/workout/workoutCatalogStore';
-import { THEME } from '@/constants/theme';
 
 interface CreateExerciseModalProps {
   visible: boolean;

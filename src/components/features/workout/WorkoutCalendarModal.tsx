@@ -30,8 +30,11 @@ export function WorkoutCalendarModal({
   // Keep viewing month in sync when selectedDate changes externally
   React.useEffect(() => {
     if (visible) {
-      setViewingYear(selectedDate.getFullYear());
-      setViewingMonth(selectedDate.getMonth());
+      const timer = setTimeout(() => {
+        setViewingYear(selectedDate.getFullYear());
+        setViewingMonth(selectedDate.getMonth());
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [visible, selectedDate]);
 
@@ -65,13 +68,13 @@ export function WorkoutCalendarModal({
     // Days in previous month
     const daysInPrevMonth = new Date(viewingYear, viewingMonth, 0).getDate();
 
-    const cells: Array<{
+    const cells: {
       dayNum: number;
       isCurrentMonth: boolean;
       date: Date;
       dateStr: string;
       isSunday: boolean;
-    }> = [];
+    }[] = [];
 
     const pad = (n: number) => n.toString().padStart(2, '0');
 

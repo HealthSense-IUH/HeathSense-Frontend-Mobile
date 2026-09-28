@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -26,10 +26,12 @@ export default function CreateRoutineScreen() {
   const [hasCooldown, setHasCooldown] = useState(false);
   const [routineItems, setRoutineItems] = useState<RoutineExerciseItem[]>([]);
   const [showPickerModal, setShowPickerModal] = useState(false);
+  const itemIdCounterRef = useRef(0);
 
   const handleAddExercise = (exercise: Exercise) => {
+    itemIdCounterRef.current += 1;
     const newItem: RoutineExerciseItem = {
-      id: `item_${Date.now()}`,
+      id: `item_${itemIdCounterRef.current}_${exercise.id}`,
       exerciseId: exercise.id,
       exerciseName: exercise.name,
       orderIndex: routineItems.length + 1,
@@ -39,7 +41,7 @@ export default function CreateRoutineScreen() {
       restDurationSec: 30,
     };
 
-    setRoutineItems([...routineItems, newItem]);
+    setRoutineItems((prev) => [...prev, newItem]);
     setShowPickerModal(false);
   };
 

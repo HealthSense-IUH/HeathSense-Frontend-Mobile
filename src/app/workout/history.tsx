@@ -13,13 +13,11 @@ import {
   Calendar,
   MoreVertical,
   ChevronDown,
-  ChevronLeft,
   ChevronRight,
   Search,
   Timer,
   Footprints,
   Zap,
-  Activity,
   Check,
 } from 'lucide-react-native';
 import Svg, {
@@ -199,14 +197,6 @@ export default function WorkoutHistoryScreen() {
       return { rangeLabel, columns: cols };
     } else {
       // 6 MONTHS WINDOW
-      const currentMonthStart = new Date(
-        anchorDate.getFullYear(),
-        anchorDate.getMonth(),
-        1,
-        0,
-        0,
-        0
-      );
       const startMonthDate = new Date(
         anchorDate.getFullYear(),
         anchorDate.getMonth() - 5,
@@ -304,13 +294,13 @@ export default function WorkoutHistoryScreen() {
   // Group active column's sessions by day for the bottom list (sorted latest first)
   const groupedSessions = useMemo(() => {
     const list = activeColumn?.sessions || [];
-    const groups: Array<{
+    const groups: {
       dateKey: string;
       headerLabel: string;
       totalDayDurationSec: number;
       totalDayCalories: number;
       items: WorkoutSession[];
-    }> = [];
+    }[] = [];
 
     const sorted = [...list].sort((a, b) => b.startedAt - a.startedAt);
 
@@ -337,8 +327,6 @@ export default function WorkoutHistoryScreen() {
           headerLabel = `Hôm nay, ${dayOfMonth} Th${monthNum}`;
         } else if (dateKey === yesterdayStr) {
           headerLabel = `Hôm qua, ${dayOfMonth} Th${monthNum}`;
-        } else if (dateKey === yesterdayStr) {
-          headerLabel = `Hôm qua, ${dayOfMonth} Th${monthNum}`;
         } else {
           headerLabel = `${dayOfWeekNames[dayOfWeek]}, ${dayOfMonth} Th${monthNum}`;
         }
@@ -360,23 +348,6 @@ export default function WorkoutHistoryScreen() {
 
     return groups;
   }, [activeColumn]);
-
-  // Navigate period backwards or forwards
-  const handleNavigatePeriod = (direction: 'PREV' | 'NEXT') => {
-    const multiplier = direction === 'PREV' ? -1 : 1;
-    setAnchorDate((prev) => {
-      const next = new Date(prev);
-      if (activeTab === 'DAYS') {
-        next.setDate(next.getDate() + multiplier * 7);
-      } else if (activeTab === 'WEEKS') {
-        next.setDate(next.getDate() + multiplier * 7 * 8);
-      } else {
-        next.setMonth(next.getMonth() + multiplier * 6);
-      }
-      return next;
-    });
-    setSelectedIndex(-1);
-  };
 
   // When a date is selected from Calendar Modal
   const handleSelectDateFromCalendar = (date: Date) => {

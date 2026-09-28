@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -24,7 +24,6 @@ import { SportMapView } from '@/components/features/workout/SportMapView';
 import { useWorkoutEngineStore } from '@/services/workout/workoutEngineStore';
 import { locationTrackingService } from '@/services/workout/locationTrackingService';
 import { workoutApiService } from '@/services/workout/workoutApiService';
-import { THEME } from '@/constants/theme';
 
 export default function ActiveWorkoutScreen() {
   const router = useRouter();
@@ -50,7 +49,7 @@ export default function ActiveWorkoutScreen() {
   const toggleScreenLock = useWorkoutEngineStore((state) => state.toggleScreenLock);
 
   const [showExitConfirm, setShowExitConfirm] = useState(false);
-  const [hasCelebrated, setHasCelebrated] = useState(false);
+  const hasCelebratedRef = useRef(false);
   const [activeMetricPage, setActiveMetricPage] = useState<number>(0);
 
   const isGpsSport = exercise?.trackingType === 'DISTANCE_GPS';
@@ -103,20 +102,20 @@ export default function ActiveWorkoutScreen() {
 
   // Trigger celebration haptic vibration when goal is reached
   useEffect(() => {
-    if (isGoalReached && !hasCelebrated) {
-      setHasCelebrated(true);
+    if (isGoalReached && !hasCelebratedRef.current) {
+      hasCelebratedRef.current = true;
       try {
         Vibration.vibrate([0, 150, 100, 200]);
       } catch {}
     }
-  }, [isGoalReached, hasCelebrated]);
+  }, [isGoalReached]);
 
   // Trigger countdown automatically on mount if status is READY
   useEffect(() => {
     if (status === 'READY') {
       startCountdown();
     }
-  }, [status]);
+  }, [status, startCountdown]);
 
   // Real-time GPS Location Tracking lifecycle for outdoor exercises
   useEffect(() => {

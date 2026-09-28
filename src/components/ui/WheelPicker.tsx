@@ -6,7 +6,6 @@ import {
   NativeSyntheticEvent,
   NativeScrollEvent,
   TouchableOpacity,
-  StyleSheet,
 } from 'react-native';
 
 export interface WheelPickerItem {

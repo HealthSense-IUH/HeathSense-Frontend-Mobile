@@ -12,8 +12,6 @@ import Svg, {
   Text as SvgText,
 } from 'react-native-svg';
 import { Layers, Crosshair, MapPin } from 'lucide-react-native';
-import { useWorkoutEngineStore } from '@/services/workout/workoutEngineStore';
-
 interface SportMapViewProps {
   status?: 'searching' | 'detected';
   height?: number | string;
@@ -31,10 +29,6 @@ export const SportMapView: React.FC<SportMapViewProps> = ({
 }) => {
   const [gpsStatus, setGpsStatus] = useState<'searching' | 'detected'>(status);
   const [layerType, setLayerType] = useState<'standard' | 'satellite'>('standard');
-
-  const gpsTrack = useWorkoutEngineStore((state) => state.gpsTrack);
-  const currentCoord =
-    gpsTrack.length > 0 ? gpsTrack[gpsTrack.length - 1] : null;
 
   useEffect(() => {
     if (status === 'searching') {

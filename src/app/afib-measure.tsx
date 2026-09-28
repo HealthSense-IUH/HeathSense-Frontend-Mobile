@@ -40,11 +40,16 @@ export default function AFibMeasureScreen() {
   const [availability, setAvailability] = useState(() => getAFibScreeningAvailability());
 
   useEffect(() => {
-    setAvailability(getAFibScreeningAvailability());
+    const timer = setTimeout(() => {
+      setAvailability(getAFibScreeningAvailability());
+    }, 0);
     const interval = setInterval(() => {
       setAvailability(getAFibScreeningAvailability());
     }, 1000);
-    return () => clearInterval(interval);
+    return () => {
+      clearTimeout(timer);
+      clearInterval(interval);
+    };
   }, [workoutStatus, lastWorkoutEndedAt]);
 
   const [countdown, setCountdown] = useState<number | null>(null);

@@ -5,7 +5,6 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
-  Pressable,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ArrowLeft, Search, X, Plus } from 'lucide-react-native';
@@ -31,7 +30,7 @@ export default function SelectExerciseScreen() {
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
 
-  const categories: Array<ExerciseCategory | 'ALL'> = [
+  const categories: (ExerciseCategory | 'ALL')[] = [
     'ALL',
     'GENERAL',
     'AEROBIC',
