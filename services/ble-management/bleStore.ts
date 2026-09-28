@@ -46,7 +46,7 @@ type BleState = {
     setBatteryLevel: (batteryLevel: number | null) => void;
     setHealthData: (payload: {
         bpm: number;
-        spo2: number;
+        spo2?: number;
         raw?: string;
         receivedAt?: number;
     }) => void;
@@ -116,11 +116,11 @@ export const useBleStore = create<BleState>((set) => ({
         }),
     setBatteryLevel: (batteryLevel) => set({ batteryLevel }),
     setHealthData: ({ bpm, spo2, receivedAt = Date.now() }) =>
-        set({
+        set((state) => ({
         currentBPM: bpm,
-        currentSpO2: spo2,
+        currentSpO2: spo2 !== undefined ? spo2 : state.currentSpO2,
         lastPacketAt: receivedAt,
-        }),
+        })),
     setPpgData: ({
         deviceMillis,
         red,

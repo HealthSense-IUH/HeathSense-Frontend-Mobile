@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Bluetooth, Activity, Flame, Footprints, Heart, Battery, Settings } from 'lucide-react-native';
+import { Bluetooth, Activity, Flame, Footprints, Heart, Battery, Settings, Dumbbell, ChevronRight } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BackgroundGradient } from '@/components/ui/BackgroundGradient';
 
@@ -222,8 +222,40 @@ export default function HomeScreen() {
           </View>
         </View>
 
+        {/* Workout & Sports Hub Quick Action Card */}
+        <TouchableOpacity
+          onPress={() => router.push('/workout' as any)}
+          activeOpacity={0.8}
+          className="mb-5 rounded-2xl bg-white/95 border border-slate-200/80 p-4 shadow-sm flex-row items-center justify-between"
+          style={{
+            shadowColor: 'rgba(15, 23, 42, 0.05)',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 1,
+            shadowRadius: 8,
+            elevation: 2,
+          }}
+        >
+          <View className="flex-row items-center gap-3.5 flex-1 min-w-0">
+            <View className="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-100 items-center justify-center">
+              <Dumbbell color="#059669" size={24} strokeWidth={2.2} />
+            </View>
+            <View className="flex-1 min-w-0">
+              <Text className="text-base font-bold text-slate-900 tracking-tight">
+                Trung tâm luyện tập
+              </Text>
+              <Text className="text-xs text-slate-500 mt-0.5" numberOfLines={1}>
+                Bắt đầu buổi tập, theo dõi nhịp tim & calo
+              </Text>
+            </View>
+          </View>
+
+          <View className="w-8 h-8 rounded-full bg-slate-100 items-center justify-center ml-2">
+            <ChevronRight color="#64748B" size={18} strokeWidth={2.4} />
+          </View>
+        </TouchableOpacity>
+
         {/* AFib Screening Section */}
-        <Text className="text-lg font-bold text-slate-900 tracking-tight mb-3 mt-2">
+        <Text className="text-lg font-bold text-slate-900 tracking-tight mb-3 mt-1">
           Tầm soát Rung nhĩ (AFib)
         </Text>
         <AFibScreeningCard />

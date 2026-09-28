@@ -25,11 +25,27 @@ import { useBLE } from '@/context/BLEContext';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
 import { StitchHeartEcgIcon } from '@/components/ui/icons/StitchIcons';
 import { THEME } from '@/constants/theme';
+import {
+  getAFibScreeningAvailability,
+  useWorkoutEngineStore,
+} from '@/services/workout';
 
 export default function AFibMeasureScreen() {
   const router = useRouter();
   const { sendCommand, stopExportAndUploadPpgRecording } = useBLE();
   const store = useBleStore();
+
+  const workoutStatus = useWorkoutEngineStore((state) => state.status);
+  const lastWorkoutEndedAt = useWorkoutEngineStore((state) => state.lastWorkoutEndedAt);
+  const [availability, setAvailability] = useState(() => getAFibScreeningAvailability());
+
+  useEffect(() => {
+    setAvailability(getAFibScreeningAvailability());
+    const interval = setInterval(() => {
+      setAvailability(getAFibScreeningAvailability());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [workoutStatus, lastWorkoutEndedAt]);
 
   const [countdown, setCountdown] = useState<number | null>(null);
   const [timeLeft, setTimeLeft] = useState(60);
@@ -98,6 +114,24 @@ export default function AFibMeasureScreen() {
   };
 
   const startCountdown = () => {
+    const current = getAFibScreeningAvailability();
+    if (!current.canScreen) {
+      if (current.reason === 'WORKOUT_IN_PROGRESS') {
+        Alert.alert(
+          "Tạm dừng đo Rung nhĩ",
+          "Chức năng đo Rung nhĩ (AFib) tạm dừng trong lúc vận động để đảm bảo độ chính xác y khoa và tránh cảnh báo sai. Vui lòng hoàn thành buổi tập thể dục trước khi đo.",
+          [{ text: "Đã hiểu" }]
+        );
+      } else if (current.reason === 'COOLDOWN_ACTIVE') {
+        Alert.alert(
+          "Thời gian phục hồi tim (10 phút)",
+          `Bạn vừa hoàn thành buổi tập thể dục. Để nhịp tim ổn định và tránh cảnh báo sai do nhịp xoang phục hồi sau gắng sức, vui lòng ngồi nghỉ tĩnh thêm ${current.formattedRemainingTime} trước khi bắt đầu đo tầm soát Rung nhĩ (AFib).`,
+          [{ text: "Đã hiểu" }]
+        );
+      }
+      return;
+    }
+
     if (!isConnected) return;
     if (countdownIntervalRef.current) {
       clearInterval(countdownIntervalRef.current);
@@ -481,17 +515,17 @@ export default function AFibMeasureScreen() {
             ) : (
               /* Stitch Gradient 3-tone CTA Button */
               <LinearGradient
-                colors={['#6CA3FA', '#4D8BF5', '#3B82F6']}
+                colors={!availability.canScreen ? ['#94A3B8', '#64748B', '#475569'] : ['#6CA3FA', '#4D8BF5', '#3B82F6']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={{
                   borderRadius: 16,
-                  shadowColor: '#3B82F6',
+                  shadowColor: !availability.canScreen ? '#64748B' : '#3B82F6',
                   shadowOffset: { width: 0, height: 8 },
                   shadowOpacity: 0.35,
                   shadowRadius: 18,
                   elevation: 5,
-                  opacity: !isConnected || countdown !== null || isAnalyzing ? 0.6 : 1,
+                  opacity: !isConnected || countdown !== null || isAnalyzing || !availability.canScreen ? 0.75 : 1,
                 }}
               >
                 <Pressable
@@ -509,14 +543,29 @@ export default function AFibMeasureScreen() {
                     />
                   </Svg>
                   <Text className="text-white font-bold text-base tracking-wide">
-                    {isAnalyzing ? "Đang xử lý kết quả..." : "Bắt đầu đo 60 giây"}
+                    {availability.reason === 'COOLDOWN_ACTIVE'
+                      ? `Hồi phục tim (${availability.formattedRemainingTime})`
+                      : availability.reason === 'WORKOUT_IN_PROGRESS'
+                      ? "Tạm ngắt khi đang tập luyện"
+                      : isAnalyzing
+                      ? "Đang xử lý kết quả..."
+                      : "Bắt đầu đo 60 giây"}
                   </Text>
                 </Pressable>
               </LinearGradient>
             )}
 
-            {/* BLE Connection Reminder Warning Tag (Stitch Specs) */}
-            {!isConnected && (
+            {/* Workout / Cooldown Warning Banner */}
+            {!availability.canScreen ? (
+              <View className="flex-row items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-amber-50/90 border border-amber-200/80 shadow-xs mt-3">
+                <AlertTriangle color="#D97706" size={15} />
+                <Text className="text-xs font-semibold text-amber-700 tracking-tight text-center">
+                  {availability.reason === 'COOLDOWN_ACTIVE'
+                    ? `Đang trong 10 phút hồi phục tim (${availability.formattedRemainingTime}). Vui lòng nghỉ tĩnh để tránh cảnh báo sai.`
+                    : "Bạn đang trong phiên tập luyện. Đo AFib bị tạm ngắt để tránh nhiễu do vận động."}
+                </Text>
+              </View>
+            ) : !isConnected ? (
               <View className="flex-row items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-rose-50/90 border border-rose-200/80 shadow-xs mt-3">
                 <AlertTriangle color="#E11D48" size={15} />
                 <Text className="text-xs font-semibold text-rose-600 tracking-tight text-center">
@@ -530,7 +579,7 @@ export default function AFibMeasureScreen() {
                   trước khi đo.
                 </Text>
               </View>
-            )}
+            ) : null}
           </View>
         </View>
         {/* END: BottomSection */}
