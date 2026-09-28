@@ -31,6 +31,7 @@ import {
 } from "./bleConstants";
 import { bleStorage, KnownBleDevice } from "./bleStorage";
 import { useBleStore } from "./bleStore";
+import { useWorkoutEngineStore } from "@/services/workout/workoutEngineStore";
 
 type TimerHandle = ReturnType<typeof setTimeout>;
 
@@ -436,13 +437,33 @@ class HuyWatchBleService {
           }
           console.log("[BLE-Report] Đã nhận báo cáo Pha 2 (Chỉ cập nhật chỉ số, không lưu file PPG).");
         } else if (line.startsWith("W:")) {
-          // Định dạng Workout vitals: W:millis,bpm,spo2
+          // Định dạng Workout vitals: W:millis,bpm,steps
           const parts = line.slice(2).split(",");
           if (parts.length >= 3) {
             const bpm = parseInt(parts[1], 10);
-            const spo2 = parseInt(parts[2], 10);
-            if (Number.isFinite(bpm) && Number.isFinite(spo2) && bpm > 0) {
-              store.setHealthData({ bpm, spo2, receivedAt: now });
+            const steps = parseInt(parts[2], 10);
+            if (Number.isFinite(bpm) && bpm > 0) {
+              store.setHealthData({ bpm, receivedAt: now });
+            }
+            if (Number.isFinite(steps) && steps >= 0) {
+              const workoutEngine = useWorkoutEngineStore.getState();
+              if (workoutEngine.status === 'ACTIVE' || workoutEngine.status === 'PAUSED') {
+                workoutEngine.addSteps(steps);
+              }
+            }
+          }
+        } else if (line.startsWith("CMD:RESYNC_DATA")) {
+          // Xử lý gói nhả bù dữ liệu offline: CMD:RESYNC_DATA,timestamp,bpm,steps
+          const parts = line.split(",");
+          if (parts.length >= 4) {
+            const bpm = parseInt(parts[2], 10);
+            const steps = parseInt(parts[3], 10);
+            if (Number.isFinite(bpm) && bpm > 0) {
+              store.setHealthData({ bpm, receivedAt: now });
+            }
+            if (Number.isFinite(steps) && steps > 0) {
+              const workoutEngine = useWorkoutEngineStore.getState();
+              workoutEngine.addSteps(steps);
             }
           }
         }

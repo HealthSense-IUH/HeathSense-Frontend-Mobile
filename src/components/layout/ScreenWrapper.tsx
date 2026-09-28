@@ -28,6 +28,7 @@ export interface ScreenWrapperProps {
   className?: string;
   withKeyboardHandling?: boolean;
   withBottomNav?: boolean;
+  scrollable?: boolean;
 }
 
 export function ScreenWrapper({
@@ -45,6 +46,7 @@ export function ScreenWrapper({
   className = '',
   withKeyboardHandling = false,
   withBottomNav = false,
+  scrollable = true,
 }: ScreenWrapperProps) {
   const [fadeAnim] = useState(() => new Animated.Value(1));
   const [scrollY] = useState(() => new Animated.Value(0));
@@ -176,27 +178,33 @@ export function ScreenWrapper({
         </Animated.View>
       )}
 
-      {/* Main Scrollable Content */}
-      <View style={{ flex: 1, marginTop: insets.top, overflow: 'hidden' }}>
-        <Animated.ScrollView
-          contentContainerStyle={[
-            { flexGrow: 1, paddingBottom: withBottomNav ? 120 : 60 },
-            { paddingTop: stickyHeader ? (HEADER_BASE_HEIGHT + stickyHeaderHeight - insets.top) : (HEADER_BASE_HEIGHT - insets.top) },
-            contentContainerStyle,
-          ]}
-          showsVerticalScrollIndicator={false}
-          onScroll={Animated.event(
-            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-            { useNativeDriver: true }
-          )}
-          onScrollBeginDrag={handleScrollBeginDrag}
-          onScrollEndDrag={handleScrollEnd}
-          onMomentumScrollEnd={handleScrollEnd}
-          scrollEventThrottle={16}
-          refreshControl={refreshControl}
-        >
-          {children}
-        </Animated.ScrollView>
+      {/* Main Content */}
+      <View style={{ flex: 1, marginTop: scrollable ? insets.top : HEADER_BASE_HEIGHT, overflow: 'hidden' }}>
+        {scrollable ? (
+          <Animated.ScrollView
+            contentContainerStyle={[
+              { flexGrow: 1, paddingBottom: withBottomNav ? 120 : 60 },
+              { paddingTop: stickyHeader ? (HEADER_BASE_HEIGHT + stickyHeaderHeight - insets.top) : (HEADER_BASE_HEIGHT - insets.top) },
+              contentContainerStyle,
+            ]}
+            showsVerticalScrollIndicator={false}
+            onScroll={Animated.event(
+              [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+              { useNativeDriver: true }
+            )}
+            onScrollBeginDrag={handleScrollBeginDrag}
+            onScrollEndDrag={handleScrollEnd}
+            onMomentumScrollEnd={handleScrollEnd}
+            scrollEventThrottle={16}
+            refreshControl={refreshControl}
+          >
+            {children}
+          </Animated.ScrollView>
+        ) : (
+          <View style={[{ flex: 1 }, contentContainerStyle]}>
+            {children}
+          </View>
+        )}
       </View>
     </View>
   );
