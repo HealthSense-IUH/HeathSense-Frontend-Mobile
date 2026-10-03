@@ -305,7 +305,7 @@ export default function AFibAnalysisDetailsScreen() {
           </Pressable>
 
           {/* Main Title */}
-          <Text className="text-xl font-extrabold text-slate-900 tracking-tight text-center flex-1 pr-1">
+          <Text className="text-[20px] font-bold text-slate-900 tracking-tight text-center flex-1 pr-1">
             Chi tiết phân tích
           </Text>
 

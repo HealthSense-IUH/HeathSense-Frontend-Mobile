@@ -260,7 +260,7 @@ export default function HistoryScreen() {
             >
               <ArrowLeft color="#334155" size={20} strokeWidth={2.2} />
             </Pressable>
-            <Text className="text-2xl font-bold tracking-tight text-slate-900">
+            <Text className="text-[20px] font-bold tracking-tight text-slate-900">
               Lịch sử đo
             </Text>
           </View>

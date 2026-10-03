@@ -203,7 +203,7 @@ export default function HistoryRecordsScreen() {
             >
               <ArrowLeft color="#0B1329" size={20} strokeWidth={2.4} />
             </Pressable>
-            <Text className="text-[23px] font-extrabold text-[#0B1329] tracking-tight">
+            <Text className="text-[20px] font-bold text-[#0B1329] tracking-tight">
               Chi tiết theo ngày
             </Text>
           </View>
