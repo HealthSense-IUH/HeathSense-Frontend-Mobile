@@ -135,9 +135,17 @@ export const workoutApiService = {
   /**
    * Lấy lịch sử các phiên tập luyện
    */
-  async getSessions(page = 0, size = 15): Promise<{ content: WorkoutSession[]; totalElements: number }> {
+  async getSessions(
+    page = 0,
+    size = 15,
+    from?: string,
+    to?: string
+  ): Promise<{ content: WorkoutSession[]; totalElements: number }> {
+    const params: Record<string, any> = { page, size };
+    if (from) params.from = from;
+    if (to) params.to = to;
     const res = await axiosClient.get<ApiResponse<any>>('/api/workouts/sessions', {
-      params: { page, size },
+      params,
     });
     const pageData = res.data?.data || res.data;
     return {

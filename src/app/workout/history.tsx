@@ -14,11 +14,13 @@ import {
   MoreVertical,
   ChevronDown,
   ChevronRight,
+  ChevronLeft,
   Search,
   Timer,
   Footprints,
   Zap,
   Check,
+  Dumbbell,
 } from 'lucide-react-native';
 import Svg, {
   Path,
@@ -72,9 +74,6 @@ export default function WorkoutHistoryScreen() {
     }
   }, [params.tab]);
 
-  useEffect(() => {
-    void syncSessionsWithBackend();
-  }, [syncSessionsWithBackend]);
 
   // When tab changes, reset selected index to latest
   const handleTabChange = (tab: TabView) => {
@@ -307,6 +306,50 @@ export default function WorkoutHistoryScreen() {
     return `${pad(mins)}:${pad(secs)}`;
   };
 
+  // Format axis duration as G:P (e.g., 01:00 or 00:30)
+  const formatChartAxisDuration = (totalSec: number) => {
+    if (totalSec <= 0) return '00:00';
+    const hrs = Math.floor(totalSec / 3600);
+    const mins = Math.floor((totalSec % 3600) / 60);
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return `${pad(hrs)}:${pad(mins)}`;
+  };
+
+  // Quick navigation through previous / next periods
+  const handleShiftPeriod = (direction: -1 | 1) => {
+    React.startTransition(() => {
+      const next = new Date(anchorDate);
+      if (activeTab === 'DAYS') {
+        next.setDate(anchorDate.getDate() + direction * 7);
+      } else if (activeTab === 'WEEKS') {
+        next.setDate(anchorDate.getDate() + direction * 7 * 8);
+      } else {
+        next.setMonth(anchorDate.getMonth() + direction * 6);
+      }
+      setAnchorDate(next);
+      setSelectedIndex(-1);
+    });
+  };
+
+  // Prevent shifting into future periods
+  const canGoNext = useMemo(() => {
+    const now = new Date();
+    const lastCol = columns[columns.length - 1];
+    if (!lastCol) return false;
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    return lastCol.startDate.getTime() < startOfToday;
+  }, [columns]);
+
+  // Synchronize active date range with backend lazily
+  useEffect(() => {
+    if (columns.length > 0) {
+      const start = columns[0].startDate.toISOString();
+      const end = columns[columns.length - 1].endDate.toISOString();
+      void syncSessionsWithBackend(start, end);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, anchorDate]);
+
   // Group active column's sessions by day for the bottom list (sorted latest first)
   const groupedSessions = useMemo(() => {
     const list = activeColumn?.sessions || [];
@@ -519,17 +562,37 @@ export default function WorkoutHistoryScreen() {
             elevation: 2,
           }}
         >
-          {/* Top Line: Date Range (Clicking opens Calendar Modal) */}
-          <View className="flex-row items-center mb-2">
+          {/* Top Line: Date Range & Quick Period Navigation */}
+          <View className="flex-row items-center justify-between mb-2">
             <Pressable
               onPress={() => setIsCalendarVisible(true)}
               className="flex-row items-center gap-1.5 py-0.5 active:opacity-70"
             >
-              <Text className="text-xs font-bold text-slate-600">
+              <Text className="text-xs font-bold text-slate-700">
                 {rangeLabel}
               </Text>
-              <ChevronRight color="#64748B" size={14} />
+              <ChevronDown color="#64748B" size={13} />
             </Pressable>
+
+            <View className="flex-row items-center gap-1">
+              <Pressable
+                onPress={() => handleShiftPeriod(-1)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                className="w-7 h-7 rounded-full bg-slate-100 items-center justify-center active:opacity-70"
+              >
+                <ChevronLeft color="#475569" size={15} strokeWidth={2.2} />
+              </Pressable>
+              <Pressable
+                onPress={() => handleShiftPeriod(1)}
+                disabled={!canGoNext}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                className={`w-7 h-7 rounded-full bg-slate-100 items-center justify-center active:opacity-70 ${
+                  !canGoNext ? 'opacity-35' : ''
+                }`}
+              >
+                <ChevronRight color="#475569" size={15} strokeWidth={2.2} />
+              </Pressable>
+            </View>
           </View>
 
           {/* Row with Sport Filter & Samsung Milestone Graphic */}
@@ -601,14 +664,14 @@ export default function WorkoutHistoryScreen() {
                 {isDistanceSport
                   ? maxDistanceAcrossColumns.toFixed(2).replace('.', ',')
                   : maxDurationAcrossColumns > 0
-                  ? formatDurationDisplay(maxDurationAcrossColumns)
+                  ? formatChartAxisDuration(maxDurationAcrossColumns)
                   : '00:00'}
               </Text>
               <Text className="text-[10px] text-slate-400 font-medium mt-3.5">
                 {isDistanceSport
                   ? (maxDistanceAcrossColumns / 2).toFixed(2).replace('.', ',')
                   : maxDurationAcrossColumns > 0
-                  ? formatDurationDisplay(Math.round(maxDurationAcrossColumns / 2))
+                  ? formatChartAxisDuration(Math.round(maxDurationAcrossColumns / 2))
                   : '00:00'}
               </Text>
             </View>
@@ -631,7 +694,12 @@ export default function WorkoutHistoryScreen() {
                 return (
                   <Pressable
                     key={item.id}
-                    onPress={() => setSelectedIndex(idx)}
+                    onPress={() => {
+                      React.startTransition(() => {
+                        setSelectedIndex(idx);
+                      });
+                    }}
+                    hitSlop={{ top: 12, bottom: 12, left: 6, right: 6 }}
                     className="items-center flex-1 active:opacity-75"
                   >
                     <View className="h-16 justify-end items-center w-full">
@@ -659,6 +727,9 @@ export default function WorkoutHistoryScreen() {
                     >
                       {item.label}
                     </Text>
+                    {isSelected && (
+                      <View className="w-1.5 h-1.5 rounded-full bg-slate-800 mt-1" />
+                    )}
                   </Pressable>
                 );
               })}
@@ -674,7 +745,7 @@ export default function WorkoutHistoryScreen() {
         </View>
 
         {/* WORKOUT SESSIONS LIST FOR SELECTED PERIOD (Images 4 & 5) */}
-        {groupedSessions.length > 0 && (
+        {groupedSessions.length > 0 ? (
           <View className="px-4">
             {groupedSessions.map((group) => {
               return (
@@ -772,6 +843,26 @@ export default function WorkoutHistoryScreen() {
                 </View>
               );
             })}
+          </View>
+        ) : (
+          <View className="mx-4 mb-6 p-6 rounded-3xl bg-white border border-slate-200/80 items-center justify-center shadow-xs">
+            <View className="w-13 h-13 rounded-2xl bg-slate-100 items-center justify-center mb-3">
+              <Dumbbell color="#94A3B8" size={26} />
+            </View>
+            <Text className="text-sm font-bold text-slate-800 mb-1">
+              Không có buổi tập nào
+            </Text>
+            <Text className="text-xs text-slate-500 text-center mb-4 max-w-[260px] leading-relaxed">
+              Chưa có dữ liệu vận động được ghi nhận trong {activeTab === 'DAYS' ? 'ngày này' : 'khoảng thời gian này'}. Hãy bắt đầu buổi tập ngay!
+            </Text>
+            <Pressable
+              onPress={() => safeRouter.navigate('/workout/select')}
+              className="px-5 py-2.5 rounded-full bg-[#00C8FF] active:opacity-85 shadow-xs"
+            >
+              <Text className="text-xs font-bold text-white">
+                Bắt đầu bài tập
+              </Text>
+            </Pressable>
           </View>
         )}
 

@@ -45,7 +45,7 @@ interface WorkoutCatalogState {
   deleteRoutine: (routineId: string) => void;
   saveSession: (session: WorkoutSession) => void;
   deleteSession: (sessionId: string) => void;
-  syncSessionsWithBackend: () => Promise<void>;
+  syncSessionsWithBackend: (from?: string, to?: string) => Promise<void>;
 
   // Selectors / Helpers
   getFavoriteExercises: () => Exercise[];
@@ -254,10 +254,10 @@ export const useWorkoutCatalogStore = create<WorkoutCatalogState>((set, get) => 
       set({ sessions: updatedSessions });
     },
 
-    syncSessionsWithBackend: async () => {
+    syncSessionsWithBackend: async (from?: string, to?: string) => {
       try {
         const { workoutApiService } = require('./workoutApiService');
-        const res = await workoutApiService.getSessions(0, 50);
+        const res = await workoutApiService.getSessions(0, 50, from, to);
         if (res && res.content && Array.isArray(res.content) && res.content.length > 0) {
           const localSessions = get().sessions;
           const sessionMap = new Map<string, WorkoutSession>();
