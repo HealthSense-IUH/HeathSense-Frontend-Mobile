@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, RefreshControl } from 'react-native';
 import { router } from 'expo-router';
+import { safeRouter } from '@/utils/safeNavigation';
 import { PlusCircle, AlertCircle, CheckCircle, X } from 'lucide-react-native';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
 import { Box } from '@/components/ui/box';
@@ -44,7 +45,7 @@ export default function ConsultationScreen() {
 
   const handleSelectSession = (session: ConsultationSessionItem) => {
     setSelectedSession(session);
-    router.push(`/consultation/chat/${session.id}`);
+    safeRouter.navigate(`/consultation/chat/${session.id}`);
   };
 
   return (
@@ -86,7 +87,7 @@ export default function ConsultationScreen() {
 
         {/* Primary CTA Button: Create Request */}
         <Pressable
-          onPress={() => router.push('/consultation/create-request')}
+          onPress={() => safeRouter.navigate('/consultation/create-request')}
           className="bg-primary rounded-2xl py-3.5 px-4 mb-4 flex-row justify-center items-center gap-2 shadow-xs active:opacity-90"
         >
           <PlusCircle size={20} color="#ffffff" />

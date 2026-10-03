@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
+import { safeRouter } from '@/utils/safeNavigation';
 import {
   ListOrdered,
   Footprints,
@@ -122,11 +123,11 @@ export const FavoriteWorkoutSection: React.FC = () => {
   const hasFavorites = favoriteExercises.length > 0;
 
   const handleNavigateToCatalog = () => {
-    router.push('/workout/catalog' as any);
+    safeRouter.navigate('/workout/catalog');
   };
 
   const handleSelectFavorite = (exercise: Exercise) => {
-    router.push({
+    safeRouter.navigate({
       pathname: '/workout/pre-workout' as any,
       params: { exerciseId: exercise.id },
     });

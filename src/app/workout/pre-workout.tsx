@@ -8,6 +8,7 @@ import {
   Switch,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { safeRouter } from '@/utils/safeNavigation';
 import {
   ArrowLeft,
   Headphones,
@@ -122,7 +123,7 @@ export default function PreWorkoutScreen() {
     }
 
     setupWorkout(exercise, targetType, finalValue, undefined, pauseOnTarget);
-    router.push('/workout/active' as any);
+    safeRouter.navigate('/workout/active');
   };
 
   return (
@@ -133,7 +134,7 @@ export default function PreWorkoutScreen() {
       className="bg-[#F2F4F7]"
       headerLeft={
         <TouchableOpacity
-          onPress={() => router.back()}
+          onPress={() => safeRouter.back()}
           className="w-10 h-10 rounded-full items-center justify-center active:opacity-70"
         >
           <ArrowLeft color={THEME.colors.textPrimary} size={22} />

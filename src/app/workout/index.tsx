@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
+import { safeRouter } from '@/utils/safeNavigation';
 import {
   ArrowLeft,
   User,
@@ -33,7 +34,7 @@ export default function WorkoutHubScreen() {
       className="bg-slate-50"
       headerLeft={
         <TouchableOpacity
-          onPress={() => router.back()}
+          onPress={() => safeRouter.back()}
           className="w-10 h-10 rounded-full items-center justify-center active:opacity-70"
         >
           <ArrowLeft color={THEME.colors.textPrimary} size={22} />
@@ -48,7 +49,7 @@ export default function WorkoutHubScreen() {
             <User color="#475569" size={18} />
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => router.push('/workout/catalog' as any)}
+            onPress={() => safeRouter.navigate('/workout/catalog')}
             className="w-9 h-9 rounded-full bg-white border border-slate-200/80 items-center justify-center shadow-sm active:opacity-80"
           >
             <MoreVertical color="#475569" size={18} />
@@ -129,7 +130,7 @@ export default function WorkoutHubScreen() {
 
         {/* SECTION 2: HUẤN LUYỆN CHẠY (Running Coach Beta Card - Light Theme) */}
         <TouchableOpacity
-          onPress={() => router.push('/workout/catalog' as any)}
+          onPress={() => safeRouter.navigate('/workout/catalog')}
           activeOpacity={0.88}
           className="mb-5 rounded-3xl bg-white border border-slate-200/80 p-5 shadow-sm"
           style={{

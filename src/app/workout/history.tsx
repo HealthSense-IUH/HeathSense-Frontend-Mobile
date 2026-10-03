@@ -8,6 +8,7 @@ import {
   Modal,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { safeRouter } from '@/utils/safeNavigation';
 import {
   ArrowLeft,
   Calendar,
@@ -412,7 +413,7 @@ export default function WorkoutHistoryScreen() {
       className="bg-slate-50"
       headerLeft={
         <TouchableOpacity
-          onPress={() => router.back()}
+          onPress={() => safeRouter.back()}
           className="w-10 h-10 rounded-full items-center justify-center active:opacity-70"
         >
           <ArrowLeft color="#0F172A" size={22} />
@@ -427,7 +428,7 @@ export default function WorkoutHistoryScreen() {
             <Calendar color="#475569" size={17} />
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => router.push('/workout/catalog' as any)}
+            onPress={() => safeRouter.navigate('/workout/catalog')}
             className="w-9 h-9 rounded-full bg-white border border-slate-200/80 items-center justify-center shadow-xs active:opacity-80"
           >
             <MoreVertical color="#475569" size={17} />
@@ -704,7 +705,7 @@ export default function WorkoutHistoryScreen() {
                         key={session.id}
                         activeOpacity={0.85}
                         onPress={() => {
-                          router.push({
+                          safeRouter.navigate({
                             pathname: '/workout/summary',
                             params: {
                               exerciseId: session.exerciseId,

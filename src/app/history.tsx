@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, Pressable, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
+import { safeRouter } from '@/utils/safeNavigation';
 import { ArrowLeft, ChevronDown, ChevronRight, Calendar, Settings, Info } from 'lucide-react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -190,12 +191,12 @@ export default function HistoryScreen() {
                                 <Pressable
                                   key={`${yearMonth}-${day}`}
                                   onPress={() => {
-                                    router.push({
+                                    safeRouter.navigate({
                                       pathname: '/history-records',
                                       params: { date: `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}` }
-                                    } as any);
+                                    });
                                   }}
-                                  className="w-full p-3 rounded-2xl bg-slate-50 border border-slate-200/70 flex-row items-center justify-between transition-all active:opacity-80 mb-2"
+                                  className="w-full p-3 rounded-2xl bg-slate-50 border border-slate-200/70 flex-row items-center justify-between active:opacity-75 mb-2"
                                 >
                                   <View className="flex-row items-center gap-3">
                                     <View className="w-8 h-8 rounded-xl bg-white border border-slate-200/80 items-center justify-center shrink-0">
@@ -247,7 +248,7 @@ export default function HistoryScreen() {
         <View className="px-5 pt-3 pb-4 flex-row items-center justify-between">
           <View className="flex-row items-center gap-3.5">
             <Pressable
-              onPress={() => router.back()}
+              onPress={() => safeRouter.back()}
               className="w-11 h-11 rounded-full bg-white border border-slate-100 items-center justify-center active:opacity-80"
               style={{
                 shadowColor: 'rgba(15, 23, 42, 0.05)',

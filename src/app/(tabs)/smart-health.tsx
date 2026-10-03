@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
+import { safeRouter } from '@/utils/safeNavigation';
 import { Bluetooth, HeartPulse } from 'lucide-react-native';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -14,7 +15,7 @@ export default function SmartHealthScreen() {
       title="Phân tích nhịp tim"
       headerRight={
         <Pressable
-          onPress={() => router.push("/(public)/scan" as any)}
+          onPress={() => safeRouter.navigate("/(public)/scan")}
           className="h-10 w-10 rounded-full bg-primary/10 items-center justify-center active:opacity-75"
         >
           <Bluetooth color={THEME.colors.primary} size={20} />
@@ -25,9 +26,7 @@ export default function SmartHealthScreen() {
         {/* Banner Card - Styled like the user's "Energy Score" illustration */}
         <Pressable 
           onPress={() => {
-            setTimeout(() => {
-              router.push("/afib-analysis-details" as any);
-            }, 50);
+            safeRouter.navigate("/afib-analysis-details");
           }}
           className="shadow-sm mb-6 active:opacity-90"
           style={{ borderRadius: 24 }}
@@ -56,7 +55,7 @@ export default function SmartHealthScreen() {
 
         {/* View History Button */}
         <Pressable
-          onPress={() => router.push("/history" as any)}
+          onPress={() => safeRouter.navigate("/history")}
           className="bg-card rounded-3xl p-5 flex-row items-center shadow-sm mb-6 border border-border active:opacity-85"
         >
           <View className="h-12 w-12 bg-primary/10 rounded-full items-center justify-center mr-4">

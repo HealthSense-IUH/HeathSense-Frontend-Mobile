@@ -8,6 +8,7 @@ import {
   Modal,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { safeRouter } from '@/utils/safeNavigation';
 import {
   ArrowLeft,
   Plus,
@@ -53,7 +54,7 @@ export default function WorkoutCatalogScreen() {
   };
 
   const handleSelectExercise = (exercise: Exercise) => {
-    router.push({
+    safeRouter.navigate({
       pathname: '/workout/pre-workout' as any,
       params: { exerciseId: exercise.id },
     });
@@ -66,7 +67,7 @@ export default function WorkoutCatalogScreen() {
       className="bg-slate-50"
       headerLeft={
         <TouchableOpacity
-          onPress={() => router.back()}
+          onPress={() => safeRouter.back()}
           className="w-10 h-10 rounded-full items-center justify-center active:opacity-70"
         >
           <ArrowLeft color={THEME.colors.textPrimary} size={22} />
@@ -239,7 +240,7 @@ export default function WorkoutCatalogScreen() {
             <TouchableOpacity
               onPress={() => {
                 setShowAddMenu(false);
-                router.push('/workout/select' as any);
+                safeRouter.navigate('/workout/select');
               }}
               activeOpacity={0.8}
               className="flex-row items-center gap-4 py-3.5 px-4 rounded-2xl bg-slate-50 mb-3 border border-slate-200/80"
@@ -267,7 +268,7 @@ export default function WorkoutCatalogScreen() {
             <TouchableOpacity
               onPress={() => {
                 setShowAddMenu(false);
-                router.push('/workout/create-routine' as any);
+                safeRouter.navigate('/workout/create-routine');
               }}
               activeOpacity={0.8}
               className="flex-row items-center gap-4 py-3.5 px-4 rounded-2xl bg-slate-50 border border-slate-200/80"

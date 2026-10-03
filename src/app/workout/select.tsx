@@ -7,6 +7,7 @@ import {
   TextInput,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { safeRouter } from '@/utils/safeNavigation';
 import { ArrowLeft, Search, X, Plus } from 'lucide-react-native';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
 import { ExerciseIcon } from '@/components/features/workout/ExerciseIcon';
@@ -53,10 +54,10 @@ export default function SelectExerciseScreen() {
   const handleSelect = (exercise: Exercise) => {
     if (isRoutinePicker) {
       // Return selected exercise to routine builder
-      router.back();
+      safeRouter.back();
       // Store can be updated or handled via callback
     } else {
-      router.push({
+      safeRouter.navigate({
         pathname: '/workout/pre-workout' as any,
         params: { exerciseId: exercise.id },
       });
@@ -68,7 +69,7 @@ export default function SelectExerciseScreen() {
       title="Chọn bài tập"
       headerLeft={
         <TouchableOpacity
-          onPress={() => router.back()}
+          onPress={() => safeRouter.back()}
           className="w-10 h-10 rounded-full items-center justify-center active:opacity-70"
         >
           <ArrowLeft color={THEME.colors.textPrimary} size={22} />

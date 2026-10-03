@@ -2,6 +2,7 @@ import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
 import { useRouter } from 'expo-router';
+import { safeRouter } from '@/utils/safeNavigation';
 import { useAuthStore } from '@/services/authentication/authStore';
 import { useLogoutMutation } from '@/hooks/mutations/useAuthMutations';
 import { useBLE } from '@/context/BLEContext';
@@ -56,7 +57,7 @@ export default function SettingsScreen() {
 
           <View className="flex-row gap-3">
             <TouchableOpacity
-              onPress={() => router.push('/(public)/scan' as any)}
+              onPress={() => safeRouter.navigate('/(public)/scan')}
               className="flex-1 bg-primary py-3 px-4 rounded-2xl flex-row items-center justify-center active:opacity-80"
             >
               <Radio color="#FFFFFF" size={16} className="mr-2" />

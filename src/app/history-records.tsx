@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Pressable, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { safeRouter } from '@/utils/safeNavigation';
 import { ArrowLeft, Clock, Activity, ShieldAlert, AlertCircle, Heart, ChevronRight, SlidersHorizontal } from 'lucide-react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -190,7 +191,7 @@ export default function HistoryRecordsScreen() {
         <View className="px-5 pt-3 pb-5 flex-row items-center justify-between">
           <View className="flex-row items-center gap-4">
             <Pressable
-              onPress={() => router.back()}
+              onPress={() => safeRouter.back()}
               className="w-10 h-10 rounded-full bg-white border border-slate-100 items-center justify-center active:opacity-80"
               style={{
                 shadowColor: 'rgba(15, 23, 42, 0.05)',

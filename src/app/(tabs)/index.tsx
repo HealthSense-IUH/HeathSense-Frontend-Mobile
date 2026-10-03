@@ -1,5 +1,6 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
+import { safeRouter } from '@/utils/safeNavigation';
 import { Bluetooth, Activity, Flame, Footprints, Heart, Battery, Settings, Dumbbell, ChevronRight } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BackgroundGradient } from '@/components/ui/BackgroundGradient';
@@ -30,9 +31,7 @@ export default function HomeScreen() {
       headerRight={
         <TouchableOpacity
           onPress={() => {
-            setTimeout(() => {
-              router.push("/(public)/scan" as any);
-            }, 50);
+            safeRouter.navigate("/(public)/scan");
           }}
           activeOpacity={0.8}
           className="flex-row items-center gap-1.5 py-1.5 px-3 rounded-full bg-white/90 border border-blue-100 shadow-sm"
@@ -62,9 +61,7 @@ export default function HomeScreen() {
         {/* Interactive BLE Connection Status Card (Stitch Specs) */}
         <TouchableOpacity
           onPress={() => {
-            setTimeout(() => {
-              router.push("/(public)/scan" as any);
-            }, 50);
+            safeRouter.navigate("/(public)/scan");
           }}
           activeOpacity={0.85}
           className="relative overflow-hidden rounded-2xl bg-white/90 border border-slate-200/80 p-4 mb-5 shadow-sm"
@@ -152,7 +149,7 @@ export default function HomeScreen() {
         <View className="flex-row items-center justify-between mb-3">
           <Text className="text-lg font-bold text-slate-900 tracking-tight">Chỉ số hôm nay</Text>
           <TouchableOpacity
-            onPress={() => router.push('/(tabs)/smart-health' as any)}
+            onPress={() => safeRouter.navigate('/(tabs)/smart-health')}
             className="w-9 h-9 rounded-xl bg-white border border-slate-200/80 shadow-sm items-center justify-center active:opacity-80"
             style={{
               shadowColor: 'rgba(15, 23, 42, 0.05)',
@@ -224,7 +221,7 @@ export default function HomeScreen() {
 
         {/* Workout & Sports Hub Quick Action Card */}
         <TouchableOpacity
-          onPress={() => router.push('/workout' as any)}
+          onPress={() => safeRouter.navigate('/workout')}
           activeOpacity={0.8}
           className="mb-5 rounded-2xl bg-white/95 border border-slate-200/80 p-4 shadow-sm flex-row items-center justify-between"
           style={{
