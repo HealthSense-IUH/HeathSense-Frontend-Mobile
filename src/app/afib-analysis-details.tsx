@@ -38,6 +38,13 @@ export default function AFibAnalysisDetailsScreen() {
 
   const { data, loading, error } = useHealthStatistics(activeFilter, referenceDate);
 
+  const handleFilterChange = (filter: FilterType) => {
+    if (filter === activeFilter) return;
+    React.startTransition(() => {
+      setActiveFilter(filter);
+    });
+  };
+
   const handlePrev = () => {
     const newDate = new Date(referenceDate);
     if (activeFilter === 'Ngày') newDate.setDate(newDate.getDate() - 1);
@@ -167,9 +174,7 @@ export default function AFibAnalysisDetailsScreen() {
     if (chartData.length > 0) {
       chartAreaContent = (
         <BarChart
-          key={activeFilter}
-          isAnimated
-          animationDuration={800}
+          isAnimated={false}
           stackData={chartData}
           barWidth={activeFilter === 'Tháng' ? 6 : (activeFilter === 'Ngày' ? 8 : 12)}
           spacing={activeFilter === 'Tháng' ? 4 : (activeFilter === 'Ngày' ? 8 : 16)}
@@ -335,7 +340,7 @@ export default function AFibAnalysisDetailsScreen() {
           showsVerticalScrollIndicator={false}
         >
           {/* TimeSegmentedControl */}
-          <TimeFilterTabs activeFilter={activeFilter} onChange={setActiveFilter} />
+          <TimeFilterTabs activeFilter={activeFilter} onChange={handleFilterChange} />
 
           {/* DateNavigatorPill */}
           <PeriodSelector

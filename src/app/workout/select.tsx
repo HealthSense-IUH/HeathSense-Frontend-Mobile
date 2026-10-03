@@ -4,6 +4,7 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
+  Pressable,
   TextInput,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -119,24 +120,21 @@ export default function SelectExerciseScreen() {
               const label = cat === 'ALL' ? 'Tất cả' : EXERCISE_CATEGORY_LABELS[cat];
 
               return (
-                <TouchableOpacity
+                <Pressable
                   key={cat}
                   onPress={() => setSelectedCategory(cat)}
-                  activeOpacity={0.75}
-                  className={`px-4 py-2 rounded-full border ${
-                    isSelected
-                      ? 'bg-slate-900 border-slate-900'
-                      : 'bg-white border-slate-200/90'
+                  className={`px-4 py-2 rounded-full items-center justify-center ${
+                    isSelected ? 'bg-[#E5E7EB]' : 'bg-transparent'
                   }`}
                 >
                   <Text
-                    className={`text-xs font-semibold ${
-                      isSelected ? 'text-white' : 'text-slate-600'
+                    className={`text-sm ${
+                      isSelected ? 'font-bold text-slate-900' : 'font-medium text-slate-500'
                     }`}
                   >
                     {label}
                   </Text>
-                </TouchableOpacity>
+                </Pressable>
               );
             })}
           </ScrollView>

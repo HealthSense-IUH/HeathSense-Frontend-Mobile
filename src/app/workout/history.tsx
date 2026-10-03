@@ -66,8 +66,11 @@ export default function WorkoutHistoryScreen() {
 
   // When tab changes, reset selected index to latest
   const handleTabChange = (tab: TabView) => {
-    setActiveTab(tab);
-    setSelectedIndex(-1);
+    if (tab === activeTab) return;
+    React.startTransition(() => {
+      setActiveTab(tab);
+      setSelectedIndex(-1);
+    });
   };
 
   // Set of dates with workout sessions ('YYYY-MM-DD') for Calendar Modal
@@ -440,7 +443,7 @@ export default function WorkoutHistoryScreen() {
         {/* TAB SWITCHER: Số ngày | Tuần | Tháng (Images 3 & 4) */}
         <View className="px-6 py-2.5">
           <View className="flex-row items-center justify-between">
-            <TouchableOpacity
+            <Pressable
               onPress={() => handleTabChange('DAYS')}
               className={`px-5 py-2 rounded-full items-center justify-center ${
                 activeTab === 'DAYS' ? 'bg-[#E5E7EB]' : 'bg-transparent'
@@ -455,9 +458,9 @@ export default function WorkoutHistoryScreen() {
               >
                 Số ngày
               </Text>
-            </TouchableOpacity>
+            </Pressable>
 
-            <TouchableOpacity
+            <Pressable
               onPress={() => handleTabChange('WEEKS')}
               className={`px-5 py-2 rounded-full items-center justify-center ${
                 activeTab === 'WEEKS' ? 'bg-[#E5E7EB]' : 'bg-transparent'
@@ -472,9 +475,9 @@ export default function WorkoutHistoryScreen() {
               >
                 Tuần
               </Text>
-            </TouchableOpacity>
+            </Pressable>
 
-            <TouchableOpacity
+            <Pressable
               onPress={() => handleTabChange('MONTHS')}
               className={`px-5 py-2 rounded-full items-center justify-center ${
                 activeTab === 'MONTHS' ? 'bg-[#E5E7EB]' : 'bg-transparent'
@@ -489,7 +492,7 @@ export default function WorkoutHistoryScreen() {
               >
                 Tháng
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </View>
 
