@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { safeRouter } from '@/utils/safeNavigation';
 import { useWorkoutCatalogStore } from '@/services/workout/workoutCatalogStore';
@@ -46,10 +46,9 @@ export function WeeklyWorkoutCard() {
   );
 
   return (
-    <TouchableOpacity
-      activeOpacity={0.88}
+    <Pressable
       onPress={() => safeRouter.navigate('/workout/history')}
-      className="mb-5 rounded-3xl bg-white border border-slate-200/80 p-5 shadow-sm"
+      className="mb-5 rounded-3xl bg-white border border-slate-200/80 p-5 shadow-sm active:opacity-90"
       style={{
         shadowColor: 'rgba(15, 23, 42, 0.05)',
         shadowOffset: { width: 0, height: 4 },
@@ -126,6 +125,6 @@ export function WeeklyWorkoutCard() {
           })}
         </View>
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 }

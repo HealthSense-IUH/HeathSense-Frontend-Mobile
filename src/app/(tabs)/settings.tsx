@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Text, Pressable, View } from 'react-native';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
 import { useRouter } from 'expo-router';
 import { safeRouter } from '@/utils/safeNavigation';
@@ -56,7 +56,7 @@ export default function SettingsScreen() {
           </View>
 
           <View className="flex-row gap-3">
-            <TouchableOpacity
+            <Pressable
               onPress={() => safeRouter.navigate('/(public)/scan')}
               className="flex-1 bg-primary py-3 px-4 rounded-2xl flex-row items-center justify-center active:opacity-80"
             >
@@ -64,16 +64,16 @@ export default function SettingsScreen() {
               <Text className="text-xs font-bold text-white">
                 {knownDevice ? 'Quét & Đổi thiết bị' : 'Tìm & Kết nối thiết bị'}
               </Text>
-            </TouchableOpacity>
+            </Pressable>
 
             {knownDevice && (
-              <TouchableOpacity
+              <Pressable
                 onPress={() => void forgetDevice()}
                 className="bg-destructive/10 border border-destructive/20 py-3 px-4 rounded-2xl flex-row items-center justify-center active:opacity-80"
               >
                 <Trash2 color={THEME.colors.error} size={16} className="mr-1.5" />
                 <Text className="text-xs font-bold text-destructive">Hủy ghép đôi</Text>
-              </TouchableOpacity>
+              </Pressable>
             )}
           </View>
         </View>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, RefreshControl, TouchableOpacity } from 'react-native';
+import { View, Text, Pressable, RefreshControl } from 'react-native';
 import { router } from 'expo-router';
 import { safeRouter } from '@/utils/safeNavigation';
 import { PlusCircle, AlertCircle, CheckCircle, X } from 'lucide-react-native';

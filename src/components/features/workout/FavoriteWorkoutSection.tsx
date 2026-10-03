@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { safeRouter } from '@/utils/safeNavigation';
 import {
@@ -145,14 +145,13 @@ export const FavoriteWorkoutSection: React.FC = () => {
       }}
     >
       {/* Section Header */}
-      <TouchableOpacity
+      <Pressable
         onPress={handleNavigateToCatalog}
-        activeOpacity={0.7}
-        className="flex-row items-center justify-between mb-3"
+        className="flex-row items-center justify-between mb-3 active:opacity-70"
       >
         <Text className="text-base font-bold text-slate-900 tracking-tight">Tập thể dục</Text>
         <ChevronRight color="#94A3B8" size={18} />
-      </TouchableOpacity>
+      </Pressable>
 
       {/* Main Content */}
       {hasFavorites ? (
@@ -163,11 +162,10 @@ export const FavoriteWorkoutSection: React.FC = () => {
             const circleBg = getExerciseCircleColor(exercise.id, exercise.category);
 
             return (
-              <TouchableOpacity
+              <Pressable
                 key={exercise.id}
                 onPress={() => handleSelectFavorite(exercise)}
-                activeOpacity={0.75}
-                className="items-center w-[72px]"
+                className="items-center w-[72px] active:opacity-75"
               >
                 {/* Colored Circle Button */}
                 <View
@@ -184,15 +182,14 @@ export const FavoriteWorkoutSection: React.FC = () => {
                 >
                   {exercise.name}
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             );
           })}
 
           {/* "Nhiều hơn" (More) Circle Button (Visible ONLY if favoriteCount > 0) */}
-          <TouchableOpacity
+          <Pressable
             onPress={handleNavigateToCatalog}
-            activeOpacity={0.75}
-            className="items-center w-[72px]"
+            className="items-center w-[72px] active:opacity-75"
           >
             {/* Soft Grey Circle Button */}
             <View className="w-[62px] h-[62px] rounded-full bg-slate-200/90 border border-slate-300/80 items-center justify-center shadow-sm">
@@ -206,19 +203,18 @@ export const FavoriteWorkoutSection: React.FC = () => {
             >
               Nhiều hơn
             </Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       ) : (
         /* Zero Favorites State - Light Mode matching Image 1 exactly */
-        <TouchableOpacity
+        <Pressable
           onPress={handleNavigateToCatalog}
-          activeOpacity={0.7}
-          className="pt-6 pb-2 min-h-[95px] justify-end"
+          className="pt-6 pb-2 min-h-[95px] justify-end active:opacity-70"
         >
           <Text className="text-xs text-slate-600 leading-relaxed font-normal">
             Chọn các bài tập thể dục yêu thích của bạn để bạn có thể truy cập chúng một cách dễ dàng.
           </Text>
-        </TouchableOpacity>
+        </Pressable>
       )}
     </View>
   );

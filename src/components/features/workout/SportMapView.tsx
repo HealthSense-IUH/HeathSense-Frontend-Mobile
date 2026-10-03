@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import Svg, {
   Path,
   Circle,
@@ -239,25 +239,23 @@ export const SportMapView: React.FC<SportMapViewProps> = ({
 
       {/* Floating Action Buttons: Recenter & Layers (Top-Right) */}
       <View className="absolute top-4 right-4 z-10 flex-col gap-2.5">
-        <TouchableOpacity
+        <Pressable
           onPress={handleRecenter}
-          activeOpacity={0.7}
-          className="w-10 h-10 rounded-full bg-white border border-slate-200/90 items-center justify-center shadow-sm active:bg-slate-100"
+          className="w-10 h-10 rounded-full bg-white border border-slate-200/90 items-center justify-center shadow-sm active:bg-slate-100 active:opacity-70"
         >
           <Crosshair color="#00C853" size={20} strokeWidth={2.4} />
-        </TouchableOpacity>
+        </Pressable>
 
-        <TouchableOpacity
+        <Pressable
           onPress={handleToggleLayer}
-          activeOpacity={0.7}
-          className="w-10 h-10 rounded-full bg-white border border-slate-200/90 items-center justify-center shadow-sm active:bg-slate-100"
+          className="w-10 h-10 rounded-full bg-white border border-slate-200/90 items-center justify-center shadow-sm active:bg-slate-100 active:opacity-70"
         >
           <Layers
             color={layerType === 'satellite' ? '#00C853' : '#475569'}
             size={19}
             strokeWidth={2.2}
           />
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       {/* Google Watermark Logo (Bottom-Left) */}

@@ -3,7 +3,7 @@ import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
+  Pressable,
   ScrollView,
   Switch,
   Alert,
@@ -73,12 +73,13 @@ export default function CreateRoutineScreen() {
     <ScreenWrapper
       title="Tạo lịch trình tập luyện"
       headerLeft={
-        <TouchableOpacity
+        <Pressable
           onPress={() => router.back()}
           className="w-10 h-10 rounded-full items-center justify-center active:opacity-70"
+          hitSlop={8}
         >
           <ArrowLeft color={THEME.colors.textPrimary} size={22} />
-        </TouchableOpacity>
+        </Pressable>
       }
     >
       <View className="flex-1">
@@ -152,20 +153,20 @@ export default function CreateRoutineScreen() {
                     </View>
                   </View>
 
-                  <TouchableOpacity
+                  <Pressable
                     onPress={() => handleRemoveItem(item.id)}
-                    className="p-2 -mr-1"
+                    className="p-2 -mr-1 active:opacity-70"
+                    hitSlop={8}
                   >
                     <Trash2 color="#EF4444" size={18} />
-                  </TouchableOpacity>
+                  </Pressable>
                 </View>
               );
             })}
 
             {/* BUTTON: '+ THÊM BÀI TẬP THỂ DỤC' */}
-            <TouchableOpacity
+            <Pressable
               onPress={() => setShowPickerModal(true)}
-              activeOpacity={0.7}
               className="flex-row items-center gap-3 p-4 border-b border-slate-100 active:bg-slate-50"
             >
               <View className="w-8 h-8 rounded-full bg-emerald-50 items-center justify-center">
@@ -174,7 +175,7 @@ export default function CreateRoutineScreen() {
               <Text className="text-base font-semibold text-emerald-600">
                 Thêm bài tập thể dục
               </Text>
-            </TouchableOpacity>
+            </Pressable>
 
             {/* ITEM: HẠ NHIỆT (COOL-DOWN) */}
             <View className="flex-row items-center justify-between p-4">
@@ -200,21 +201,19 @@ export default function CreateRoutineScreen() {
 
         {/* BOTTOM ACTION BAR: 'Thoát' | 'Lưu' (Image 1) */}
         <View className="absolute bottom-6 left-5 right-5 flex-row gap-3">
-          <TouchableOpacity
+          <Pressable
             onPress={() => router.back()}
-            activeOpacity={0.8}
             className="flex-1 py-4 rounded-2xl bg-white border border-slate-200 items-center justify-center shadow-sm active:opacity-75"
           >
             <Text className="text-slate-600 font-semibold text-base">Thoát</Text>
-          </TouchableOpacity>
+          </Pressable>
 
-          <TouchableOpacity
+          <Pressable
             onPress={handleSave}
-            activeOpacity={0.8}
             className="flex-1 py-4 rounded-2xl bg-slate-900 items-center justify-center shadow-md active:opacity-75"
           >
             <Text className="text-white font-bold text-base">Lưu</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </View>
 
@@ -226,23 +225,23 @@ export default function CreateRoutineScreen() {
               <Text className="text-lg font-bold text-slate-900">
                 Chọn bài tập vào lịch trình
               </Text>
-              <TouchableOpacity onPress={() => setShowPickerModal(false)}>
+              <Pressable onPress={() => setShowPickerModal(false)} className="active:opacity-70" hitSlop={8}>
                 <Text className="text-slate-500 font-medium">Đóng</Text>
-              </TouchableOpacity>
+              </Pressable>
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false}>
               {exercises.map((ex) => (
-                <TouchableOpacity
+                <Pressable
                   key={ex.id}
                   onPress={() => handleAddExercise(ex)}
-                  className="flex-row items-center py-3 border-b border-slate-100"
+                  className="flex-row items-center py-3 border-b border-slate-100 active:bg-slate-50"
                 >
                   <ExerciseIcon name={ex.iconName} size={18} className="mr-3" />
                   <Text className="text-base font-medium text-slate-800 flex-1">
                     {ex.name}
                   </Text>
-                </TouchableOpacity>
+                </Pressable>
               ))}
             </ScrollView>
           </View>

@@ -3,7 +3,6 @@ import {
   View,
   Text,
   ScrollView,
-  TouchableOpacity,
   Pressable,
   TextInput,
 } from 'react-native';
@@ -69,20 +68,20 @@ export default function SelectExerciseScreen() {
     <ScreenWrapper
       title="Chọn bài tập"
       headerLeft={
-        <TouchableOpacity
+        <Pressable
           onPress={() => safeRouter.back()}
           className="w-10 h-10 rounded-full items-center justify-center active:opacity-70"
         >
           <ArrowLeft color={THEME.colors.textPrimary} size={22} />
-        </TouchableOpacity>
+        </Pressable>
       }
       headerRight={
-        <TouchableOpacity
+        <Pressable
           onPress={() => setIsSearchVisible(!isSearchVisible)}
           className="w-10 h-10 rounded-full items-center justify-center active:opacity-70"
         >
           <Search color={THEME.colors.textPrimary} size={22} />
-        </TouchableOpacity>
+        </Pressable>
       }
     >
       <View className="flex-1">
@@ -100,9 +99,9 @@ export default function SelectExerciseScreen() {
                 className="flex-1 ml-2.5 text-slate-800 text-base font-medium"
               />
               {searchQuery.length > 0 && (
-                <TouchableOpacity onPress={() => setSearchQuery('')}>
+                <Pressable onPress={() => setSearchQuery('')} className="active:opacity-60">
                   <X color="#94A3B8" size={18} />
-                </TouchableOpacity>
+                </Pressable>
               )}
             </View>
           </View>
@@ -154,11 +153,10 @@ export default function SelectExerciseScreen() {
                 const isLast = index === filteredExercises.length - 1;
 
                 return (
-                  <TouchableOpacity
+                  <Pressable
                     key={exercise.id}
                     onPress={() => handleSelect(exercise)}
-                    activeOpacity={0.7}
-                    className={`flex-row items-center px-4 py-3.5 ${
+                    className={`flex-row items-center px-4 py-3.5 active:bg-slate-50 ${
                       !isLast ? 'border-b border-slate-100' : ''
                     }`}
                   >
@@ -181,7 +179,7 @@ export default function SelectExerciseScreen() {
                     >
                       {exercise.name}
                     </Text>
-                  </TouchableOpacity>
+                  </Pressable>
                 );
               })
             )}
@@ -190,17 +188,16 @@ export default function SelectExerciseScreen() {
 
         {/* STICKY BOTTOM BUTTON: '+ Tạo bài tập thể dục mới' (Exact One UI layout from Image 4) */}
         <View className="absolute bottom-6 left-5 right-5 items-center">
-          <TouchableOpacity
+          <Pressable
             onPress={() => setShowCreateModal(true)}
-            activeOpacity={0.85}
-            className="flex-row items-center justify-center bg-slate-900/95 py-3.5 px-6 rounded-full shadow-lg border border-slate-700/80"
+            className="flex-row items-center justify-center bg-slate-900/95 py-3.5 px-6 rounded-full shadow-lg border border-slate-700/80 active:opacity-85"
             style={{ elevation: 5 }}
           >
             <Plus color="#10B981" size={20} className="mr-2" />
             <Text className="text-white font-bold text-base">
               Tạo bài tập thể dục mới
             </Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </View>
 

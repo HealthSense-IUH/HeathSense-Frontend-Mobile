@@ -3,7 +3,6 @@ import {
   View,
   Text,
   Modal,
-  TouchableOpacity,
   Pressable,
 } from 'react-native';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
@@ -158,25 +157,25 @@ export function WorkoutCalendarModal({
         >
           {/* Header Row: Prev Month, Title, Next Month */}
           <View className="flex-row items-center justify-between mb-6 px-1">
-            <TouchableOpacity
+            <Pressable
               onPress={handlePrevMonth}
               hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
               className="w-9 h-9 rounded-full items-center justify-center active:opacity-60"
             >
               <ChevronLeft color="#94A3B8" size={22} strokeWidth={2.2} />
-            </TouchableOpacity>
+            </Pressable>
 
             <Text className="text-base font-bold text-slate-800 tracking-tight">
               tháng {viewingMonth + 1} năm {viewingYear}
             </Text>
 
-            <TouchableOpacity
+            <Pressable
               onPress={handleNextMonth}
               hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
               className="w-9 h-9 rounded-full items-center justify-center active:opacity-60"
             >
               <ChevronRight color="#94A3B8" size={22} strokeWidth={2.2} />
-            </TouchableOpacity>
+            </Pressable>
           </View>
 
           {/* Weekday Labels Row: T.2 -> CN (Sunday in Red) */}
@@ -208,13 +207,12 @@ export function WorkoutCalendarModal({
                   key={`${cell.dateStr}_${idx}`}
                   className="w-10 h-11 items-center justify-center my-0.5"
                 >
-                  <TouchableOpacity
-                    activeOpacity={0.7}
+                  <Pressable
                     onPress={() => {
                       onSelectDate(cell.date);
                       onClose();
                     }}
-                    className={`w-9 h-9 rounded-full items-center justify-center ${
+                    className={`w-9 h-9 rounded-full items-center justify-center active:opacity-70 ${
                       isSelected
                         ? 'bg-black shadow-xs'
                         : hasWorkout
@@ -237,7 +235,7 @@ export function WorkoutCalendarModal({
                     >
                       {cell.dayNum}
                     </Text>
-                  </TouchableOpacity>
+                  </Pressable>
                 </View>
               );
             })}

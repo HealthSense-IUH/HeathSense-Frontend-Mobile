@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, Pressable, ActivityIndicator } from 'react-native';
 import { Activity, ShieldCheck, HeartPulse, Calendar } from 'lucide-react-native';
 import { consultationApi } from '../../../../services/consultation.service';
 import type { HealthRecordItem, CareHistoryEpisodeResponse } from '@/types/consultation';

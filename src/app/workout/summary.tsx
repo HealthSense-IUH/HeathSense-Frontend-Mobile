@@ -3,7 +3,7 @@ import {
   View,
   Text,
   ScrollView,
-  TouchableOpacity,
+  Pressable,
   TextInput,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -91,7 +91,7 @@ export default function WorkoutSummaryScreen() {
         <View className="px-5 pt-3 pb-8 relative">
           {/* Header Action Row */}
           <View className="flex-row items-center justify-between mb-8">
-            <TouchableOpacity
+            <Pressable
               onPress={() => {
                 if (router.canGoBack()) {
                   router.back();
@@ -100,20 +100,21 @@ export default function WorkoutSummaryScreen() {
                 }
               }}
               className="w-10 h-10 rounded-full items-center justify-center active:opacity-70"
+              hitSlop={8}
             >
               <ArrowLeft color="#FFFFFF" size={24} />
-            </TouchableOpacity>
+            </Pressable>
 
             <View className="flex-row items-center gap-2">
-              <TouchableOpacity className="w-10 h-10 rounded-full items-center justify-center active:opacity-70">
+              <Pressable className="w-10 h-10 rounded-full items-center justify-center active:opacity-70" hitSlop={6}>
                 <Share2 color="#FFFFFF" size={20} />
-              </TouchableOpacity>
-              <TouchableOpacity className="w-10 h-10 rounded-full items-center justify-center active:opacity-70">
+              </Pressable>
+              <Pressable className="w-10 h-10 rounded-full items-center justify-center active:opacity-70" hitSlop={6}>
                 <Pencil color="#FFFFFF" size={20} />
-              </TouchableOpacity>
-              <TouchableOpacity className="w-10 h-10 rounded-full items-center justify-center active:opacity-70">
+              </Pressable>
+              <Pressable className="w-10 h-10 rounded-full items-center justify-center active:opacity-70" hitSlop={6}>
                 <MoreVertical color="#FFFFFF" size={20} />
-              </TouchableOpacity>
+              </Pressable>
             </View>
           </View>
 
@@ -206,10 +207,9 @@ export default function WorkoutSummaryScreen() {
           </View>
 
           {/* Ghi chú Card (Image 4 Specs - Interactive Editable Note) */}
-          <TouchableOpacity
-            activeOpacity={0.9}
+          <Pressable
             onPress={() => inputRef.current?.focus()}
-            className="flex-row items-start gap-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl p-4 mt-2 shadow-sm"
+            className="flex-row items-start gap-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl p-4 mt-2 shadow-sm active:opacity-90"
           >
             <View className="pt-0.5">
               <FileText color="#94A3B8" size={20} />
@@ -229,7 +229,7 @@ export default function WorkoutSummaryScreen() {
                 <Check color="#10B981" size={18} strokeWidth={2.5} />
               </View>
             )}
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </ScrollView>
       </View>
