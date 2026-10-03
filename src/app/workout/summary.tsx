@@ -22,7 +22,6 @@ import {
 } from '@/components/features/workout/SportSummaryHeaderGraphic';
 import { useWorkoutEngineStore } from '@/services/workout/workoutEngineStore';
 import { useWorkoutCatalogStore } from '@/services/workout/workoutCatalogStore';
-import { workoutApiService } from '@/services/workout/workoutApiService';
 
 export default function WorkoutSummaryScreen() {
   const router = useRouter();
@@ -52,8 +51,6 @@ export default function WorkoutSummaryScreen() {
     if (lastSession) {
       const updatedSession = { ...lastSession, note: text };
       saveSession(updatedSession);
-      // Background sync with backend database
-      workoutApiService.saveSession(updatedSession).catch(() => {});
     }
   };
 

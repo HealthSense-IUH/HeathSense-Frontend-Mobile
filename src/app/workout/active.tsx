@@ -23,7 +23,6 @@ import { SlideToUnlock } from '@/components/features/workout/SlideToUnlock';
 import { SportMapView } from '@/components/features/workout/SportMapView';
 import { useWorkoutEngineStore } from '@/services/workout/workoutEngineStore';
 import { locationTrackingService } from '@/services/workout/locationTrackingService';
-import { workoutApiService } from '@/services/workout/workoutApiService';
 
 export default function ActiveWorkoutScreen() {
   const router = useRouter();
@@ -147,11 +146,6 @@ export default function ActiveWorkoutScreen() {
   const handleFinish = async () => {
     const session = finishWorkout();
     if (session) {
-      // Async background sync with Backend
-      workoutApiService.saveSession(session).catch((err) => {
-        console.warn('Backend sync failed, session kept in MMKV:', err);
-      });
-
       // Navigate directly to summary screen (Image 4)
       router.replace({
         pathname: '/workout/summary' as any,

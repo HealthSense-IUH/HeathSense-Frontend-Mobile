@@ -6,7 +6,7 @@ import {
   Pressable,
   Modal,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { safeRouter } from '@/utils/safeNavigation';
 import {
   ArrowLeft,
@@ -47,17 +47,30 @@ interface ChartColumnItem {
 
 export default function WorkoutHistoryScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ tab?: TabView }>();
   const sessions = useWorkoutCatalogStore((state) => state.sessions);
   const syncSessionsWithBackend = useWorkoutCatalogStore(
     (state) => state.syncSessionsWithBackend
   );
 
-  const [activeTab, setActiveTab] = useState<TabView>('WEEKS');
+  const [activeTab, setActiveTab] = useState<TabView>(() => {
+    if (params.tab && ['DAYS', 'WEEKS', 'MONTHS'].includes(params.tab)) {
+      return params.tab as TabView;
+    }
+    return 'DAYS';
+  });
   const [selectedSportFilter, setSelectedSportFilter] = useState<string>('ALL');
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState<boolean>(false);
   const [anchorDate, setAnchorDate] = useState<Date>(new Date());
   const [selectedIndex, setSelectedIndex] = useState<number>(-1); // -1 = latest item
   const [isCalendarVisible, setIsCalendarVisible] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (params.tab && ['DAYS', 'WEEKS', 'MONTHS'].includes(params.tab) && params.tab !== activeTab) {
+      setActiveTab(params.tab as TabView);
+      setSelectedIndex(-1);
+    }
+  }, [params.tab]);
 
   useEffect(() => {
     void syncSessionsWithBackend();

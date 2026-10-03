@@ -47,7 +47,12 @@ export function WeeklyWorkoutCard() {
 
   return (
     <Pressable
-      onPress={() => safeRouter.navigate('/workout/history')}
+      onPress={() =>
+        safeRouter.navigate({
+          pathname: '/workout/history',
+          params: { tab: 'DAYS' },
+        } as any)
+      }
       className="mb-5 rounded-3xl bg-white border border-slate-200/80 p-5 shadow-sm active:opacity-90"
       style={{
         shadowColor: 'rgba(15, 23, 42, 0.05)',
