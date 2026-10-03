@@ -6,7 +6,9 @@ import {
   loginApi,
   logoutApi,
   registerApi,
+  updateProfileApi,
 } from './index';
+import { setOnAuthFailed } from '@/utils/axiosClient';
 import { LoginRequest, RegisterRequest, UserSession } from '@/types/authentication';
 
 type AuthState = {
@@ -89,20 +91,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         });
 
         // Background update profile info & sync timezone
-        import('./index').then(({ updateProfileApi }) => {
-          const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-          updateProfileApi({ timezone: tz })
-            .then((updatedUser) => {
-              if (updatedUser) {
-                set({ user: updatedUser });
-              }
-            })
-            .catch((err) => {
-              console.warn('[authStore] Failed to sync timezone:', err);
-              // Fallback to getProfileApi if update fails
-              getProfileApi().then(u => u && set({ user: u })).catch(() => {});
-            });
-        });
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        updateProfileApi({ timezone: tz })
+          .then((updatedUser) => {
+            if (updatedUser) {
+              set({ user: updatedUser });
+            }
+          })
+          .catch((err) => {
+            console.warn('[authStore] Failed to sync timezone:', err?.message || err);
+            // Fallback to getProfileApi if timezone update fails
+            getProfileApi().then((u) => u && set({ user: u })).catch(() => {});
+          });
       } else {
         set({
           user: null,
@@ -135,3 +135,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   clearError: () => set({ error: null }),
 }));
+
+// Cleanly clear store if token refresh permanently fails
+setOnAuthFailed(() => {
+  useAuthStore.getState().clearUser();
+});
