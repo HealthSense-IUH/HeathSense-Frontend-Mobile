@@ -746,7 +746,7 @@ export default function WorkoutHistoryScreen() {
 
         {/* WORKOUT SESSIONS LIST FOR SELECTED PERIOD (Images 4 & 5) */}
         {groupedSessions.length > 0 ? (
-          <View className="px-4">
+          <View key="workout-sessions-list" className="px-4">
             {groupedSessions.map((group) => {
               return (
                 <View key={group.dateKey} className="mb-4">
@@ -845,7 +845,7 @@ export default function WorkoutHistoryScreen() {
             })}
           </View>
         ) : (
-          <View className="mx-4 mb-6 p-6 rounded-3xl bg-white border border-slate-200/80 items-center justify-center shadow-xs">
+          <View key="workout-sessions-empty" className="mx-4 mb-6 p-6 rounded-3xl bg-white border border-slate-200/80 items-center justify-center shadow-xs">
             <View className="w-13 h-13 rounded-2xl bg-slate-100 items-center justify-center mb-3">
               <Dumbbell color="#94A3B8" size={26} />
             </View>
