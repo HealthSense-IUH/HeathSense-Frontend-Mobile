@@ -740,12 +740,11 @@ class HuyWatchBleService {
     const btPerm = await requestBluetoothPermissions();
 
     let foregroundServiceTypes: Array<AndroidForegroundServiceType> | undefined;
+    const sdk =
+      typeof Platform.Version === "string"
+        ? parseInt(Platform.Version, 10)
+        : (Platform.Version as number);
     try {
-      const sdk =
-        typeof Platform.Version === "string"
-          ? parseInt(Platform.Version, 10)
-          : (Platform.Version as number);
-
       if (btPerm.ok) {
         if (sdk >= 34) {
           const hasConnected = await PermissionsAndroid.check(
@@ -761,6 +760,10 @@ class HuyWatchBleService {
     } catch (err) {
       console.warn("Error checking connected device permission:", err);
     }
+
+    // Android 14+: service connectedDevice cần quyền Bluetooth; thiếu quyền mà vẫn bật thì hệ điều hành đánh sập app.
+    // Khi đó chỉ hiện thông báo thường (không chạy nền) thay vì foreground service.
+    const runAsForegroundService = sdk < 34 || foregroundServiceTypes !== undefined;
 
     const channelId = await this.createForegroundChannel();
     const hasHealthData =
@@ -781,7 +784,7 @@ class HuyWatchBleService {
           : `Đang theo dõi dữ liệu từ thiết bị ${deviceId}`),
       android: {
         channelId,
-        asForegroundService: true,
+        asForegroundService: runAsForegroundService,
         ...(foregroundServiceTypes ? { foregroundServiceTypes } : {}),
         color: "#7ee0d4",
         ongoing: true,

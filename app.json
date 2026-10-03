@@ -53,7 +53,8 @@
         {
           "neverForLocation": true
         }
-      ]
+      ],
+      "./plugins/withNotifeeConnectedDeviceService"
     ],
     "experiments": {
       "typedRoutes": true
