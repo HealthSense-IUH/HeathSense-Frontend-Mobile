@@ -31,29 +31,20 @@ export default function RootLayout() {
             >
               <Stack.Screen name="(tabs)" />
               <Stack.Screen name="(public)" />
-              <Stack.Screen name="history" getId={() => 'history'} />
-              <Stack.Screen
-                name="history-records"
-                getId={({ params }) => `history-records-${(params as any)?.date || 'default'}`}
-              />
-              <Stack.Screen name="afib-analysis-details" getId={() => 'afib-analysis-details'} />
-              <Stack.Screen name="afib-measure" getId={() => 'afib-measure'} />
-              <Stack.Screen name="consultation/create-request" getId={() => 'consultation-create-request'} />
-              <Stack.Screen
-                name="consultation/chat/[sessionId]"
-                getId={({ params }) => `consultation-chat-${(params as any)?.sessionId || 'default'}`}
-              />
-              <Stack.Screen name="workout/index" getId={() => 'workout-index'} />
-              <Stack.Screen name="workout/catalog" getId={() => 'workout-catalog'} />
-              <Stack.Screen name="workout/history" getId={() => 'workout-history'} />
-              <Stack.Screen name="workout/select" getId={() => 'workout-select'} />
-              <Stack.Screen name="workout/create-routine" getId={() => 'workout-create-routine'} />
-              <Stack.Screen
-                name="workout/pre-workout"
-                getId={({ params }) => `workout-pre-${(params as any)?.id || 'default'}`}
-              />
-              <Stack.Screen name="workout/active" getId={() => 'workout-active'} />
-              <Stack.Screen name="workout/summary" getId={() => 'workout-summary'} />
+              <Stack.Screen name="history" dangerouslySingular={true} />
+              <Stack.Screen name="history-records" dangerouslySingular={true} />
+              <Stack.Screen name="afib-analysis-details" dangerouslySingular={true} />
+              <Stack.Screen name="afib-measure" dangerouslySingular={true} />
+              <Stack.Screen name="consultation/create-request" dangerouslySingular={true} />
+              <Stack.Screen name="consultation/chat/[sessionId]" dangerouslySingular={true} />
+              <Stack.Screen name="workout/index" dangerouslySingular={true} />
+              <Stack.Screen name="workout/catalog" dangerouslySingular={true} />
+              <Stack.Screen name="workout/history" dangerouslySingular={true} />
+              <Stack.Screen name="workout/select" dangerouslySingular={true} />
+              <Stack.Screen name="workout/create-routine" dangerouslySingular={true} />
+              <Stack.Screen name="workout/pre-workout" dangerouslySingular={true} />
+              <Stack.Screen name="workout/active" dangerouslySingular={true} />
+              <Stack.Screen name="workout/summary" dangerouslySingular={true} />
             </Stack>
           </View>
         </BLEProvider>
