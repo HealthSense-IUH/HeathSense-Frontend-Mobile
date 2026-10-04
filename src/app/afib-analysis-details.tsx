@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, ActivityIndicator, Pressable, ScrollView, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
 import { safeRouter } from '@/utils/safeNavigation';
 import { ChevronLeft, Settings, Info, Plus } from 'lucide-react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -22,7 +21,6 @@ const STAT_COLORS = {
 };
 
 export default function AFibAnalysisDetailsScreen() {
-  const router = useRouter();
   const insets = useSafeAreaInsets();
   const [activeFilter, setActiveFilter] = useState<FilterType>('Ngày');
   const [referenceDate, setReferenceDate] = useState(new Date());

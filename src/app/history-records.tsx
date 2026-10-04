@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, Pressable, ScrollView, ActivityIndicator, Alert } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { safeRouter } from '@/utils/safeNavigation';
 import { ArrowLeft, Clock, Activity, ShieldAlert, AlertCircle, Heart, ChevronRight, SlidersHorizontal } from 'lucide-react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -44,7 +44,6 @@ const formatTime = (isoString: string) => {
 };
 
 export default function HistoryRecordsScreen() {
-  const router = useRouter();
   const insets = useSafeAreaInsets();
   const { date } = useLocalSearchParams<{ date: string }>();
 
@@ -119,7 +118,7 @@ export default function HistoryRecordsScreen() {
               <Pressable
                 key={record.id}
                 onPress={() => handleRecordPress(record)}
-                className="bg-white rounded-[22px] p-5 border border-slate-100/80 active:opacity-80 transition-all mb-3.5"
+                className="bg-white rounded-[22px] p-5 border border-slate-100/80 active:opacity-80 mb-3.5"
                 style={{
                   shadowColor: 'rgba(9, 30, 66, 0.05)',
                   shadowOffset: { width: 0, height: 4 },

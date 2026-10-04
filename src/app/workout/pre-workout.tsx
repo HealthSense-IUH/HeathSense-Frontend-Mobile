@@ -6,7 +6,7 @@ import {
   Pressable,
   Switch,
 } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { safeRouter } from '@/utils/safeNavigation';
 import {
   ArrowLeft,
@@ -26,7 +26,6 @@ import { WorkoutTargetType } from '@/services/workout/workoutTypes';
 import { THEME } from '@/constants/theme';
 
 export default function PreWorkoutScreen() {
-  const router = useRouter();
   const { exerciseId } = useLocalSearchParams<{ exerciseId: string }>();
 
   const exercises = useWorkoutCatalogStore((state) => state.exercises);

@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text, ScrollView, Pressable } from 'react-native';
-import { useRouter } from 'expo-router';
 import { safeRouter } from '@/utils/safeNavigation';
 import {
   ArrowLeft,
@@ -17,7 +16,6 @@ import { useWorkoutCatalogStore } from '@/services/workout/workoutCatalogStore';
 import { THEME } from '@/constants/theme';
 
 export default function WorkoutHubScreen() {
-  const router = useRouter();
   const getTodayStats = useWorkoutCatalogStore((state) => state.getTodayStats);
   const getWeeklyStats = useWorkoutCatalogStore((state) => state.getWeeklyStats);
 
@@ -105,12 +103,14 @@ export default function WorkoutHubScreen() {
             {/* 7-Day Bar Chart Representation */}
             <View className="flex-row items-end gap-2 pb-1">
               {dailyDist.map((item, index) => {
-                const dayNum = index + 18;
-                const isToday = index === 2 || dayNum === currentDateNum;
+                const dayNum = item.dateStr
+                  ? parseInt(item.dateStr.split('-')[2], 10)
+                  : index + 18;
+                const isToday = dayNum === currentDateNum || index === 2;
                 const barHeight = isToday ? 42 : Math.max(14, (item.durationSeconds / 60) * 1.5 + (index % 3) * 8 + 12);
 
                 return (
-                  <View key={index} className="items-center">
+                  <View key={item.dateStr || index} className="items-center">
                     {/* Vertical Bar */}
                     <View
                       className={`w-3.5 rounded-full ${

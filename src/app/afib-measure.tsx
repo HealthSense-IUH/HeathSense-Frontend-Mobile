@@ -9,7 +9,6 @@ import {
   Easing,
   StyleSheet,
 } from 'react-native';
-import { useRouter } from 'expo-router';
 import { safeRouter } from '@/utils/safeNavigation';
 import {
   ArrowLeft,
@@ -32,7 +31,6 @@ import {
 } from '@/services/workout';
 
 export default function AFibMeasureScreen() {
-  const router = useRouter();
   const { sendCommand, stopExportAndUploadPpgRecording } = useBLE();
   const store = useBleStore();
 

@@ -24,7 +24,7 @@ import { THEME } from '@/constants/theme';
 // Modular Feature Components
 import { StepHeroCard } from '@/components/features/workout/steps/StepHeroCard';
 import { StepHourlyCard } from '@/components/features/workout/steps/StepHourlyCard';
-import { Step7DaysCard, DayStepItem } from '@/components/features/workout/steps/Step7DaysCard';
+import { Step7DaysCard } from '@/components/features/workout/steps/Step7DaysCard';
 import { StepComparisonCard } from '@/components/features/workout/steps/StepComparisonCard';
 import { StepDetailCard } from '@/components/features/workout/steps/StepDetailCard';
 import { StepRelatedDataGrid } from '@/components/features/workout/steps/StepRelatedDataGrid';

@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, RefreshControl } from 'react-native';
-import { router } from 'expo-router';
 import { safeRouter } from '@/utils/safeNavigation';
 import { PlusCircle, AlertCircle, CheckCircle, X } from 'lucide-react-native';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
 import { Box } from '@/components/ui/box';
-import { HStack } from '@/components/ui/hstack';
 import { useConsultationsLogic } from '@/hooks/useConsultationsLogic';
 import { ConsultationRequestsList } from '@/components/features/consultation/ConsultationRequestsList';
 import { ConsultationSessionsList } from '@/components/features/consultation/ConsultationSessionsList';

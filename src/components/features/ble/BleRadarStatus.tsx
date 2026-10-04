@@ -3,7 +3,6 @@ import { View, Text, ActivityIndicator, Pressable, Animated, Easing } from 'reac
 import { Settings } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StitchBleWaveIcon } from '@/components/ui/icons/StitchIcons';
-import { useRouter } from 'expo-router';
 import { safeRouter } from '@/utils/safeNavigation';
 import { THEME } from '@/constants/theme';
 
@@ -16,8 +15,6 @@ export const BleRadarStatus: React.FC<BleRadarStatusProps> = ({
   isScanning,
   scanStatusMessage,
 }) => {
-  const router = useRouter();
-
   // Standard React Native / React 19 Animated state (persistent across renders without ref access)
   const [pulse1] = useState(() => new Animated.Value(0));
   const [pulse2] = useState(() => new Animated.Value(0));

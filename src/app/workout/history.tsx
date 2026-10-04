@@ -6,7 +6,7 @@ import {
   Pressable,
   Modal,
 } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { safeRouter } from '@/utils/safeNavigation';
 import {
   ArrowLeft,
@@ -48,7 +48,6 @@ interface ChartColumnItem {
 }
 
 export default function WorkoutHistoryScreen() {
-  const router = useRouter();
   const params = useLocalSearchParams<{ tab?: TabView }>();
   const sessions = useWorkoutCatalogStore((state) => state.sessions);
   const syncSessionsWithBackend = useWorkoutCatalogStore(
@@ -61,18 +60,20 @@ export default function WorkoutHistoryScreen() {
     }
     return 'DAYS';
   });
+  const [prevTabParam, setPrevTabParam] = useState(params.tab);
   const [selectedSportFilter, setSelectedSportFilter] = useState<string>('ALL');
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState<boolean>(false);
   const [anchorDate, setAnchorDate] = useState<Date>(new Date());
   const [selectedIndex, setSelectedIndex] = useState<number>(-1); // -1 = latest item
   const [isCalendarVisible, setIsCalendarVisible] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (params.tab && ['DAYS', 'WEEKS', 'MONTHS'].includes(params.tab) && params.tab !== activeTab) {
+  if (params.tab !== prevTabParam) {
+    setPrevTabParam(params.tab);
+    if (params.tab && ['DAYS', 'WEEKS', 'MONTHS'].includes(params.tab)) {
       setActiveTab(params.tab as TabView);
       setSelectedIndex(-1);
     }
-  }, [params.tab]);
+  }
 
 
   // When tab changes, reset selected index to latest
@@ -229,9 +230,8 @@ export default function WorkoutHistoryScreen() {
         59
       );
 
-      const rangeLabel = `Tháng ${startMonthDate.getMonth() + 1} - Tháng ${
-        endMonthDate.getMonth() + 1
-      } năm ${endMonthDate.getFullYear()}`;
+      const rangeLabel = `Tháng ${startMonthDate.getMonth() + 1} - Tháng ${endMonthDate.getMonth() + 1
+        } năm ${endMonthDate.getFullYear()}`;
 
       const cols: ChartColumnItem[] = Array.from({ length: 6 }, (_, i) => {
         const mStart = new Date(
@@ -500,16 +500,14 @@ export default function WorkoutHistoryScreen() {
           <View className="flex-row items-center justify-between">
             <Pressable
               onPress={() => handleTabChange('DAYS')}
-              className={`px-5 py-2 rounded-full items-center justify-center ${
-                activeTab === 'DAYS' ? 'bg-[#E5E7EB]' : 'bg-transparent'
-              }`}
+              className={`px-5 py-2 rounded-full items-center justify-center ${activeTab === 'DAYS' ? 'bg-[#E5E7EB]' : 'bg-transparent'
+                }`}
             >
               <Text
-                className={`text-sm ${
-                  activeTab === 'DAYS'
+                className={`text-sm ${activeTab === 'DAYS'
                     ? 'font-bold text-slate-900'
                     : 'font-medium text-slate-500'
-                }`}
+                  }`}
               >
                 Số ngày
               </Text>
@@ -517,16 +515,14 @@ export default function WorkoutHistoryScreen() {
 
             <Pressable
               onPress={() => handleTabChange('WEEKS')}
-              className={`px-5 py-2 rounded-full items-center justify-center ${
-                activeTab === 'WEEKS' ? 'bg-[#E5E7EB]' : 'bg-transparent'
-              }`}
+              className={`px-5 py-2 rounded-full items-center justify-center ${activeTab === 'WEEKS' ? 'bg-[#E5E7EB]' : 'bg-transparent'
+                }`}
             >
               <Text
-                className={`text-sm ${
-                  activeTab === 'WEEKS'
+                className={`text-sm ${activeTab === 'WEEKS'
                     ? 'font-bold text-slate-900'
                     : 'font-medium text-slate-500'
-                }`}
+                  }`}
               >
                 Tuần
               </Text>
@@ -534,16 +530,14 @@ export default function WorkoutHistoryScreen() {
 
             <Pressable
               onPress={() => handleTabChange('MONTHS')}
-              className={`px-5 py-2 rounded-full items-center justify-center ${
-                activeTab === 'MONTHS' ? 'bg-[#E5E7EB]' : 'bg-transparent'
-              }`}
+              className={`px-5 py-2 rounded-full items-center justify-center ${activeTab === 'MONTHS' ? 'bg-[#E5E7EB]' : 'bg-transparent'
+                }`}
             >
               <Text
-                className={`text-sm ${
-                  activeTab === 'MONTHS'
+                className={`text-sm ${activeTab === 'MONTHS'
                     ? 'font-bold text-slate-900'
                     : 'font-medium text-slate-500'
-                }`}
+                  }`}
               >
                 Tháng
               </Text>
@@ -586,9 +580,8 @@ export default function WorkoutHistoryScreen() {
                 onPress={() => handleShiftPeriod(1)}
                 disabled={!canGoNext}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                className={`w-7 h-7 rounded-full bg-slate-100 items-center justify-center active:opacity-70 ${
-                  !canGoNext ? 'opacity-35' : ''
-                }`}
+                className={`w-7 h-7 rounded-full bg-slate-100 items-center justify-center active:opacity-70 ${!canGoNext ? 'opacity-35' : ''
+                  }`}
               >
                 <ChevronRight color="#475569" size={15} strokeWidth={2.2} />
               </Pressable>
@@ -664,15 +657,15 @@ export default function WorkoutHistoryScreen() {
                 {isDistanceSport
                   ? maxDistanceAcrossColumns.toFixed(2).replace('.', ',')
                   : maxDurationAcrossColumns > 0
-                  ? formatChartAxisDuration(maxDurationAcrossColumns)
-                  : '00:00'}
+                    ? formatChartAxisDuration(maxDurationAcrossColumns)
+                    : '00:00'}
               </Text>
               <Text className="text-[10px] text-slate-400 font-medium mt-3.5">
                 {isDistanceSport
                   ? (maxDistanceAcrossColumns / 2).toFixed(2).replace('.', ',')
                   : maxDurationAcrossColumns > 0
-                  ? formatChartAxisDuration(Math.round(maxDurationAcrossColumns / 2))
-                  : '00:00'}
+                    ? formatChartAxisDuration(Math.round(maxDurationAcrossColumns / 2))
+                    : '00:00'}
               </Text>
             </View>
 
@@ -683,12 +676,12 @@ export default function WorkoutHistoryScreen() {
                 const hasAct = item.durationSeconds > 0;
                 const barHeight = hasAct
                   ? Math.max(
-                      18,
-                      Math.min(
-                        52,
-                        Math.round((item.durationSeconds / Math.max(1, maxDurationAcrossColumns)) * 48) + 10
-                      )
+                    18,
+                    Math.min(
+                      52,
+                      Math.round((item.durationSeconds / Math.max(1, maxDurationAcrossColumns)) * 48) + 10
                     )
+                  )
                   : 0;
 
                 return (
@@ -717,13 +710,12 @@ export default function WorkoutHistoryScreen() {
 
                     {/* Column Label / Day or Week Number */}
                     <Text
-                      className={`text-[11px] mt-2 ${
-                        isSelected
+                      className={`text-[11px] mt-2 ${isSelected
                           ? 'text-slate-900 font-extrabold'
                           : item.durationSeconds > 0
-                          ? 'text-slate-700 font-bold'
-                          : 'text-slate-400 font-medium'
-                      }`}
+                            ? 'text-slate-700 font-bold'
+                            : 'text-slate-400 font-medium'
+                        }`}
                     >
                       {item.label}
                     </Text>
@@ -952,11 +944,10 @@ export default function WorkoutHistoryScreen() {
                   className="flex-row items-center justify-between px-5 py-3 rounded-2xl active:bg-slate-100"
                 >
                   <Text
-                    className={`text-[15px] ${
-                      isSelected
+                    className={`text-[15px] ${isSelected
                         ? 'font-bold text-[#00C8FF]'
                         : 'font-semibold text-slate-800'
-                    }`}
+                      }`}
                   >
                     {opt.name}
                   </Text>

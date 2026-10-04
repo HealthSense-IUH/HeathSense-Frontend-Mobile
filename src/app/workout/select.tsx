@@ -6,7 +6,7 @@ import {
   Pressable,
   TextInput,
 } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { safeRouter } from '@/utils/safeNavigation';
 import { ArrowLeft, Search, X, Plus } from 'lucide-react-native';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
@@ -20,8 +20,19 @@ import {
 } from '@/services/workout/workoutTypes';
 import { THEME } from '@/constants/theme';
 
+const CATEGORIES: (ExerciseCategory | 'ALL')[] = [
+  'ALL',
+  'GENERAL',
+  'AEROBIC',
+  'FREE_WEIGHT',
+  'MACHINE_WEIGHT',
+  'WILDERNESS',
+  'WATER',
+  'WINTER',
+  'BALL',
+];
+
 export default function SelectExerciseScreen() {
-  const router = useRouter();
   const params = useLocalSearchParams<{ mode?: string }>();
   const isRoutinePicker = params.mode === 'routine';
 
@@ -31,17 +42,7 @@ export default function SelectExerciseScreen() {
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
 
-  const categories: (ExerciseCategory | 'ALL')[] = [
-    'ALL',
-    'GENERAL',
-    'AEROBIC',
-    'FREE_WEIGHT',
-    'MACHINE_WEIGHT',
-    'WILDERNESS',
-    'WATER',
-    'WINTER',
-    'BALL',
-  ];
+  const categories = CATEGORIES;
 
   const filteredExercises = exercises.filter((ex) => {
     const matchesCategory = selectedCategory === 'ALL' || ex.category === selectedCategory;

@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, Pressable, ScrollView, ActivityIndicator, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
 import { safeRouter } from '@/utils/safeNavigation';
 import { ArrowLeft, ChevronDown, ChevronRight, Calendar, Settings, Info } from 'lucide-react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -51,7 +50,6 @@ const getSubtitle = (year: string, month: string, day: string) => {
 };
 
 export default function HistoryScreen() {
-  const router = useRouter();
   const insets = useSafeAreaInsets();
   const { data: dates, isLoading, error } = useAvailableHistoryDates('Asia/Ho_Chi_Minh');
 

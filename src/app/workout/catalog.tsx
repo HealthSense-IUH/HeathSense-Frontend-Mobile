@@ -6,7 +6,6 @@ import {
   Pressable,
   Modal,
 } from 'react-native';
-import { useRouter } from 'expo-router';
 import { safeRouter } from '@/utils/safeNavigation';
 import {
   ArrowLeft,
@@ -25,8 +24,6 @@ import { Exercise } from '@/services/workout/workoutTypes';
 import { THEME } from '@/constants/theme';
 
 export default function WorkoutCatalogScreen() {
-  const router = useRouter();
-
   const exercises = useWorkoutCatalogStore((state) => state.exercises);
   const favoriteIds = useWorkoutCatalogStore((state) => state.favoriteIds);
   const toggleFavorite = useWorkoutCatalogStore((state) => state.toggleFavorite);

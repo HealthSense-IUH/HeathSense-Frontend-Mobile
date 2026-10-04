@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text, Pressable, ScrollView } from 'react-native';
-import { useRouter } from 'expo-router';
 import { safeRouter } from '@/utils/safeNavigation';
 import { Bluetooth, HeartPulse } from 'lucide-react-native';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
@@ -8,8 +7,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { THEME } from '@/constants/theme';
 
 export default function SmartHealthScreen() {
-  const router = useRouter();
-
   return (
     <ScreenWrapper
       title="Phân tích nhịp tim"

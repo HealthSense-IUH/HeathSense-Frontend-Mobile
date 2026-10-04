@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text, Pressable } from 'react-native';
-import { useRouter } from 'expo-router';
 import { safeRouter } from '@/utils/safeNavigation';
 import {
   ListOrdered,
@@ -110,7 +109,6 @@ export const getExerciseIconComponent = (iconNameOrId?: string) => {
 export { getExerciseCircleColor };
 
 export const FavoriteWorkoutSection: React.FC = () => {
-  const router = useRouter();
   const exercises = useWorkoutCatalogStore((state) => state.exercises);
   const favoriteIds = useWorkoutCatalogStore((state) => state.favoriteIds);
 

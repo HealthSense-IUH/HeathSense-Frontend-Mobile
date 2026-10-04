@@ -1,5 +1,4 @@
 import { View, Text, Pressable } from 'react-native';
-import { useRouter } from 'expo-router';
 import { safeRouter } from '@/utils/safeNavigation';
 import { Bluetooth, Activity, Flame, Footprints, Heart, Battery, Settings, Dumbbell, ChevronRight } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -13,7 +12,6 @@ import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
 import { THEME } from '@/constants/theme';
 
 export default function HomeScreen() {
-  const router = useRouter();
   const currentBPM = useBleStore(state => state.currentBPM);
   const currentSpO2 = useBleStore(state => state.currentSpO2);
   const connectedDevice = useBleStore(state => state.connectedDeviceId);

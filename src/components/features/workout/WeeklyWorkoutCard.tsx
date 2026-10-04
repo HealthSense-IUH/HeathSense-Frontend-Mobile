@@ -1,11 +1,9 @@
 import React, { useEffect } from 'react';
 import { View, Text, Pressable } from 'react-native';
-import { useRouter } from 'expo-router';
 import { safeRouter } from '@/utils/safeNavigation';
 import { useWorkoutCatalogStore } from '@/services/workout/workoutCatalogStore';
 
 export function WeeklyWorkoutCard() {
-  const router = useRouter();
   const getWeeklyStats = useWorkoutCatalogStore((state) => state.getWeeklyStats);
   const syncSessionsWithBackend = useWorkoutCatalogStore(
     (state) => state.syncSessionsWithBackend
