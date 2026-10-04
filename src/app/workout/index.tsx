@@ -22,9 +22,11 @@ export default function WorkoutHubScreen() {
   const todayStats = getTodayStats();
   const weeklyStats = getWeeklyStats();
 
-  // 7-day distribution data from store
+  // Thời lượng tập 7 ngày trong tuần (dữ liệu thật từ store); cột cao theo tỉ lệ với ngày tập nhiều nhất
   const dailyDist = weeklyStats.dailyDistribution || [];
-  const currentDateNum = new Date().getDate();
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const maxDuration = Math.max(0, ...dailyDist.map((item) => item.durationSeconds));
 
   return (
     <ScreenWrapper
@@ -95,13 +97,13 @@ export default function WorkoutHubScreen() {
 
             {/* 7-Day Bar Chart Representation */}
             <View className="flex-row items-end gap-2 pb-1">
-              {dailyDist.map((item, index) => {
-                const dayNum = index + 18;
-                const isToday = index === 2 || dayNum === currentDateNum;
-                const barHeight = isToday ? 42 : Math.max(14, (item.durationSeconds / 60) * 1.5 + (index % 3) * 8 + 12);
+              {dailyDist.map((item) => {
+                const dayNum = Number(item.dateStr.slice(8, 10));
+                const isToday = item.dateStr === todayStr;
+                const barHeight = maxDuration > 0 ? 6 + (item.durationSeconds / maxDuration) * 36 : 6;
 
                 return (
-                  <View key={index} className="items-center">
+                  <View key={item.dateStr} className="items-center">
                     {/* Vertical Bar */}
                     <View
                       className={`w-3.5 rounded-full ${

@@ -17,6 +17,7 @@ import {
   ShieldAlert,
   Heart,
   AlertTriangle,
+  ChevronRight,
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path, Circle } from 'react-native-svg';
@@ -25,6 +26,7 @@ import { useBLE } from '@/context/BLEContext';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
 import { StitchHeartEcgIcon } from '@/components/ui/icons/StitchIcons';
 import { THEME } from '@/constants/theme';
+import { getPredictionMeta } from '@/constants/healthRecords';
 import {
   getAFibScreeningAvailability,
   useWorkoutEngineStore,
@@ -65,6 +67,7 @@ export default function AFibMeasureScreen() {
   const isRecording = store.isRecordingPpg;
   const isAnalyzing = store.isAnalyzing;
   const result = store.aiAnalysisResult;
+  const resultMeta = getPredictionMeta(result?.predictionLabel, result?.status);
   const error = store.recordingError;
   const startedAt = store.recordingStartedAt;
   const isConnected = Boolean(store.connectedDeviceId);
@@ -337,38 +340,35 @@ export default function AFibMeasureScreen() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 borderWidth: 4,
-                borderColor:
-                  result.predictionLabel === 'NORMAL' ? '#10B981' : '#F43F5E',
-                backgroundColor:
-                  result.predictionLabel === 'NORMAL' ? '#ECFDF5' : '#FFF1F2',
-                shadowColor:
-                  result.predictionLabel === 'NORMAL'
-                    ? 'rgba(16, 185, 129, 0.25)'
-                    : 'rgba(244, 63, 94, 0.25)',
+                borderColor: resultMeta.dot,
+                backgroundColor: resultMeta.bg,
+                shadowColor: resultMeta.dot,
                 shadowOffset: { width: 0, height: 10 },
-                shadowOpacity: 1,
+                shadowOpacity: 0.25,
                 shadowRadius: 24,
                 elevation: 6,
               }}
             >
-              {result.predictionLabel === 'NORMAL' ? (
-                <Heart color="#10B981" size={54} />
+              {resultMeta.isRisk ? (
+                <ShieldAlert color={resultMeta.dot} size={54} />
               ) : (
-                <ShieldAlert color="#F43F5E" size={54} />
+                <Heart color={resultMeta.dot} size={54} />
               )}
-              <Text
-                className={`text-lg font-bold mt-2 ${result.predictionLabel === 'NORMAL'
-                  ? 'text-emerald-700'
-                  : 'text-rose-700'
-                  }`}
-              >
-                {result.predictionLabel === 'NORMAL'
-                  ? 'Bình thường'
-                  : 'Rung nhĩ (AFib)'}
+              <Text className="text-lg font-bold mt-2" style={{ color: resultMeta.text }}>
+                {resultMeta.label}
               </Text>
               <Text className="text-xs text-slate-500 font-medium mt-0.5">
-                Khả năng bị rung nhĩ: {Math.round((result.confidence ?? 0) * 100)}%
+                Khả năng bị rung nhĩ: {((result.confidence ?? 0) * 100).toFixed(1)}%
               </Text>
+              <Pressable
+                onPress={() => router.push(`/health-record/${result.id}` as any)}
+                hitSlop={8}
+                className="mt-1.5 flex-row items-center active:opacity-70"
+                style={{ gap: 2 }}
+              >
+                <Text className="text-xs font-semibold text-[#0D6EFD]">Xem chi tiết</Text>
+                <ChevronRight color="#0D6EFD" size={14} strokeWidth={2.2} />
+              </Pressable>
             </View>
           ) : (
             /* Ready / Idle State with Rotating Dashed Ring (Stitch Specs) */

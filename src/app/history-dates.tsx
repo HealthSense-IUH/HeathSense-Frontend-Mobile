@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, Pressable, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, Pressable, ScrollView, ActivityIndicator, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, ChevronDown, ChevronRight, Calendar, Settings, Info } from 'lucide-react-native';
+import { ArrowLeft, ChevronDown, ChevronRight, Calendar, Info } from 'lucide-react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useAvailableHistoryDates } from '@/hooks/useHealthHistory';
@@ -46,13 +46,13 @@ const getSubtitle = (year: string, month: string, day: string) => {
   if (year === y && paddedMonth === m && paddedDay === d) {
     return 'Hôm nay • Bản ghi gần nhất';
   }
-  return 'Chỉ số ổn định';
+  return 'Bản ghi đã lưu';
 };
 
 export default function HistoryScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { data: dates, isLoading, error } = useAvailableHistoryDates('Asia/Ho_Chi_Minh');
+  const { data: dates, isLoading, isFetching, error, refetch } = useAvailableHistoryDates();
 
   // State to manage manual expanded overrides for years and months
   const [expandedYears, setExpandedYears] = useState<Record<string, boolean>>({});
@@ -78,14 +78,6 @@ export default function HistoryScreen() {
       const current = prev[yearMonth] !== undefined ? prev[yearMonth] : isDefaultExpanded;
       return { ...prev, [yearMonth]: !current };
     });
-  };
-
-  const handleSettingsPress = () => {
-    Alert.alert(
-      'Tùy chọn lịch sử',
-      'Dữ liệu lịch sử đo được đồng bộ tự động từ thiết bị và lưu trữ theo mốc thời gian.',
-      [{ text: 'Đóng', style: 'cancel' }]
-    );
   };
 
   const renderContent = () => {
@@ -128,13 +120,7 @@ export default function HistoryScreen() {
             <View
               key={year}
               className="bg-white rounded-3xl border border-slate-200/70 p-5 mb-4"
-              style={{
-                shadowColor: 'rgba(13, 110, 253, 0.04)',
-                shadowOffset: { width: 0, height: 10 },
-                shadowOpacity: 1,
-                shadowRadius: 30,
-                elevation: 2,
-              }}
+              style={{ boxShadow: '0 10px 30px rgba(13, 110, 253, 0.04)' }}
             >
               {/* Year Header Selector */}
               <Pressable
@@ -231,7 +217,7 @@ export default function HistoryScreen() {
             <Info color="#0D6EFD" size={18} strokeWidth={2.2} />
           </View>
           <Text className="flex-1 text-xs font-medium text-slate-600 leading-relaxed">
-            Chọn một ngày để xem chi tiết các kết quả đo và điện tâm đồ.
+            Chọn một ngày để xem các lần đo trong ngày đó.
           </Text>
         </View>
         {/* END: Notice Banner Card */}
@@ -249,37 +235,15 @@ export default function HistoryScreen() {
             <Pressable
               onPress={() => router.back()}
               className="w-11 h-11 rounded-full bg-white border border-slate-100 items-center justify-center active:opacity-80"
-              style={{
-                shadowColor: 'rgba(15, 23, 42, 0.05)',
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 1,
-                shadowRadius: 20,
-                elevation: 2,
-              }}
+              style={{ boxShadow: '0 4px 20px rgba(15, 23, 42, 0.05)' }}
               aria-label="Quay lại"
             >
               <ArrowLeft color="#334155" size={20} strokeWidth={2.2} />
             </Pressable>
             <Text className="text-2xl font-bold tracking-tight text-slate-900">
-              Lịch sử đo
+              Lịch đo theo ngày
             </Text>
           </View>
-
-          {/* Quick Action / Settings Button */}
-          <Pressable
-            onPress={handleSettingsPress}
-            className="w-10 h-10 rounded-full bg-white border border-slate-100 items-center justify-center active:opacity-80"
-            style={{
-              shadowColor: 'rgba(15, 23, 42, 0.05)',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 1,
-              shadowRadius: 20,
-              elevation: 2,
-            }}
-            aria-label="Tùy chọn"
-          >
-            <Settings color="#64748B" size={18} strokeWidth={2} />
-          </Pressable>
         </View>
         {/* END: TopNavigationBar */}
 
@@ -288,6 +252,7 @@ export default function HistoryScreen() {
           className="flex-1 px-5 pt-2"
           contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 32) }}
           showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={isFetching && !isLoading} onRefresh={() => refetch()} tintColor="#0D6EFD" />}
         >
           {renderContent()}
         </ScrollView>

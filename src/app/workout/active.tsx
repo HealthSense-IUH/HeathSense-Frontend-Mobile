@@ -23,7 +23,6 @@ import { SlideToUnlock } from '@/components/features/workout/SlideToUnlock';
 import { SportMapView } from '@/components/features/workout/SportMapView';
 import { useWorkoutEngineStore } from '@/services/workout/workoutEngineStore';
 import { locationTrackingService } from '@/services/workout/locationTrackingService';
-import { workoutApiService } from '@/services/workout/workoutApiService';
 
 export default function ActiveWorkoutScreen() {
   const router = useRouter();
@@ -147,15 +146,12 @@ export default function ActiveWorkoutScreen() {
   const handleFinish = async () => {
     const session = finishWorkout();
     if (session) {
-      // Async background sync with Backend
-      workoutApiService.saveSession(session).catch((err) => {
-        console.warn('Backend sync failed, session kept in MMKV:', err);
-      });
-
+      // finishWorkout() đã lưu MMKV và đồng bộ lên server qua catalogStore.saveSession
       // Navigate directly to summary screen (Image 4)
       router.replace({
         pathname: '/workout/summary' as any,
         params: {
+          sessionId: session.id,
           exerciseId: session.exerciseId || exercise?.id || '',
           exerciseName: session.exerciseName,
           durationSeconds: String(session.durationSeconds),
@@ -183,7 +179,7 @@ export default function ActiveWorkoutScreen() {
           {/* Top Bar: Only sport name, no exit/action buttons while locked */}
           <View className="pt-2 pb-1 px-1">
             <Text className="text-white font-bold text-xl tracking-tight">
-              {exercise?.name || 'Cầu lông'}
+              {exercise?.name || 'Buổi tập'}
             </Text>
           </View>
 
@@ -298,7 +294,7 @@ export default function ActiveWorkoutScreen() {
     >
       <View className="flex-1 justify-between bg-[#F2F4F7] px-4 pb-6">
         {/* ========================================================================= */}
-        {/* TOP COMPACT BAR: < Cầu lông                [headphones] [music] [more]    */}
+        {/* TOP COMPACT BAR: < Tên bài tập             [headphones] [music] [more]    */}
         {/* ========================================================================= */}
         <View className="flex-row items-center justify-between pt-1 pb-1">
           <View className="flex-row items-center gap-2">
@@ -309,7 +305,7 @@ export default function ActiveWorkoutScreen() {
               <ArrowLeft color="#0F172A" size={24} strokeWidth={2.2} />
             </TouchableOpacity>
             <Text className="text-slate-900 font-bold text-xl tracking-tight">
-              {exercise?.name || 'Cầu lông'}
+              {exercise?.name || 'Buổi tập'}
             </Text>
           </View>
 

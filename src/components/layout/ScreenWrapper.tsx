@@ -183,7 +183,8 @@ export function ScreenWrapper({
         {scrollable ? (
           <Animated.ScrollView
             contentContainerStyle={[
-              { flexGrow: 1, paddingBottom: withBottomNav ? 120 : 60 },
+              // Thanh tab cao thêm insets.bottom (CustomTabBar) nên nội dung cũng chừa thêm phần đó
+              { flexGrow: 1, paddingBottom: withBottomNav ? 120 + insets.bottom : 60 },
               { paddingTop: stickyHeader ? (HEADER_BASE_HEIGHT + stickyHeaderHeight - insets.top) : (HEADER_BASE_HEIGHT - insets.top) },
               contentContainerStyle,
             ]}

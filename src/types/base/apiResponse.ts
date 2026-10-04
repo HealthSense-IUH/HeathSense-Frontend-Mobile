@@ -4,22 +4,6 @@ export interface ApiResponse<T> {
   data: T
 }
 
-export interface ErrorResponse {
-  code?: number
-  message?: string
-  data?: unknown
-}
-
-export interface Slice<T> {
-  content: T[]
-  last: boolean
-  number: number
-  size: number
-  numberOfElements: number
-  first: boolean
-  empty: boolean
-}
-
 export interface PageResponse<T> {
   content: T[]
   page: number
@@ -29,8 +13,3 @@ export interface PageResponse<T> {
   hasMore: boolean
 }
 
-export interface PaginationParams {
-  page: number
-  size: number
-  filter?: string | null
-}

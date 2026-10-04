@@ -134,4 +134,3 @@ export const THEME = {
   },
 } as const;
 
-export type ThemeType = typeof THEME;

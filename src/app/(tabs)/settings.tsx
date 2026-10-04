@@ -2,11 +2,12 @@ import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
 import { useRouter } from 'expo-router';
+import Constants from 'expo-constants';
 import { useAuthStore } from '@/services/authentication/authStore';
 import { useLogoutMutation } from '@/hooks/mutations/useAuthMutations';
 import { useBLE } from '@/context/BLEContext';
 import { LogoutButton } from '@/components/features/auth/LogoutButton';
-import { Activity, Battery, Info, Radio, Shield, Trash2, Watch } from 'lucide-react-native';
+import { Battery, ChevronRight, Info, Radio, Trash2, User as UserIcon, Watch } from 'lucide-react-native';
 import { THEME } from '@/constants/theme';
 
 export default function SettingsScreen() {
@@ -22,7 +23,8 @@ export default function SettingsScreen() {
 
   return (
     <ScreenWrapper 
-      title="Cài đặt" 
+      title="Cài đặt"
+      withBottomNav
       description="Quản lý tài khoản, kết nối"
     >
       <View className="px-5 mt-4">
@@ -39,7 +41,7 @@ export default function SettingsScreen() {
               </View>
               <View className="flex-1">
                 <Text className="text-sm font-bold text-foreground" numberOfLines={1}>
-                  {knownDevice ? knownDevice.name || 'HuyWatch Device' : 'Chưa ghép đôi thiết bị'}
+                  {knownDevice ? knownDevice.name || 'Thiết bị đeo' : 'Chưa ghép đôi thiết bị'}
                 </Text>
                 <Text className="text-xs text-muted-foreground mt-0.5" numberOfLines={1}>
                   {connectedDevice ? 'Trạng thái: Đã kết nối' : knownDevice ? 'Trạng thái: Chưa kết nối' : 'Nhấn nút bên dưới để quét'}
@@ -77,39 +79,30 @@ export default function SettingsScreen() {
           </View>
         </View>
 
-        {/* App Information Section */}
-        <View className="bg-card border border-border rounded-3xl p-5 shadow-sm space-y-4 mb-6">
-          <Text className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">
-            Thông tin hệ thống
-          </Text>
-
-          <View className="flex-row items-center py-2 border-b border-border/40">
+        {/* Tài khoản: hồ sơ cá nhân (giống mục Hồ sơ trên web) */}
+        <View className="bg-card border border-border rounded-3xl p-5 shadow-sm mb-6">
+          <Text className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">Tài khoản</Text>
+          <TouchableOpacity
+            onPress={() => router.push('/profile' as any)}
+            activeOpacity={0.8}
+            className="flex-row items-center py-2"
+          >
             <View className="w-9 h-9 bg-primary/10 rounded-xl items-center justify-center mr-3">
-              <Activity size={18} color={THEME.colors.primary} />
+              <UserIcon size={18} color={THEME.colors.primary} />
             </View>
             <View className="flex-1">
-              <Text className="text-sm font-semibold text-foreground">Ứng dụng HealthSense</Text>
-              <Text className="text-xs text-muted-foreground">Phiên bản 1.0.0 (Expo SDK 57)</Text>
+              <Text className="text-sm font-semibold text-foreground">Hồ sơ cá nhân</Text>
+              <Text className="text-xs text-muted-foreground">Thông tin liên hệ, định danh và bảo mật tài khoản</Text>
             </View>
-          </View>
-
-          <View className="flex-row items-center py-2 border-b border-border/40">
-            <View className="w-9 h-9 bg-secondary/60 rounded-xl items-center justify-center mr-3">
-              <Shield size={18} color={THEME.colors.primaryM3} />
-            </View>
-            <View className="flex-1">
-              <Text className="text-sm font-semibold text-foreground">Bảo mật Token</Text>
-              <Text className="text-xs text-muted-foreground">Expo SecureStore (KeyStore/Keychain)</Text>
-            </View>
-          </View>
-
-          <View className="flex-row items-center py-2">
+            <ChevronRight size={18} color="#94A3B8" />
+          </TouchableOpacity>
+          <View className="flex-row items-center py-2 border-t border-border/40 mt-1">
             <View className="w-9 h-9 bg-accent/20 rounded-xl items-center justify-center mr-3">
               <Info size={18} color={THEME.colors.statusNormal} />
             </View>
             <View className="flex-1">
-              <Text className="text-sm font-semibold text-foreground">Core Service Backend</Text>
-              <Text className="text-xs text-muted-foreground">Spring Boot Microservices & Redis</Text>
+              <Text className="text-sm font-semibold text-foreground">Ứng dụng HealthSense</Text>
+              <Text className="text-xs text-muted-foreground">Phiên bản {Constants.expoConfig?.version ?? '--'}</Text>
             </View>
           </View>
         </View>

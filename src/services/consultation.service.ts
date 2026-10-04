@@ -44,6 +44,13 @@ import type {
   SubmitConsultationMoreInfoPayload,
   UpdateCareServicePackagePayload,
   UpsertConsultationFinalSummaryPayload,
+  CreateQueueConsultationRequestPayload,
+  CurrentQueueStateResponse,
+  ConsultationQueueStatisticsResponse,
+  ConfirmConsultationRequestPayload,
+  ConsultationSessionResponse,
+  ContinuationDecisionResponse,
+  SubmitContinuationDecisionPayload,
 } from "@/types/consultation"
 
 type PageParams = {
@@ -63,6 +70,40 @@ export const consultationApi = {
     return axiosClient.get<ApiResponse<HealthRecordPage>, ApiResponse<HealthRecordPage>>(
       "/api/health-records/my-records",
       { params: normalizePageParams(params) }
+    )
+  },
+  // ---- Luồng hàng đợi (QUEUE_DISPATCH_V1) — giống web ----
+  createQueueRequest(payload: CreateQueueConsultationRequestPayload) {
+    return axiosClient.post<ApiResponse<ConsultationRequestItem>, ApiResponse<ConsultationRequestItem>>(
+      "/api/consultation-requests",
+      payload
+    )
+  },
+  getCurrentQueueState() {
+    return axiosClient.get<ApiResponse<CurrentQueueStateResponse>, ApiResponse<CurrentQueueStateResponse>>(
+      "/api/consultation-requests/current"
+    )
+  },
+  getQueueStatistics() {
+    return axiosClient.get<ApiResponse<ConsultationQueueStatisticsResponse>, ApiResponse<ConsultationQueueStatisticsResponse>>(
+      "/api/consultation-queue/statistics"
+    )
+  },
+  confirmQueueRequest(requestId: string | number, payload: ConfirmConsultationRequestPayload) {
+    return axiosClient.post<ApiResponse<ConsultationSessionResponse>, ApiResponse<ConsultationSessionResponse>>(
+      `/api/consultation-requests/${requestId}/confirm`,
+      payload
+    )
+  },
+  getCurrentContinuation(sessionId: string | number) {
+    return axiosClient.get<ApiResponse<ContinuationDecisionResponse>, ApiResponse<ContinuationDecisionResponse>>(
+      `/api/consultation-sessions/${sessionId}/continuations/current`
+    )
+  },
+  submitContinuationDecision(sessionId: string | number, round: number, payload: SubmitContinuationDecisionPayload) {
+    return axiosClient.put<ApiResponse<ContinuationDecisionResponse>, ApiResponse<ContinuationDecisionResponse>>(
+      `/api/consultation-sessions/${sessionId}/continuations/${round}/decision`,
+      payload
     )
   },
   createRequest(payload: CreateConsultationRequestPayload) {

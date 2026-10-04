@@ -1,7 +1,9 @@
-import { Dimensions, Platform, Alert } from 'react-native';
+import { Dimensions } from 'react-native';
+import { router } from 'expo-router';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
-import { Plus } from 'lucide-react-native';
+import { HeartPulse } from 'lucide-react-native';
 
 import { Box } from '@/components/ui/box';
 import { HStack } from '@/components/ui/hstack';
@@ -12,6 +14,9 @@ const { width } = Dimensions.get('window');
 
 export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const tabHeight = THEME.layout.dockHeight;
+  // Chừa vùng an toàn phía dưới (thanh điều hướng Android / home indicator iOS) để thanh tab không nằm đè lên
+  const { bottom: bottomInset } = useSafeAreaInsets();
+  const barHeight = tabHeight + bottomInset;
   
   // Cutout shape calculations
   const center = width / 2;
@@ -24,16 +29,16 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
     C ${center - cw} 0, ${center - cw} ${cd}, ${center} ${cd}
     C ${center + cw} ${cd}, ${center + cw} 0, ${center + cw + 25} 0
     L ${width} 0
-    L ${width} ${tabHeight}
-    L 0 ${tabHeight}
+    L ${width} ${barHeight}
+    L 0 ${barHeight}
     Z
   `;
 
   return (
-    <HStack className="absolute bottom-0 w-full" style={{ height: tabHeight, paddingBottom: Platform.OS === 'ios' ? 20 : 0 }}>
+    <HStack className="absolute bottom-0 w-full" style={{ height: barHeight, paddingBottom: bottomInset }}>
       {/* Background SVG - Explicitly setting fill to White (#FFFFFF) with ambient shadow */}
       <Box className="absolute top-0 left-0 right-0 bottom-0 shadow-sm" style={{ boxShadow: '0 -2px 10px rgba(15, 23, 42, 0.05)' }}>
-        <Svg width={width} height={tabHeight} viewBox={`0 0 ${width} ${tabHeight}`}>
+        <Svg width={width} height={barHeight} viewBox={`0 0 ${width} ${barHeight}`}>
           <Path d={path} fill={THEME.colors.card} />
         </Svg>
       </Box>
@@ -49,9 +54,10 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
             backgroundColor: THEME.colors.primary,
             ...THEME.shadows.fab,
           }}
-          onPress={() => Alert.alert('HealthSense', 'Chọn thao tác nhanh hoặc đo lâm sàng')}
+          onPress={() => router.push('/afib-measure' as any)}
+          accessibilityLabel="Đo tầm soát rung nhĩ"
         >
-          <Plus color="#FFFFFF" size={28} />
+          <HeartPulse color="#FFFFFF" size={26} strokeWidth={2.2} />
         </Pressable>
       </Box>
 

@@ -53,7 +53,6 @@ interface WorkoutCatalogState {
   getExerciseById: (id: string) => Exercise | undefined;
   getTodayStats: () => DailyActivityStats;
   getWeeklyStats: (targetDate?: Date) => WeeklyStatsSummary;
-  getCardioLoadScore: () => { score: number; status: 'RECOVERY' | 'OPTIMAL' | 'OVERTRAINING' };
 }
 
 const loadFromStorage = <T>(key: string, defaultValue: T): T => {
@@ -342,11 +341,11 @@ export const useWorkoutCatalogStore = create<WorkoutCatalogState>((set, get) => 
 
       return {
         date: getLocalDateStr(now),
-        totalSteps: Math.max(totalSteps, 1616), // Mock floor to match user's device screen
+        totalSteps,
         targetSteps: 6000,
-        activeMinutes: Math.round(activeSeconds / 60) || 18,
+        activeMinutes: Math.round(activeSeconds / 60),
         targetActiveMinutes: 30,
-        caloriesBurned: Math.round(caloriesBurned) || 57,
+        caloriesBurned: Math.round(caloriesBurned),
         targetCalories: 300,
       };
     },
@@ -445,19 +444,6 @@ export const useWorkoutCatalogStore = create<WorkoutCatalogState>((set, get) => 
         totalSessions: weekSessions.length,
         dailyDistribution,
       };
-    },
-
-    getCardioLoadScore: () => {
-      const stats = get().getWeeklyStats();
-      const minutes = stats.totalDurationSeconds / 60;
-
-      if (minutes < 45) {
-        return { score: 35, status: 'RECOVERY' };
-      } else if (minutes <= 150) {
-        return { score: 78, status: 'OPTIMAL' };
-      } else {
-        return { score: 92, status: 'OVERTRAINING' };
-      }
     },
   };
 });

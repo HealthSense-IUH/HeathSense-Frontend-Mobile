@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Home, Activity, Settings, Stethoscope } from 'lucide-react-native';
+import { Home, HeartPulse, Settings, Stethoscope } from 'lucide-react-native';
 import { CustomTabBar } from '@/components/ui/CustomTabBar';
 
 export default function TabLayout() {
@@ -17,10 +17,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="smart-health"
+        name="history"
         options={{
-          title: 'Sức khoẻ',
-          tabBarIcon: ({ color, size }) => <Activity color={color} size={size} />,
+          title: 'Lịch sử đo',
+          tabBarIcon: ({ color, size }) => <HeartPulse color={color} size={size} />,
         }}
       />
       <Tabs.Screen

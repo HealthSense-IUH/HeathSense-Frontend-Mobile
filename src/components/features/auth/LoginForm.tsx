@@ -1,15 +1,20 @@
-import React, { useRef, useState } from 'react';
+import React, { forwardRef, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
   Text,
   TextInput,
+  TextInputProps,
   View,
 } from 'react-native';
-import { AlertCircle, Eye, EyeOff, Lock, Mail, LogIn } from 'lucide-react-native';
+import { AlertCircle, ArrowRight, AtSign, CircleX, Eye, EyeOff, Lock } from 'lucide-react-native';
 import { LoginRequest } from '@/types/authentication';
-import { MedicalInput } from '@/components/ui/MedicalInput';
-import { GradientButton } from '@/components/ui/GradientButton';
+
+/** Màu theo thiết kế Stitch "Đăng nhập xác thực" (Clinical Clarity & Modern Pulse) */
+const BRAND = '#2B6CB0';
+const ON_SURFACE = '#0B1C30';
+const ON_SURFACE_VARIANT = '#424655';
+const OUTLINE = '#727787';
 
 interface LoginFormProps {
   onSubmit: (data: LoginRequest) => Promise<void>;
@@ -17,6 +22,56 @@ interface LoginFormProps {
   error?: string | null;
   onNavigateToRegister?: () => void;
 }
+
+interface AuthFieldProps extends TextInputProps {
+  label: string;
+  icon: React.ReactNode;
+  rightElement?: React.ReactNode;
+}
+
+/** Ô nhập của màn đăng nhập: nhãn nhỏ phía trên, khung cao 52 bo 16, sáng lên khi đang nhập. */
+const AuthField = forwardRef<TextInput, AuthFieldProps>(({ label, icon, rightElement, onFocus, onBlur, ...props }, ref) => {
+  const [focused, setFocused] = useState(false);
+
+  return (
+    <View className="w-full" style={{ gap: 4 }}>
+      <Text className="text-[11px] font-semibold" style={{ color: ON_SURFACE_VARIANT }}>
+        {label}
+      </Text>
+      <View
+        className="flex-row items-center w-full px-3"
+        style={{
+          height: 52,
+          gap: 8,
+          borderRadius: 16,
+          borderWidth: 1,
+          borderColor: focused ? 'rgba(43, 108, 176, 0.45)' : 'rgba(226, 232, 240, 0.8)',
+          backgroundColor: focused ? '#FFFFFF' : '#F8FAFC',
+          boxShadow: focused ? '0 4px 12px rgba(15, 23, 42, 0.08)' : undefined,
+        }}
+      >
+        {icon}
+        <TextInput
+          ref={ref}
+          className="flex-1 text-sm h-full"
+          style={{ color: ON_SURFACE }}
+          placeholderTextColor={OUTLINE}
+          onFocus={(e) => {
+            setFocused(true);
+            onFocus?.(e);
+          }}
+          onBlur={(e) => {
+            setFocused(false);
+            onBlur?.(e);
+          }}
+          {...props}
+        />
+        {rightElement}
+      </View>
+    </View>
+  );
+});
+AuthField.displayName = 'AuthField';
 
 export const LoginForm: React.FC<LoginFormProps> = ({
   onSubmit,
@@ -29,6 +84,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
 
+  const emailInputRef = useRef<TextInput>(null);
   const passwordInputRef = useRef<TextInput>(null);
 
   const handleSubmit = async () => {
@@ -52,99 +108,114 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   const displayError = localError || error;
 
   return (
-    <View className="w-full bg-white rounded-3xl p-6 sm:p-7 shadow-sm border border-slate-100">
-      {/* Medical Lock Badge Icon */}
-      <View className="flex items-center -mt-1 justify-center mb-6">
-        <View className="w-14 h-14 rounded-2xl bg-medical-50 border border-blue-100/80 items-center justify-center shadow-sm">
-          <Lock size={28} color="#0D6EFD" />
-        </View>
-      </View>
-      
-      {/* Card Heading */}
-      <View className="items-center mb-6">
-        <Text className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-          Chào mừng trở lại!
-        </Text>
-        <Text className="text-xs sm:text-sm text-slate-500 mt-1">
-          Đăng nhập vào tài khoản HealthSense của bạn
-        </Text>
-      </View>
+    <View
+      className="w-full bg-white p-6"
+      style={{
+        borderRadius: 32,
+        boxShadow: '0 10px 30px -5px rgba(0, 0, 0, 0.05), 0 4px 12px -2px rgba(0, 0, 0, 0.03)',
+      }}
+    >
+      <Text className="text-xl font-bold tracking-tight mb-6" style={{ color: ON_SURFACE }}>
+        Đăng nhập tài khoản
+      </Text>
 
-      {/* Error Alert Banner */}
       {displayError ? (
-        <View className="flex-row items-center bg-rose-50 border border-rose-200 p-3.5 rounded-xl mb-4">
-          <AlertCircle size={20} color="#E11D48" className="mr-2" />
-          <Text className="text-xs font-semibold text-rose-600 flex-1">
-            {displayError}
-          </Text>
+        <View className="flex-row items-center bg-rose-50 border border-rose-200 p-3.5 rounded-2xl mb-4">
+          <AlertCircle size={20} color="#E11D48" />
+          <Text className="text-xs font-semibold text-rose-600 flex-1 ml-2">{displayError}</Text>
         </View>
       ) : null}
 
-      {/* Inputs */}
-      <View className="space-y-4 w-full">
-        <MedicalInput
-          label="EMAIL"
-          icon={<Mail size={20} />}
-          placeholder="nhapemail@domain.com"
+      <View className="w-full" style={{ gap: 16 }}>
+        <AuthField
+          ref={emailInputRef}
+          label="Tài khoản / Email"
+          icon={<AtSign size={20} color={ON_SURFACE_VARIANT} />}
+          placeholder="nhap.email@domain.com"
           keyboardType="email-address"
           autoCapitalize="none"
           autoCorrect={false}
+          autoComplete="email"
           value={email}
           onChangeText={setEmail}
           editable={!isLoading}
           returnKeyType="next"
           onSubmitEditing={() => passwordInputRef.current?.focus()}
+          rightElement={
+            email ? (
+              <Pressable
+                onPress={() => {
+                  setEmail('');
+                  emailInputRef.current?.focus();
+                }}
+                hitSlop={8}
+                accessibilityLabel="Xóa nội dung"
+                className="p-1"
+              >
+                <CircleX size={18} color={OUTLINE} />
+              </Pressable>
+            ) : null
+          }
         />
 
-        <View className="space-y-1.5 w-full">
-          <View className="flex-row items-center justify-between z-10 relative">
-            <Text className="text-[11px] font-bold tracking-wider text-slate-500 uppercase">MẬT KHẨU</Text>
-            <Pressable hitSlop={8}>
-              <Text className="text-[11px] font-semibold text-medical-500">Quên mật khẩu?</Text>
+        <AuthField
+          ref={passwordInputRef}
+          label="Mật khẩu bảo vệ"
+          icon={<Lock size={20} color={ON_SURFACE_VARIANT} />}
+          placeholder="••••••••••••"
+          secureTextEntry={!showPassword}
+          autoComplete="password"
+          value={password}
+          onChangeText={setPassword}
+          editable={!isLoading}
+          returnKeyType="done"
+          onSubmitEditing={handleSubmit}
+          rightElement={
+            <Pressable
+              onPress={() => setShowPassword(!showPassword)}
+              hitSlop={8}
+              accessibilityLabel={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+              className="p-1"
+            >
+              {showPassword ? (
+                <EyeOff size={20} color={ON_SURFACE_VARIANT} />
+              ) : (
+                <Eye size={20} color={ON_SURFACE_VARIANT} />
+              )}
             </Pressable>
-          </View>
-          <MedicalInput
-            ref={passwordInputRef}
-            icon={<Lock size={20} />}
-            placeholder="••••••••"
-            secureTextEntry={!showPassword}
-            value={password}
-            onChangeText={setPassword}
-            editable={!isLoading}
-            returnKeyType="done"
-            onSubmitEditing={handleSubmit}
-            rightElement={
-              <Pressable onPress={() => setShowPassword(!showPassword)} hitSlop={8}>
-                {showPassword ? (
-                  <EyeOff size={20} color="#94A3B8" />
-                ) : (
-                  <Eye size={20} color="#94A3B8" />
-                )}
-              </Pressable>
-            }
-          />
-        </View>
+          }
+        />
 
-        {/* Submit Button */}
-        <View className="pt-2">
-          <GradientButton 
-            title={isLoading ? 'Đang xử lý...' : 'Đăng nhập'} 
-            onPress={handleSubmit} 
-            disabled={isLoading}
-            icon={!isLoading ? <LogIn size={16} color="white" /> : <ActivityIndicator size="small" color="white" />}
-          />
-        </View>
+        <Pressable
+          onPress={handleSubmit}
+          disabled={isLoading}
+          accessibilityRole="button"
+          className="w-full flex-row items-center justify-center mt-2 active:opacity-90"
+          style={{
+            height: 50,
+            gap: 8,
+            borderRadius: 9999,
+            backgroundColor: BRAND,
+            opacity: isLoading ? 0.7 : 1,
+            boxShadow: '0 4px 16px rgba(43, 108, 176, 0.25)',
+          }}
+        >
+          {isLoading ? <ActivityIndicator size="small" color="#FFFFFF" /> : null}
+          <Text className="text-white text-sm font-semibold tracking-wide">
+            {isLoading ? 'Đang xử lý...' : 'Đăng nhập'}
+          </Text>
+          {!isLoading ? <ArrowRight size={20} color="#FFFFFF" /> : null}
+        </Pressable>
       </View>
 
-      {/* Divider & Sign Up Redirection */}
       {onNavigateToRegister && (
-        <View className="flex-row items-center justify-center mt-6 pt-5 border-t border-slate-100">
-          <Text className="text-xs sm:text-sm text-slate-500 font-normal">
-            Chưa có tài khoản?{' '}
+        <View className="flex-row items-center justify-center pt-5 mt-2">
+          <Text className="text-xs" style={{ color: ON_SURFACE_VARIANT }}>
+            Chưa có tài khoản?
           </Text>
           <Pressable onPress={onNavigateToRegister} hitSlop={8}>
-            <Text className="text-xs sm:text-sm font-bold text-medical-500 ml-1">
-              Đăng ký ngay
+            <Text className="text-xs font-semibold ml-1" style={{ color: BRAND }}>
+              Đăng ký
             </Text>
           </Pressable>
         </View>

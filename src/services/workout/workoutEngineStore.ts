@@ -588,11 +588,3 @@ export const getAFibScreeningAvailability = (): AFibScreeningAvailability => {
     formattedRemainingTime: '00:00',
   };
 };
-
-/**
- * Selector helper: returns true if AFib measurement should be blocked
- * (either currently in active workout OR within 10-minute post-workout cooldown).
- */
-export const isWorkoutInProgress = (): boolean => {
-  return !getAFibScreeningAvailability().canScreen;
-};

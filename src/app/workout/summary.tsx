@@ -22,39 +22,36 @@ import {
 } from '@/components/features/workout/SportSummaryHeaderGraphic';
 import { useWorkoutEngineStore } from '@/services/workout/workoutEngineStore';
 import { useWorkoutCatalogStore } from '@/services/workout/workoutCatalogStore';
-import { workoutApiService } from '@/services/workout/workoutApiService';
 
 export default function WorkoutSummaryScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const lastSession = useWorkoutEngineStore((state) => state.lastCompletedSession);
-
-  const exerciseId = (params.exerciseId as string) || lastSession?.exerciseId || '';
-  const exerciseName = (params.exerciseName as string) || lastSession?.exerciseName || 'Cầu lông';
-  const durationSeconds = Number(params.durationSeconds) || lastSession?.durationSeconds || 19;
-  const caloriesBurned = Number(params.caloriesBurned) || lastSession?.caloriesBurned || 1;
-  const totalCalories =
-    Number(params.totalCalories) ||
-    lastSession?.totalCalories ||
-    Math.max(caloriesBurned, Math.round(caloriesBurned + (durationSeconds * 1560) / 86400));
-  const distanceKm = Number(params.distanceKm) || lastSession?.distanceKm;
-  const avgHeartRate = Number(params.avgHeartRate) || lastSession?.avgHeartRate;
-  const [startedAt] = useState(() => Number(params.startedAt) || lastSession?.startedAt || Date.now());
-
+  const sessions = useWorkoutCatalogStore((state) => state.sessions);
   const saveSession = useWorkoutCatalogStore((state) => state.saveSession);
-  const [note, setNote] = useState<string>(lastSession?.note || (params.note as string) || '');
+
+  // Buổi tập đang xem: theo sessionId (mở từ lịch sử hoặc vừa kết thúc), không có thì là buổi vừa tập xong
+  const sessionId = params.sessionId as string | undefined;
+  const session = (sessionId && sessions.find((s) => s.id === sessionId)) || (!sessionId ? lastSession : null);
+
+  const exerciseId = (params.exerciseId as string) || session?.exerciseId || '';
+  const exerciseName = (params.exerciseName as string) || session?.exerciseName || 'Buổi tập';
+  const durationSeconds = Number(params.durationSeconds) || session?.durationSeconds || 0;
+  const caloriesBurned = Number(params.caloriesBurned) || session?.caloriesBurned || 0;
+  const totalCalories = Number(params.totalCalories) || session?.totalCalories || caloriesBurned;
+  const distanceKm = Number(params.distanceKm) || session?.distanceKm;
+  const avgHeartRate = Number(params.avgHeartRate) || session?.avgHeartRate;
+  const [startedAt] = useState(() => Number(params.startedAt) || session?.startedAt || Date.now());
+
+  const [note, setNote] = useState<string>(session?.note || (params.note as string) || '');
   const [isSaved, setIsSaved] = useState(false);
   const inputRef = useRef<TextInput>(null);
 
-  const handleNoteChange = (text: string) => {
-    setNote(text);
+  // Lưu ghi chú khi rời ô nhập (saveSession tự đồng bộ lên server) — không gọi API mỗi lần gõ phím
+  const handleNoteBlur = () => {
+    if (!session || note === (session.note || '')) return;
+    saveSession({ ...session, note });
     setIsSaved(true);
-    if (lastSession) {
-      const updatedSession = { ...lastSession, note: text };
-      saveSession(updatedSession);
-      // Background sync with backend database
-      workoutApiService.saveSession(updatedSession).catch(() => {});
-    }
   };
 
   const themeConfig = getSportThemeConfig(exerciseId, exerciseName);
@@ -217,7 +214,12 @@ export default function WorkoutSummaryScreen() {
             <TextInput
               ref={inputRef}
               value={note}
-              onChangeText={handleNoteChange}
+              onChangeText={(text) => {
+                setNote(text);
+                setIsSaved(false);
+              }}
+              onBlur={handleNoteBlur}
+              editable={!!session}
               placeholder="Ghi chú"
               placeholderTextColor="#94A3B8"
               multiline

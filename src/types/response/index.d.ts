@@ -1,20 +1,2 @@
-import { PredictionLabel, RecordStatus } from '@/types/ppg';
-
-export interface PresignedUrlResponse {
-    recordId: string | number;
-    uploadUrl: string;
-    s3Key: string;
-}
-
-export interface HealthRecordResponse {
-    id: string | number;
-    userId: string | number;
-    fileName: string;
-    fileSize: number;
-    status: RecordStatus;
-    predictionLabel?: PredictionLabel | null;
-    confidence?: number | null;
-    hrvFeaturesJson?: string | null;
-    createdAt: string;
-    updatedAt: string;
-}
+// Kiểu bản ghi đo dùng chung một chỗ: src/types/health-records (giữ file này để các import cũ không đổi)
+export type { HealthRecordResponse, PresignedUrlResponse } from '@/types/health-records';

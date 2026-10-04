@@ -14,7 +14,6 @@ import {
   MoreVertical,
   ChevronDown,
   ChevronRight,
-  Search,
   Timer,
   Footprints,
   Zap,
@@ -292,6 +291,19 @@ export default function WorkoutHistoryScreen() {
   };
 
   // Group active column's sessions by day for the bottom list (sorted latest first)
+  // Tổng hợp thật của các buổi tập trong khoảng đang chọn (cột đang chọn trên biểu đồ)
+  const periodStats = useMemo(() => {
+    const list = activeColumn?.sessions || [];
+    const hrValues = list.map((s) => s.avgHeartRate).filter((v): v is number => typeof v === 'number' && v > 0);
+    return {
+      steps: list.reduce((sum, s) => sum + (s.totalSteps || 0), 0),
+      calories: Math.round(list.reduce((sum, s) => sum + (s.caloriesBurned || 0), 0)),
+      avgHeartRate: hrValues.length
+        ? Math.round(hrValues.reduce((sum, v) => sum + v, 0) / hrValues.length)
+        : null,
+    };
+  }, [activeColumn]);
+
   const groupedSessions = useMemo(() => {
     const list = activeColumn?.sessions || [];
     const groups: {
@@ -364,13 +376,6 @@ export default function WorkoutHistoryScreen() {
       }
     });
 
-    // Seed defaults matching Samsung Health if no sessions yet recorded
-    if (map.size === 0) {
-      map.set('badminton', 'Cầu lông');
-      map.set('running', 'Chạy bộ');
-      map.set('walking', 'Đi bộ');
-      map.set('combo', 'Bài tập kết hợp');
-    }
 
     return [
       { id: 'ALL', name: 'Tất cả' },
@@ -651,13 +656,6 @@ export default function WorkoutHistoryScreen() {
               })}
             </View>
 
-            {/* Floating Search/Zoom Icon on Bottom Right (Image 3 & 4) */}
-            <TouchableOpacity
-              activeOpacity={0.8}
-              className="absolute right-0 bottom-[-2px] w-8 h-8 rounded-full bg-slate-100 border border-slate-200/80 items-center justify-center shadow-xs"
-            >
-              <Search color="#64748B" size={14} />
-            </TouchableOpacity>
           </View>
         </View>
 
@@ -707,6 +705,7 @@ export default function WorkoutHistoryScreen() {
                           router.push({
                             pathname: '/workout/summary',
                             params: {
+                              sessionId: session.id,
                               exerciseId: session.exerciseId,
                               exerciseName: session.exerciseName,
                               durationSeconds: session.durationSeconds,
@@ -771,44 +770,37 @@ export default function WorkoutHistoryScreen() {
           </Text>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row">
-            {/* Tile 1: Mức tải tim mạch */}
-            <View className="bg-white rounded-2xl p-4 mr-3 w-36 border border-slate-200/70 shadow-xs">
-              <View className="w-9 h-9 rounded-xl bg-blue-50 items-center justify-center mb-3">
-                <Timer color="#3B82F6" size={18} />
+            {[
+              {
+                key: 'hr',
+                label: 'Nhịp tim TB',
+                value: periodStats.avgHeartRate ? `${periodStats.avgHeartRate} bpm` : '--',
+                icon: <Timer color="#3B82F6" size={18} />,
+                bg: 'bg-blue-50',
+              },
+              {
+                key: 'steps',
+                label: 'Bước',
+                value: periodStats.steps > 0 ? periodStats.steps.toLocaleString('vi-VN') : '--',
+                icon: <Footprints color="#10B981" size={18} />,
+                bg: 'bg-emerald-50',
+              },
+              {
+                key: 'kcal',
+                label: 'Calo tiêu hao',
+                value: periodStats.calories > 0 ? `${periodStats.calories.toLocaleString('vi-VN')} kcal` : '--',
+                icon: <Zap color="#F59E0B" size={18} />,
+                bg: 'bg-amber-50',
+              },
+            ].map((tile) => (
+              <View key={tile.key} className="bg-white rounded-2xl p-4 mr-3 w-36 border border-slate-200/70 shadow-xs">
+                <View className={`w-9 h-9 rounded-xl ${tile.bg} items-center justify-center mb-3`}>
+                  {tile.icon}
+                </View>
+                <Text className="text-xs font-bold text-slate-700 leading-tight mb-1">{tile.label}</Text>
+                <Text className="text-[11px] font-semibold text-slate-500 mt-auto">{tile.value}</Text>
               </View>
-              <Text className="text-xs font-bold text-slate-700 leading-tight mb-1" numberOfLines={2}>
-                Mức tải tim mạch hằng ng...
-              </Text>
-              <Text className="text-[11px] font-semibold text-emerald-600 mt-auto">
-                Tối ưu
-              </Text>
-            </View>
-
-            {/* Tile 2: Bước */}
-            <View className="bg-white rounded-2xl p-4 mr-3 w-36 border border-slate-200/70 shadow-xs">
-              <View className="w-9 h-9 rounded-xl bg-emerald-50 items-center justify-center mb-3">
-                <Footprints color="#10B981" size={18} />
-              </View>
-              <Text className="text-xs font-bold text-slate-700 leading-tight mb-1">
-                Bước
-              </Text>
-              <Text className="text-[11px] font-semibold text-slate-500 mt-auto">
-                Theo dõi hàng ngày
-              </Text>
-            </View>
-
-            {/* Tile 3: Điểm năng lượng */}
-            <View className="bg-white rounded-2xl p-4 mr-3 w-36 border border-slate-200/70 shadow-xs">
-              <View className="w-9 h-9 rounded-xl bg-amber-50 items-center justify-center mb-3">
-                <Zap color="#F59E0B" size={18} />
-              </View>
-              <Text className="text-xs font-bold text-slate-700 leading-tight mb-1">
-                Điểm năng lượng
-              </Text>
-              <Text className="text-[11px] font-semibold text-slate-500 mt-auto">
-                85 / 100
-              </Text>
-            </View>
+            ))}
           </ScrollView>
         </View>
       </ScrollView>

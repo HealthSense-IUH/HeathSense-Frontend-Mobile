@@ -1,157 +1,127 @@
 import React from 'react';
-import { View, Text, Pressable } from 'react-native';
-import { MessageCircle, FileText, RefreshCw, Calendar, User, Clock } from 'lucide-react-native';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
+import { Calendar, FileText, MessageCircle, MessagesSquare, RefreshCw, User } from 'lucide-react-native';
 import type { ConsultationSessionItem } from '@/types/consultation';
+import { getConsultationStatusConfig, isQueueFlow } from '@/constants/consultation';
+import { formatDateTime } from '@/utils/formatters';
 
 interface Props {
   sessions: ConsultationSessionItem[];
   loading: boolean;
-  onRefresh: () => void;
   onSelectSession: (session: ConsultationSessionItem) => void;
   onViewSummary?: (sessionId: string | number) => void;
   onOpenRenewal?: (session: ConsultationSessionItem) => void;
 }
 
-export function ConsultationSessionsList({
-  sessions,
-  loading,
-  onRefresh,
-  onSelectSession,
-  onViewSummary,
-  onOpenRenewal,
-}: Props) {
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'ACTIVE':
-        return (
-          <View className="px-2.5 py-1 rounded-full bg-emerald-500/10 flex-row items-center gap-1">
-            <View className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            <Text className="text-[11px] font-bold text-emerald-700">Đang diễn ra</Text>
-          </View>
-        );
-      case 'SCHEDULED':
-        return (
-          <View className="px-2.5 py-1 rounded-full bg-blue-500/10 flex-row items-center gap-1">
-            <Clock size={12} color="#2563eb" />
-            <Text className="text-[11px] font-bold text-blue-700">Chờ bắt đầu</Text>
-          </View>
-        );
-      case 'COMPLETED':
-        return (
-          <View className="px-2.5 py-1 rounded-full bg-muted flex-row items-center gap-1">
-            <Text className="text-[11px] font-bold text-muted-foreground">Đã hoàn tất</Text>
-          </View>
-        );
-      case 'CLOSED':
-      case 'EXPIRED':
-        return (
-          <View className="px-2.5 py-1 rounded-full bg-red-500/10 flex-row items-center gap-1">
-            <Text className="text-[11px] font-bold text-red-700">Đã kết thúc</Text>
-          </View>
-        );
-      default:
-        return (
-          <View className="px-2.5 py-1 rounded-full bg-muted">
-            <Text className="text-[11px] font-semibold text-muted-foreground">{status}</Text>
-          </View>
-        );
-    }
-  };
+export function StatusPill({ status }: { status?: string | null }) {
+  const cfg = getConsultationStatusConfig(status);
+  return (
+    <View className="px-2.5 py-1 rounded-full border" style={{ backgroundColor: cfg.bg, borderColor: cfg.border }}>
+      <Text className="text-[11px] font-bold" style={{ color: cfg.text }}>{cfg.label}</Text>
+    </View>
+  );
+}
 
-  const renderItem = (item: ConsultationSessionItem) => {
-    const doctorName = item.doctorDisplayName || `Bác sĩ #${item.doctorId}`;
-    const isActive = item.status === 'ACTIVE';
+/** Danh sách phiên tư vấn của tôi (giống web SessionsPanel cho hội viên). */
+export function ConsultationSessionsList({ sessions, loading, onSelectSession, onViewSummary, onOpenRenewal }: Props) {
+  const activeSession = sessions.find((s) => s.status === 'ACTIVE');
 
+  if (loading && sessions.length === 0) {
     return (
-      <View
-        key={String(item.id)}
-        className="bg-card border border-border rounded-2xl p-4 mb-3.5 shadow-xs"
-      >
-        {/* Top Header */}
-        <View className="flex-row justify-between items-center mb-3">
-          <View className="flex-row items-center gap-2.5">
-            <View className="h-9 w-9 rounded-full bg-primary/10 items-center justify-center">
-              <User size={18} className="text-primary" />
-            </View>
-            <View>
-              <Text className="font-bold text-foreground text-sm">{doctorName}</Text>
-              <Text className="text-[11px] text-muted-foreground">Phiên tư vấn #{item.id}</Text>
-            </View>
-          </View>
-          {getStatusBadge(item.status)}
-        </View>
-
-        {/* Expiration date */}
-        <View className="flex-row items-center gap-1.5 mb-2">
-          <Calendar size={12} className="text-muted-foreground" />
-          <Text className="text-muted-foreground text-[11px]">
-            Hạn kết thúc: {item.endsAt ? new Date(item.endsAt).toLocaleDateString('vi-VN') : '---'}
-          </Text>
-        </View>
-
-        {/* Last message preview */}
-        {item.lastMessagePreview && (
-          <View className="bg-muted/30 p-2.5 rounded-xl mb-3">
-            <Text className="text-muted-foreground text-xs" numberOfLines={1}>
-              Tin mới nhất: {item.lastMessagePreview}
-            </Text>
-          </View>
-        )}
-
-        {/* Action Buttons */}
-        <View className="flex-row gap-2 pt-2 border-t border-border/70 justify-end flex-wrap">
-          {/* Summary button */}
-          {(item.status === 'COMPLETED' || item.status === 'CLOSED') && onViewSummary && (
-            <Pressable
-              onPress={() => onViewSummary(item.id)}
-              className="px-3 py-2 rounded-xl bg-muted active:opacity-75 flex-row items-center gap-1.5"
-            >
-              <FileText size={14} className="text-foreground" />
-              <Text className="text-foreground text-xs font-semibold">Xem tổng kết</Text>
-            </Pressable>
-          )}
-
-          {/* Renewal button */}
-          {(item.status === 'ACTIVE' || item.status === 'COMPLETED') && onOpenRenewal && (
-            <Pressable
-              onPress={() => onOpenRenewal(item)}
-              className="px-3 py-2 rounded-xl border border-primary/30 bg-primary/5 active:opacity-75 flex-row items-center gap-1.5"
-            >
-              <RefreshCw size={14} className="text-primary" />
-              <Text className="text-primary text-xs font-bold">Gia hạn</Text>
-            </Pressable>
-          )}
-
-          {/* Main Chat Action */}
-          <Pressable
-            onPress={() => onSelectSession(item)}
-            className={`px-4 py-2 rounded-xl flex-row items-center gap-1.5 active:opacity-90 ${
-              isActive ? 'bg-primary' : 'bg-muted'
-            }`}
-          >
-            <MessageCircle size={14} color={isActive ? '#ffffff' : '#64748b'} />
-            <Text
-              className={`text-xs font-bold ${
-                isActive ? 'text-white' : 'text-muted-foreground'
-              }`}
-            >
-              {isActive ? 'Vào phòng chat' : 'Xem tin nhắn'}
-            </Text>
-          </Pressable>
-        </View>
+      <View className="py-12 items-center">
+        <ActivityIndicator color="#0D6EFD" />
+        <Text className="text-xs text-muted-foreground mt-2">Đang tải danh sách...</Text>
       </View>
     );
-  };
+  }
 
   return (
-    <View className="pb-5">
+    <View className="pb-5" style={{ gap: 12 }}>
+      <View>
+        <Text className="text-base font-bold text-foreground">Phiên Tư vấn của tôi</Text>
+        <Text className="text-xs text-muted-foreground">Chỉ các phiên đang hoạt động mới có thể gửi tin nhắn.</Text>
+      </View>
+
+      {activeSession ? (
+        <View className="p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10" style={{ gap: 10 }}>
+          <View className="flex-row items-center" style={{ gap: 8 }}>
+            <View className="h-3 w-3 rounded-full bg-emerald-500" />
+            <Text className="font-semibold text-emerald-950 text-sm flex-1">Bạn đang có phiên tư vấn trực tiếp đang diễn ra!</Text>
+          </View>
+          <Text className="text-xs text-muted-foreground">
+            Bác sĩ: <Text className="font-medium text-foreground">{activeSession.doctorDisplayName || `#${activeSession.doctorId}`}</Text> • Mã phiên: #{activeSession.id}
+            {activeSession.lastMessagePreview ? <Text className="italic"> • Tin nhắn mới nhất: “{activeSession.lastMessagePreview}”</Text> : null}
+          </Text>
+          <Pressable onPress={() => onSelectSession(activeSession)} className="self-start h-9 px-4 rounded-xl bg-emerald-600 flex-row items-center active:opacity-90" style={{ gap: 6 }}>
+            <MessagesSquare size={14} color="#FFFFFF" />
+            <Text className="text-white text-xs font-bold">Vào phòng tư vấn ngay</Text>
+          </Pressable>
+        </View>
+      ) : null}
+
       {sessions.length === 0 ? (
-        <View className="flex-1 items-center justify-center pt-12">
-          <MessageCircle size={36} className="text-muted-foreground/40 mb-2" />
-          <Text className="text-muted-foreground text-sm">Bạn chưa có phiên tư vấn nào.</Text>
+        <View className="items-center justify-center pt-10">
+          <MessageCircle size={36} color="#CBD5E1" />
+          <Text className="text-muted-foreground text-sm mt-2">Không có phiên tư vấn nào.</Text>
         </View>
       ) : (
-        sessions.map((item) => renderItem(item))
+        sessions.map((item) => {
+          const doctorName = item.doctorDisplayName || `Bác sĩ #${item.doctorId}`;
+          const isActive = item.status === 'ACTIVE';
+          const canRenew = !isQueueFlow(item.flowType) && (item.status === 'ACTIVE' || item.status === 'COMPLETED');
+          const canSummary = item.status === 'COMPLETED' || item.status === 'CANCELLED';
+          return (
+            <View key={String(item.id)} className="bg-card border border-border rounded-2xl p-4 shadow-xs" style={{ gap: 10 }}>
+              <View className="flex-row justify-between items-center">
+                <View className="flex-row items-center flex-1" style={{ gap: 10 }}>
+                  <View className="h-9 w-9 rounded-full bg-primary/10 items-center justify-center">
+                    <User size={18} color="#0D6EFD" />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="font-bold text-foreground text-sm" numberOfLines={1}>{doctorName}</Text>
+                    <Text className="text-[11px] text-muted-foreground">Phiên tư vấn #{item.id}</Text>
+                  </View>
+                </View>
+                <StatusPill status={item.status} />
+              </View>
+
+              <View style={{ gap: 4 }}>
+                <View className="flex-row items-center" style={{ gap: 6 }}>
+                  <Calendar size={12} color="#64748B" />
+                  <Text className="text-muted-foreground text-[11px]">Ngày tạo: {formatDateTime(item.createdAt)} • Hạn kết thúc: {formatDateTime(item.endsAt)}</Text>
+                </View>
+                <View className="bg-muted/30 p-2.5 rounded-xl">
+                  <Text className="text-muted-foreground text-xs" numberOfLines={1}>
+                    Tin nhắn gần nhất: {item.lastMessagePreview || 'Chưa có tin nhắn'}
+                  </Text>
+                </View>
+              </View>
+
+              <View className="flex-row flex-wrap justify-end pt-2 border-t border-border/70" style={{ gap: 8 }}>
+                {canSummary && onViewSummary ? (
+                  <Pressable onPress={() => onViewSummary(item.id)} className="px-3 py-2 rounded-xl bg-muted active:opacity-75 flex-row items-center" style={{ gap: 6 }}>
+                    <FileText size={14} color="#0F172A" />
+                    <Text className="text-foreground text-xs font-semibold">Xem tổng kết</Text>
+                  </Pressable>
+                ) : null}
+                {canRenew && onOpenRenewal ? (
+                  <Pressable onPress={() => onOpenRenewal(item)} className="px-3 py-2 rounded-xl border border-primary/30 bg-primary/5 active:opacity-75 flex-row items-center" style={{ gap: 6 }}>
+                    <RefreshCw size={14} color="#0D6EFD" />
+                    <Text className="text-primary text-xs font-bold">Gia hạn</Text>
+                  </Pressable>
+                ) : null}
+                <Pressable
+                  onPress={() => onSelectSession(item)}
+                  className={`px-4 py-2 rounded-xl flex-row items-center active:opacity-90 ${isActive ? 'bg-primary' : 'bg-muted'}`}
+                  style={{ gap: 6 }}
+                >
+                  <MessageCircle size={14} color={isActive ? '#ffffff' : '#64748b'} />
+                  <Text className={`text-xs font-bold ${isActive ? 'text-white' : 'text-muted-foreground'}`}>{isActive ? 'Vào phòng tư vấn' : 'Xem tin nhắn'}</Text>
+                </Pressable>
+              </View>
+            </View>
+          );
+        })
       )}
     </View>
   );

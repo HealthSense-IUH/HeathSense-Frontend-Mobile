@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { FileText, X, CheckCircle, AlertCircle, HeartPulse } from 'lucide-react-native';
-import { consultationApi } from '../../../../services/consultation.service';
+import { consultationApi } from '@/services/consultation.service';
 import type { ConsultationFinalSummaryResponse } from '@/types/consultation';
 
 interface MemberFinalSummaryModalProps {

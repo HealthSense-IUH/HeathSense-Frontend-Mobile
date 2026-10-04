@@ -6,10 +6,17 @@ import { useRouter } from 'expo-router';
 import { useBleStore } from '@/services/ble-management/bleStore';
 import { LinearGradient } from 'expo-linear-gradient';
 import { getAFibScreeningAvailability, useWorkoutEngineStore } from '@/services/workout';
+import { useMyRecords } from '@/hooks/useHealthHistory';
+import { getPredictionMeta } from '@/constants/healthRecords';
+import { formatDateTime } from '@/utils/formatters';
 
 export function AFibScreeningCard() {
   const router = useRouter();
   const aiAnalysisResult = useBleStore(state => state.aiAnalysisResult);
+  // Bản ghi mới nhất trên server; lúc chưa tải xong thì dùng kết quả vừa đo trong phiên
+  const { data: latestPage } = useMyRecords(1, 1);
+  const latestRecord = latestPage?.content?.[0] ?? aiAnalysisResult;
+  const latestMeta = latestRecord ? getPredictionMeta(latestRecord.predictionLabel, latestRecord.status) : null;
   const workoutStatus = useWorkoutEngineStore(state => state.status);
   const lastWorkoutEndedAt = useWorkoutEngineStore(state => state.lastWorkoutEndedAt);
 
@@ -142,25 +149,21 @@ export function AFibScreeningCard() {
         </View>
 
         {/* Middle Section: Last result summary or descriptive prompt */}
-        {aiAnalysisResult ? (
+        {latestRecord && latestMeta ? (
           <View className="bg-white/20 rounded-2xl p-3.5 mb-4 backdrop-blur-sm border border-white/20">
             <View className="flex-row items-center mb-1">
-              {aiAnalysisResult.predictionLabel === 'NORMAL' ? (
-                <CheckCircle2 color="#FFFFFF" size={17} className="mr-2" />
-              ) : (
+              {latestMeta.isRisk ? (
                 <AlertCircle color="#FFFFFF" size={17} className="mr-2" />
+              ) : (
+                <CheckCircle2 color="#FFFFFF" size={17} className="mr-2" />
               )}
               <Text className="text-sm font-bold text-white flex-1">
-                Lần đo gần nhất: {
-                  aiAnalysisResult.predictionLabel === 'NORMAL' ? 'Nhịp xoang bình thường' :
-                    aiAnalysisResult.predictionLabel === 'AFIB' ? 'Cảnh báo: Rung nhĩ (AFib)' :
-                      aiAnalysisResult.predictionLabel === 'AFIB_SUSPECTED' ? 'Nghi ngờ Rung nhĩ' :
-                        'Không xác định'
-                }
+                Lần đo gần nhất: {latestMeta.label}
               </Text>
             </View>
             <Text className="text-xs text-white/85 pl-6">
-              Độ tin cậy: {Math.round((aiAnalysisResult.confidence ?? 0) * 100)}% • Chạm để đo lại
+              {latestRecord.confidence != null ? `Khả năng bị rung nhĩ: ${(latestRecord.confidence * 100).toFixed(1)}% • ` : ''}
+              {formatDateTime(latestRecord.createdAt)}
             </Text>
           </View>
         ) : (
@@ -186,7 +189,7 @@ export function AFibScreeningCard() {
                 ? `Hồi phục: ${availability.formattedRemainingTime}`
                 : availability.reason === 'WORKOUT_IN_PROGRESS'
                 ? 'Tạm ngắt khi tập'
-                : (aiAnalysisResult ? 'Thực hiện đo lại' : 'Bắt đầu đo ngay')}
+                : (latestRecord ? 'Thực hiện đo lại' : 'Bắt đầu đo ngay')}
             </Text>
           </View>
 

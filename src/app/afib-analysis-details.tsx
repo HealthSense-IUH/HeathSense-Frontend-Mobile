@@ -55,19 +55,36 @@ export default function AFibAnalysisDetailsScreen() {
     setReferenceDate(newDate);
   };
 
+  // Nhãn kỳ đang xem tính từ referenceDate (không cố định "Hôm nay/Tuần này" khi đã lùi sang kỳ trước)
   const periodText = useMemo(() => {
-    if (activeFilter === 'Ngày') return `Ngày ${referenceDate.getDate()}/${referenceDate.getMonth() + 1}`;
-    if (activeFilter === 'Tuần') return `Tuần này`;
-    if (activeFilter === 'Tháng') return `Tháng ${referenceDate.getMonth() + 1}`;
-    return `Năm ${referenceDate.getFullYear()}`;
+    const d = referenceDate;
+    if (activeFilter === 'Ngày') return `Ngày ${d.getDate()}/${d.getMonth() + 1}`;
+    if (activeFilter === 'Tuần') {
+      const monday = new Date(d);
+      monday.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+      return `${monday.getDate()}/${monday.getMonth() + 1} - ${sunday.getDate()}/${sunday.getMonth() + 1}`;
+    }
+    if (activeFilter === 'Tháng') return `Tháng ${d.getMonth() + 1}/${d.getFullYear()}`;
+    return `Năm ${d.getFullYear()}`;
   }, [activeFilter, referenceDate]);
 
   const badgeLabel = useMemo(() => {
-    if (activeFilter === 'Ngày') return 'Hôm nay';
-    if (activeFilter === 'Tuần') return 'Tuần này';
-    if (activeFilter === 'Tháng') return 'Tháng này';
-    return 'Năm này';
-  }, [activeFilter]);
+    const now = new Date();
+    const d = referenceDate;
+    const sameYear = d.getFullYear() === now.getFullYear();
+    const sameMonth = sameYear && d.getMonth() === now.getMonth();
+    const startOfWeek = (x: Date) => {
+      const m = new Date(x.getFullYear(), x.getMonth(), x.getDate());
+      m.setDate(m.getDate() - ((m.getDay() + 6) % 7));
+      return m.getTime();
+    };
+    if (activeFilter === 'Ngày') return sameMonth && d.getDate() === now.getDate() ? 'Hôm nay' : periodText;
+    if (activeFilter === 'Tuần') return startOfWeek(d) === startOfWeek(now) ? 'Tuần này' : periodText;
+    if (activeFilter === 'Tháng') return sameMonth ? 'Tháng này' : periodText;
+    return sameYear ? 'Năm nay' : periodText;
+  }, [activeFilter, referenceDate, periodText]);
 
   const { chartData, maxValue } = useMemo(() => {
     if (!data?.chartData || data.chartData.length === 0) return { chartData: [], maxValue: 10 };

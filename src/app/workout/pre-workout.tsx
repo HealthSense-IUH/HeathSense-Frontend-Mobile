@@ -127,7 +127,7 @@ export default function PreWorkoutScreen() {
 
   return (
     <ScreenWrapper
-      title={exercise?.name || 'Chạy bộ'}
+      title={exercise?.name || 'Buổi tập'}
       statusBarStyle="dark"
       scrollable={false}
       className="bg-[#F2F4F7]"
