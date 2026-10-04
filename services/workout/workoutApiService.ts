@@ -135,9 +135,17 @@ export const workoutApiService = {
   /**
    * Lấy lịch sử các phiên tập luyện
    */
-  async getSessions(page = 0, size = 15): Promise<{ content: WorkoutSession[]; totalElements: number }> {
+  async getSessions(
+    page = 0,
+    size = 15,
+    from?: string,
+    to?: string
+  ): Promise<{ content: WorkoutSession[]; totalElements: number }> {
+    const params: Record<string, any> = { page, size };
+    if (from) params.from = from;
+    if (to) params.to = to;
     const res = await axiosClient.get<ApiResponse<any>>('/api/workouts/sessions', {
-      params: { page, size },
+      params,
     });
     const pageData = res.data?.data || res.data;
     return {
@@ -164,5 +172,49 @@ export const workoutApiService = {
       params: { date, timezone },
     });
     return (res.data?.data || res.data) as DailyActivityStats;
+  },
+
+  /**
+   * Đồng bộ dữ liệu số bước chân lên Backend Server
+   */
+  async syncStepData(data: {
+    date: string;
+    totalSteps: number;
+    distanceMeters?: number;
+    caloriesBurned?: number;
+    activeMinutes?: number;
+    targetSteps?: number;
+    hourlySteps?: { hour: number; steps: number }[];
+    deviceSource?: string;
+  }): Promise<any> {
+    const res = await axiosClient.post<ApiResponse<any>>('/api/workouts/steps/sync', data);
+    return res.data?.data || res.data;
+  },
+
+  /**
+   * Lấy chi tiết số bước theo ngày (24 giờ + Calo + Quãng đường)
+   */
+  async getDailyStepDetail(date?: string, timezone = 'Asia/Ho_Chi_Minh'): Promise<any> {
+    const res = await axiosClient.get<ApiResponse<any>>('/api/workouts/steps/daily', {
+      params: { date, timezone },
+    });
+    return res.data?.data || res.data;
+  },
+
+  /**
+   * Lấy lịch sử số bước 7 ngày + So sánh cộng đồng
+   */
+  async getStepHistory(offset = 0, timezone = 'Asia/Ho_Chi_Minh'): Promise<any> {
+    const res = await axiosClient.get<ApiResponse<any>>('/api/workouts/steps/history', {
+      params: { offset, timezone },
+    });
+    return res.data?.data || res.data;
+  },
+
+  /**
+   * Cập nhật mục tiêu số bước cá nhân
+   */
+  async updateStepGoal(targetSteps: number): Promise<void> {
+    await axiosClient.put<ApiResponse<void>>('/api/workouts/steps/goal', { targetSteps });
   },
 };

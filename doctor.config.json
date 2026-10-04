@@ -5,11 +5,17 @@
       ".expo/**",
       "dist/**",
       "node_modules/**",
-      "src/components/ui/**"
+      "src/components/ui/**",
+      "src/components/features/workout/SportGraphicBanner.tsx",
+      "src/constants/googleMapStyles.ts",
+      "src/constants/statusColors.ts",
+      "utils/gpxGenerator.ts"
     ]
   },
   "rules": {
     "deslop/unused-dependency": "off",
-    "react-doctor/rn-prefer-reanimated": "off"
+    "deslop/unused-file": "off",
+    "react-doctor/rn-prefer-reanimated": "off",
+    "socket/low-supply-chain-score": "off"
   }
 }

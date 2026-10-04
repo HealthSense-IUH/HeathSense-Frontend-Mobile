@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
   Modal,
   ScrollView,
   Pressable,
@@ -22,6 +21,23 @@ interface CreateExerciseModalProps {
   onClose: () => void;
   onCreated?: (exerciseId: string) => void;
 }
+
+const CATEGORIES: ExerciseCategory[] = [
+  'GENERAL',
+  'AEROBIC',
+  'FREE_WEIGHT',
+  'MACHINE_WEIGHT',
+  'WILDERNESS',
+  'WATER',
+  'WINTER',
+  'BALL',
+];
+
+const TRACKING_TYPES: TrackingMetricType[] = [
+  'TIME_CALORIES',
+  'DISTANCE_GPS',
+  'SETS_REST',
+];
 
 export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
   visible,
@@ -64,23 +80,6 @@ export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
     }
   };
 
-  const categories: ExerciseCategory[] = [
-    'GENERAL',
-    'AEROBIC',
-    'FREE_WEIGHT',
-    'MACHINE_WEIGHT',
-    'WILDERNESS',
-    'WATER',
-    'WINTER',
-    'BALL',
-  ];
-
-  const trackingTypes: TrackingMetricType[] = [
-    'TIME_CALORIES',
-    'DISTANCE_GPS',
-    'SETS_REST',
-  ];
-
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable
@@ -101,12 +100,12 @@ export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
             <Text className="text-xl font-bold text-white tracking-tight">
               Tạo bài tập thể dục mới
             </Text>
-            <TouchableOpacity
+            <Pressable
               onPress={onClose}
               className="w-8 h-8 rounded-full bg-slate-800 items-center justify-center active:opacity-75"
             >
               <X color="#94A3B8" size={18} />
-            </TouchableOpacity>
+            </Pressable>
           </View>
 
           {/* Form Content */}
@@ -138,24 +137,23 @@ export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
               <Text className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
                 Dữ liệu cần ghi
               </Text>
-              <TouchableOpacity
+              <Pressable
                 onPress={() => {
                   setShowTrackingDropdown(!showTrackingDropdown);
                   setShowCategoryDropdown(false);
                 }}
-                activeOpacity={0.8}
-                className="bg-slate-800/90 flex-row items-center justify-between px-4 py-3.5 rounded-2xl border border-slate-700"
+                className="bg-slate-800/90 flex-row items-center justify-between px-4 py-3.5 rounded-2xl border border-slate-700 active:opacity-80"
               >
                 <Text className="text-emerald-400 font-medium text-base" numberOfLines={1}>
                   {TRACKING_TYPE_LABELS[trackingType]}
                 </Text>
                 <ChevronDown color="#94A3B8" size={18} />
-              </TouchableOpacity>
+              </Pressable>
 
               {showTrackingDropdown && (
                 <View className="mt-2 bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-lg">
-                  {trackingTypes.map((item) => (
-                    <TouchableOpacity
+                  {TRACKING_TYPES.map((item) => (
+                    <Pressable
                       key={item}
                       onPress={() => {
                         setTrackingType(item);
@@ -171,7 +169,7 @@ export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
                         {TRACKING_TYPE_LABELS[item]}
                       </Text>
                       {trackingType === item && <Check color="#10B981" size={18} />}
-                    </TouchableOpacity>
+                    </Pressable>
                   ))}
                 </View>
               )}
@@ -182,24 +180,23 @@ export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
               <Text className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
                 Thể loại
               </Text>
-              <TouchableOpacity
+              <Pressable
                 onPress={() => {
                   setShowCategoryDropdown(!showCategoryDropdown);
                   setShowTrackingDropdown(false);
                 }}
-                activeOpacity={0.8}
-                className="bg-slate-800/90 flex-row items-center justify-between px-4 py-3.5 rounded-2xl border border-slate-700"
+                className="bg-slate-800/90 flex-row items-center justify-between px-4 py-3.5 rounded-2xl border border-slate-700 active:opacity-80"
               >
                 <Text className="text-emerald-400 font-medium text-base">
                   {EXERCISE_CATEGORY_LABELS[category]}
                 </Text>
                 <ChevronDown color="#94A3B8" size={18} />
-              </TouchableOpacity>
+              </Pressable>
 
               {showCategoryDropdown && (
                 <View className="mt-2 bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-lg">
-                  {categories.map((cat) => (
-                    <TouchableOpacity
+                  {CATEGORIES.map((cat) => (
+                    <Pressable
                       key={cat}
                       onPress={() => {
                         setCategory(cat);
@@ -215,7 +212,7 @@ export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
                         {EXERCISE_CATEGORY_LABELS[cat]}
                       </Text>
                       {category === cat && <Check color="#10B981" size={18} />}
-                    </TouchableOpacity>
+                    </Pressable>
                   ))}
                 </View>
               )}
@@ -224,21 +221,19 @@ export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
 
           {/* Action Buttons: Thoát | Lưu */}
           <View className="flex-row gap-3 pt-2">
-            <TouchableOpacity
+            <Pressable
               onPress={onClose}
-              activeOpacity={0.8}
               className="flex-1 py-3.5 rounded-2xl bg-slate-800 items-center justify-center border border-slate-700 active:opacity-75"
             >
               <Text className="text-slate-300 font-semibold text-base">Thoát</Text>
-            </TouchableOpacity>
+            </Pressable>
 
-            <TouchableOpacity
+            <Pressable
               onPress={handleSave}
-              activeOpacity={0.8}
               className="flex-1 py-3.5 rounded-2xl bg-emerald-600 items-center justify-center shadow-md active:opacity-75"
             >
               <Text className="text-white font-bold text-base">Lưu</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </Pressable>
       </Pressable>

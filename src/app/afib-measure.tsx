@@ -9,7 +9,7 @@ import {
   Easing,
   StyleSheet,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { safeRouter } from '@/utils/safeNavigation';
 import {
   ArrowLeft,
   Settings,
@@ -31,7 +31,6 @@ import {
 } from '@/services/workout';
 
 export default function AFibMeasureScreen() {
-  const router = useRouter();
   const { sendCommand, stopExportAndUploadPpgRecording } = useBLE();
   const store = useBleStore();
 
@@ -199,7 +198,7 @@ export default function AFibMeasureScreen() {
       }
       headerLeft={
         <Pressable
-          onPress={() => router.back()}
+          onPress={() => safeRouter.back()}
           className="w-11 h-11 rounded-full bg-white/95 shadow-sm border border-blue-100 items-center justify-center active:opacity-80"
           style={{
             shadowColor: 'rgba(13, 110, 253, 0.08)',
@@ -577,7 +576,7 @@ export default function AFibMeasureScreen() {
                   Vui lòng kết nối đồng hồ BLE trong mục{" "}
                   <Text
                     className="underline font-bold"
-                    onPress={() => router.push("/(public)/scan" as any)}
+                    onPress={() => safeRouter.navigate("/(public)/scan")}
                   >
                     Cài đặt
                   </Text>{" "}

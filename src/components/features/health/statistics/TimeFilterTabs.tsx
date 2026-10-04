@@ -9,26 +9,39 @@ interface TimeFilterTabsProps {
   onChange: (filter: FilterType) => void;
 }
 
-export function TimeFilterTabs({ activeFilter, onChange }: TimeFilterTabsProps) {
+export const TimeFilterTabs = React.memo(function TimeFilterTabs({
+  activeFilter,
+  onChange,
+}: TimeFilterTabsProps) {
+  const handlePress = (filter: FilterType) => {
+    if (filter === activeFilter) return;
+    onChange(filter);
+  };
+
   return (
-    <View className="flex-row items-center justify-between mx-5 mt-4 p-1 bg-[#E9EEF7] rounded-2xl">
-      {FILTERS.map((filter) => (
-        <Pressable
-          key={filter}
-          onPress={() => onChange(filter)}
-          className={`flex-1 items-center justify-center py-2 rounded-xl transition-all active:opacity-80 ${
-            activeFilter === filter ? 'bg-white shadow-sm' : 'bg-transparent'
-          }`}
-        >
-          <Text
-            className={`text-sm ${
-              activeFilter === filter ? 'text-medical-500 font-bold' : 'text-slate-500 font-semibold'
-            }`}
-          >
-            {filter}
-          </Text>
-        </Pressable>
-      ))}
+    <View className="px-6 py-2.5">
+      <View className="flex-row items-center justify-between">
+        {FILTERS.map((filter) => {
+          const isActive = activeFilter === filter;
+          return (
+            <Pressable
+              key={filter}
+              onPress={() => handlePress(filter)}
+              className={`px-4 py-2 rounded-full items-center justify-center ${
+                isActive ? 'bg-[#E5E7EB]' : 'bg-transparent'
+              }`}
+            >
+              <Text
+                className={`text-sm ${
+                  isActive ? 'font-bold text-slate-900' : 'font-medium text-slate-500'
+                }`}
+              >
+                {filter}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
     </View>
   );
-}
+});

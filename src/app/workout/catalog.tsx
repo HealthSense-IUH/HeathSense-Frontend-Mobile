@@ -3,11 +3,10 @@ import {
   View,
   Text,
   ScrollView,
-  TouchableOpacity,
   Pressable,
   Modal,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { safeRouter } from '@/utils/safeNavigation';
 import {
   ArrowLeft,
   Plus,
@@ -25,8 +24,6 @@ import { Exercise } from '@/services/workout/workoutTypes';
 import { THEME } from '@/constants/theme';
 
 export default function WorkoutCatalogScreen() {
-  const router = useRouter();
-
   const exercises = useWorkoutCatalogStore((state) => state.exercises);
   const favoriteIds = useWorkoutCatalogStore((state) => state.favoriteIds);
   const toggleFavorite = useWorkoutCatalogStore((state) => state.toggleFavorite);
@@ -53,7 +50,7 @@ export default function WorkoutCatalogScreen() {
   };
 
   const handleSelectExercise = (exercise: Exercise) => {
-    router.push({
+    safeRouter.navigate({
       pathname: '/workout/pre-workout' as any,
       params: { exerciseId: exercise.id },
     });
@@ -65,27 +62,27 @@ export default function WorkoutCatalogScreen() {
       statusBarStyle="dark"
       className="bg-slate-50"
       headerLeft={
-        <TouchableOpacity
-          onPress={() => router.back()}
+        <Pressable
+          onPress={() => safeRouter.back()}
           className="w-10 h-10 rounded-full items-center justify-center active:opacity-70"
         >
           <ArrowLeft color={THEME.colors.textPrimary} size={22} />
-        </TouchableOpacity>
+        </Pressable>
       }
       headerRight={
         <View className="flex-row items-center gap-1">
-          <TouchableOpacity
+          <Pressable
             onPress={() => setShowAddMenu(true)}
             className="w-10 h-10 rounded-full items-center justify-center active:opacity-70"
           >
             <Plus color={THEME.colors.textPrimary} size={24} />
-          </TouchableOpacity>
-          <TouchableOpacity
+          </Pressable>
+          <Pressable
             onPress={() => setShowAddMenu(true)}
             className="w-10 h-10 rounded-full items-center justify-center active:opacity-70"
           >
             <MoreVertical color={THEME.colors.textPrimary} size={20} />
-          </TouchableOpacity>
+          </Pressable>
         </View>
       }
     >
@@ -101,11 +98,10 @@ export default function WorkoutCatalogScreen() {
               {favoriteExercises.map((exercise, index) => {
                 const isLast = index === favoriteExercises.length - 1;
                 return (
-                  <TouchableOpacity
+                  <Pressable
                     key={exercise.id}
                     onPress={() => handleSelectExercise(exercise)}
-                    activeOpacity={0.7}
-                    className={`flex-row items-center justify-between py-3.5 px-4 ${
+                    className={`flex-row items-center justify-between py-3.5 px-4 active:bg-slate-50 ${
                       !isLast ? 'border-b border-slate-100' : ''
                     }`}
                   >
@@ -128,18 +124,17 @@ export default function WorkoutCatalogScreen() {
                     {/* Right: Vertical Line Divider + Solid Yellow Star */}
                     <View className="flex-row items-center">
                       <View className="w-[1px] h-5 bg-slate-200 mr-2" />
-                      <TouchableOpacity
+                      <Pressable
                         onPress={(e) => {
                           e.stopPropagation();
                           handleToggleStar(exercise.id);
                         }}
-                        className="p-1.5"
-                        activeOpacity={0.7}
+                        className="p-1.5 active:opacity-60"
                       >
                         <Star color="#EAB308" fill="#EAB308" size={22} />
-                      </TouchableOpacity>
+                      </Pressable>
                     </View>
-                  </TouchableOpacity>
+                  </Pressable>
                 );
               })}
             </View>
@@ -156,11 +151,10 @@ export default function WorkoutCatalogScreen() {
             {otherExercises.map((exercise, index) => {
               const isLast = index === otherExercises.length - 1;
               return (
-                <TouchableOpacity
+                <Pressable
                   key={exercise.id}
                   onPress={() => handleSelectExercise(exercise)}
-                  activeOpacity={0.7}
-                  className={`flex-row items-center justify-between py-3.5 px-4 ${
+                  className={`flex-row items-center justify-between py-3.5 px-4 active:bg-slate-50 ${
                     !isLast ? 'border-b border-slate-100' : ''
                   }`}
                 >
@@ -183,18 +177,17 @@ export default function WorkoutCatalogScreen() {
                   {/* Right: Vertical Line Divider + Star Outline */}
                   <View className="flex-row items-center">
                     <View className="w-[1px] h-5 bg-slate-200 mr-2" />
-                    <TouchableOpacity
+                    <Pressable
                       onPress={(e) => {
                         e.stopPropagation();
                         handleToggleStar(exercise.id);
                       }}
-                      className="p-1.5"
-                      activeOpacity={0.7}
+                      className="p-1.5 active:opacity-60"
                     >
                       <Star color="#94A3B8" size={22} strokeWidth={1.8} />
-                    </TouchableOpacity>
+                    </Pressable>
                   </View>
-                </TouchableOpacity>
+                </Pressable>
               );
             })}
           </View>
@@ -208,7 +201,7 @@ export default function WorkoutCatalogScreen() {
         <View className="absolute bottom-10 left-6 right-6 z-50 items-center pointer-events-none">
           <View
             className="bg-slate-900/95 px-5 py-3.5 rounded-full shadow-2xl border border-slate-800 max-w-[95%]"
-            style={{ elevation: 8 }}
+            style={{ boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)' }}
           >
             <Text className="text-white text-xs font-medium text-center leading-4">
               {toastMessage}
@@ -236,47 +229,44 @@ export default function WorkoutCatalogScreen() {
               Thêm bài tập thể dục
             </Text>
 
-            <TouchableOpacity
+            <Pressable
               onPress={() => {
                 setShowAddMenu(false);
-                router.push('/workout/select' as any);
+                safeRouter.navigate('/workout/select');
               }}
-              activeOpacity={0.8}
-              className="flex-row items-center gap-4 py-3.5 px-4 rounded-2xl bg-slate-50 mb-3 border border-slate-200/80"
+              className="flex-row items-center gap-4 py-3.5 px-4 rounded-2xl bg-slate-50 mb-3 border border-slate-200/80 active:bg-slate-100"
             >
               <ListOrdered color="#10B981" size={22} />
               <Text className="text-slate-800 font-semibold text-base">
                 Chọn từ danh sách bài tập
               </Text>
-            </TouchableOpacity>
+            </Pressable>
 
-            <TouchableOpacity
+            <Pressable
               onPress={() => {
                 setShowAddMenu(false);
                 setShowCreateModal(true);
               }}
-              activeOpacity={0.8}
-              className="flex-row items-center gap-4 py-3.5 px-4 rounded-2xl bg-slate-50 mb-3 border border-slate-200/80"
+              className="flex-row items-center gap-4 py-3.5 px-4 rounded-2xl bg-slate-50 mb-3 border border-slate-200/80 active:bg-slate-100"
             >
               <PlusCircle color="#0EA5E9" size={22} />
               <Text className="text-slate-800 font-semibold text-base">
                 Tạo bài tập thể dục mới
               </Text>
-            </TouchableOpacity>
+            </Pressable>
 
-            <TouchableOpacity
+            <Pressable
               onPress={() => {
                 setShowAddMenu(false);
-                router.push('/workout/create-routine' as any);
+                safeRouter.navigate('/workout/create-routine');
               }}
-              activeOpacity={0.8}
-              className="flex-row items-center gap-4 py-3.5 px-4 rounded-2xl bg-slate-50 border border-slate-200/80"
+              className="flex-row items-center gap-4 py-3.5 px-4 rounded-2xl bg-slate-50 border border-slate-200/80 active:bg-slate-100"
             >
               <Timer color="#F59E0B" size={22} />
               <Text className="text-slate-800 font-semibold text-base">
                 Tạo lịch trình tập luyện
               </Text>
-            </TouchableOpacity>
+            </Pressable>
 
             <View className="h-4" />
           </Pressable>

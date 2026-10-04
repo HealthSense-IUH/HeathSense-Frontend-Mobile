@@ -3,7 +3,7 @@ import { View, Text, ActivityIndicator, Pressable, Animated, Easing } from 'reac
 import { Settings } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StitchBleWaveIcon } from '@/components/ui/icons/StitchIcons';
-import { useRouter } from 'expo-router';
+import { safeRouter } from '@/utils/safeNavigation';
 import { THEME } from '@/constants/theme';
 
 interface BleRadarStatusProps {
@@ -15,8 +15,6 @@ export const BleRadarStatus: React.FC<BleRadarStatusProps> = ({
   isScanning,
   scanStatusMessage,
 }) => {
-  const router = useRouter();
-
   // Standard React Native / React 19 Animated state (persistent across renders without ref access)
   const [pulse1] = useState(() => new Animated.Value(0));
   const [pulse2] = useState(() => new Animated.Value(0));
@@ -90,7 +88,7 @@ export const BleRadarStatus: React.FC<BleRadarStatusProps> = ({
       {/* Top Right Settings Gear Button */}
       <Pressable 
         aria-label="Cài đặt kết nối"
-        onPress={() => router.push('/(tabs)/settings' as any)}
+        onPress={() => safeRouter.navigate('/(tabs)/settings')}
         className="absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-100/80 flex items-center justify-center active:opacity-70 z-20"
       >
         <Settings color="#64748B" size={18} strokeWidth={2} />

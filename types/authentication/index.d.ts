@@ -1,11 +1,16 @@
 //////////Common//////////
 export interface UserSession {
     userId: number;
+    id?: number;
     email: string;
     fullName: string;
+    displayName?: string;
     role: string;
     accountStatus: string;
+    status?: string;
     timezone?: string;
+    avatarUrl?: string;
+    phone?: string;
 }
 
 export interface ApiResponse<T> {

@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, ActivityIndicator, Pressable, ScrollView, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
+import { safeRouter } from '@/utils/safeNavigation';
 import { ChevronLeft, Settings, Info, Plus } from 'lucide-react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -21,7 +21,6 @@ const STAT_COLORS = {
 };
 
 export default function AFibAnalysisDetailsScreen() {
-  const router = useRouter();
   const insets = useSafeAreaInsets();
   const [activeFilter, setActiveFilter] = useState<FilterType>('Ngày');
   const [referenceDate, setReferenceDate] = useState(new Date());
@@ -36,6 +35,13 @@ export default function AFibAnalysisDetailsScreen() {
   }, []);
 
   const { data, loading, error } = useHealthStatistics(activeFilter, referenceDate);
+
+  const handleFilterChange = (filter: FilterType) => {
+    if (filter === activeFilter) return;
+    React.startTransition(() => {
+      setActiveFilter(filter);
+    });
+  };
 
   const handlePrev = () => {
     const newDate = new Date(referenceDate);
@@ -126,7 +132,7 @@ export default function AFibAnalysisDetailsScreen() {
       [
         {
           text: 'Đo lâm sàng ngay',
-          onPress: () => router.push('/afib-measure' as any),
+          onPress: () => safeRouter.navigate('/afib-measure'),
         },
         { text: 'Đóng', style: 'cancel' },
       ]
@@ -166,9 +172,7 @@ export default function AFibAnalysisDetailsScreen() {
     if (chartData.length > 0) {
       chartAreaContent = (
         <BarChart
-          key={activeFilter}
-          isAnimated
-          animationDuration={800}
+          isAnimated={false}
           stackData={chartData}
           barWidth={activeFilter === 'Tháng' ? 6 : (activeFilter === 'Ngày' ? 8 : 12)}
           spacing={activeFilter === 'Tháng' ? 4 : (activeFilter === 'Ngày' ? 8 : 16)}
@@ -261,7 +265,7 @@ export default function AFibAnalysisDetailsScreen() {
         {/* BEGIN: Action Button (In scroll flow) */}
         <View className="px-5 mt-1 mb-6">
           <Pressable
-            onPress={() => router.push('/afib-measure' as any)}
+            onPress={() => safeRouter.navigate('/afib-measure')}
             className="w-full py-3.5 px-4 bg-medical-500 active:bg-medical-600 rounded-2xl flex-row items-center justify-center active:opacity-80"
             style={{
               shadowColor: 'rgba(13, 110, 253, 0.35)',
@@ -290,7 +294,7 @@ export default function AFibAnalysisDetailsScreen() {
         <View className="px-5 py-3 flex-row items-center justify-between relative">
           {/* Back Action Button */}
           <Pressable
-            onPress={() => router.back()}
+            onPress={() => safeRouter.back()}
             className="w-10 h-10 rounded-full bg-white items-center justify-center border border-slate-100 active:opacity-80"
             style={{
               shadowColor: 'rgba(13, 110, 253, 0.06)',
@@ -305,7 +309,7 @@ export default function AFibAnalysisDetailsScreen() {
           </Pressable>
 
           {/* Main Title */}
-          <Text className="text-xl font-extrabold text-slate-900 tracking-tight text-center flex-1 pr-1">
+          <Text className="text-[20px] font-bold text-slate-900 tracking-tight text-center flex-1 pr-1">
             Chi tiết phân tích
           </Text>
 
@@ -334,7 +338,7 @@ export default function AFibAnalysisDetailsScreen() {
           showsVerticalScrollIndicator={false}
         >
           {/* TimeSegmentedControl */}
-          <TimeFilterTabs activeFilter={activeFilter} onChange={setActiveFilter} />
+          <TimeFilterTabs activeFilter={activeFilter} onChange={handleFilterChange} />
 
           {/* DateNavigatorPill */}
           <PeriodSelector

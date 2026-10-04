@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Pressable, ScrollView, ActivityIndicator, Alert } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
+import { safeRouter } from '@/utils/safeNavigation';
 import { ArrowLeft, Clock, Activity, ShieldAlert, AlertCircle, Heart, ChevronRight, SlidersHorizontal } from 'lucide-react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -43,7 +44,6 @@ const formatTime = (isoString: string) => {
 };
 
 export default function HistoryRecordsScreen() {
-  const router = useRouter();
   const insets = useSafeAreaInsets();
   const { date } = useLocalSearchParams<{ date: string }>();
 
@@ -118,7 +118,7 @@ export default function HistoryRecordsScreen() {
               <Pressable
                 key={record.id}
                 onPress={() => handleRecordPress(record)}
-                className="bg-white rounded-[22px] p-5 border border-slate-100/80 active:opacity-80 transition-all mb-3.5"
+                className="bg-white rounded-[22px] p-5 border border-slate-100/80 active:opacity-80 mb-3.5"
                 style={{
                   shadowColor: 'rgba(9, 30, 66, 0.05)',
                   shadowOffset: { width: 0, height: 4 },
@@ -190,7 +190,7 @@ export default function HistoryRecordsScreen() {
         <View className="px-5 pt-3 pb-5 flex-row items-center justify-between">
           <View className="flex-row items-center gap-4">
             <Pressable
-              onPress={() => router.back()}
+              onPress={() => safeRouter.back()}
               className="w-10 h-10 rounded-full bg-white border border-slate-100 items-center justify-center active:opacity-80"
               style={{
                 shadowColor: 'rgba(15, 23, 42, 0.05)',
@@ -203,7 +203,7 @@ export default function HistoryRecordsScreen() {
             >
               <ArrowLeft color="#0B1329" size={20} strokeWidth={2.4} />
             </Pressable>
-            <Text className="text-[23px] font-extrabold text-[#0B1329] tracking-tight">
+            <Text className="text-[20px] font-bold text-[#0B1329] tracking-tight">
               Chi tiết theo ngày
             </Text>
           </View>

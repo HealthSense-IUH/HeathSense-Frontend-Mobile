@@ -30,7 +30,9 @@ export const useHealthStatistics = (filter: FilterType, referenceDate: Date) => 
   const query = useQuery<HealthStatisticsResponse, Error>({
     queryKey: [QUERY_KEYS.HEALTH_STATS, period, dateKey],
     queryFn: () => getHealthStatisticsApi(period, formattedDate, timezone),
-    placeholderData: keepPreviousData, // <--- Giữ data cũ trong lúc fetch data mới để chống giật UI
+    placeholderData: keepPreviousData, // Giữ data cũ trong lúc fetch data mới để chống giật UI
+    staleTime: 5 * 60 * 1000, // Cache dữ liệu 5 phút: chuyển tab tức thì 0ms, không tốn request mạng
+    gcTime: 30 * 60 * 1000, // Giữ trong bộ nhớ cache 30 phút
   });
 
   return {

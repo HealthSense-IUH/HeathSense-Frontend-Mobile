@@ -27,7 +27,8 @@
         "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.POST_NOTIFICATIONS",
         "android.permission.FOREGROUND_SERVICE",
-        "android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE"
+        "android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE",
+        "android.permission.ACTIVITY_RECOGNITION"
       ],
       "package": "com.huynhducphu.healthsensefrontendmobile",
       "softwareKeyboardLayoutMode": "pan",

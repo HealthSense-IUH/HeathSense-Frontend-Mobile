@@ -1,5 +1,5 @@
-import { View, Text, TouchableOpacity } from 'react-native';
-import { useRouter } from 'expo-router';
+import { View, Text, Pressable } from 'react-native';
+import { safeRouter } from '@/utils/safeNavigation';
 import { Bluetooth, Activity, Flame, Footprints, Heart, Battery, Settings, Dumbbell, ChevronRight } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BackgroundGradient } from '@/components/ui/BackgroundGradient';
@@ -12,7 +12,6 @@ import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
 import { THEME } from '@/constants/theme';
 
 export default function HomeScreen() {
-  const router = useRouter();
   const currentBPM = useBleStore(state => state.currentBPM);
   const currentSpO2 = useBleStore(state => state.currentSpO2);
   const connectedDevice = useBleStore(state => state.connectedDeviceId);
@@ -28,14 +27,11 @@ export default function HomeScreen() {
       statusBarStyle="dark"
       backgroundComponent={<BackgroundGradient />}
       headerRight={
-        <TouchableOpacity
+        <Pressable
           onPress={() => {
-            setTimeout(() => {
-              router.push("/(public)/scan" as any);
-            }, 50);
+            safeRouter.navigate("/(public)/scan");
           }}
-          activeOpacity={0.8}
-          className="flex-row items-center gap-1.5 py-1.5 px-3 rounded-full bg-white/90 border border-blue-100 shadow-sm"
+          className="flex-row items-center gap-1.5 py-1.5 px-3 rounded-full bg-white/90 border border-blue-100 shadow-sm active:opacity-75"
           style={{
             shadowColor: 'rgba(13, 110, 253, 0.08)',
             shadowOffset: { width: 0, height: 2 },
@@ -43,6 +39,7 @@ export default function HomeScreen() {
             shadowRadius: 6,
             elevation: 2,
           }}
+          hitSlop={6}
         >
           <Bluetooth
             color={isConnected ? THEME.colors.statusNormal : THEME.colors.primary}
@@ -55,19 +52,16 @@ export default function HomeScreen() {
           >
             {isConnected ? 'Đã kết nối' : 'Chờ kết nối'}
           </Text>
-        </TouchableOpacity>
+        </Pressable>
       }
     >
       <View className="px-5 mt-3">
         {/* Interactive BLE Connection Status Card (Stitch Specs) */}
-        <TouchableOpacity
+        <Pressable
           onPress={() => {
-            setTimeout(() => {
-              router.push("/(public)/scan" as any);
-            }, 50);
+            safeRouter.navigate("/(public)/scan");
           }}
-          activeOpacity={0.85}
-          className="relative overflow-hidden rounded-2xl bg-white/90 border border-slate-200/80 p-4 mb-5 shadow-sm"
+          className="relative overflow-hidden rounded-2xl bg-white/90 border border-slate-200/80 p-4 mb-5 shadow-sm active:opacity-85"
           style={{
             shadowColor: 'rgba(15, 23, 42, 0.06)',
             shadowOffset: { width: 0, height: 4 },
@@ -146,14 +140,14 @@ export default function HomeScreen() {
               </Text>
             </LinearGradient>
           </View>
-        </TouchableOpacity>
+        </Pressable>
 
         {/* Section Header with Quick Settings Gear Button */}
         <View className="flex-row items-center justify-between mb-3">
           <Text className="text-lg font-bold text-slate-900 tracking-tight">Chỉ số hôm nay</Text>
-          <TouchableOpacity
-            onPress={() => router.push('/(tabs)/smart-health' as any)}
-            className="w-9 h-9 rounded-xl bg-white border border-slate-200/80 shadow-sm items-center justify-center active:opacity-80"
+          <Pressable
+            onPress={() => safeRouter.navigate('/(tabs)/smart-health')}
+            className="w-9 h-9 rounded-xl bg-white border border-slate-200/80 shadow-sm items-center justify-center active:opacity-70"
             style={{
               shadowColor: 'rgba(15, 23, 42, 0.05)',
               shadowOffset: { width: 0, height: 2 },
@@ -161,10 +155,11 @@ export default function HomeScreen() {
               shadowRadius: 6,
               elevation: 1,
             }}
+            hitSlop={6}
             aria-label="Cài đặt chỉ số"
           >
             <Settings color="#64748B" size={16} strokeWidth={2} />
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
         {/* 2x2 Metrics Grid (100% Stitch Gradient Cards) */}
@@ -223,10 +218,9 @@ export default function HomeScreen() {
         </View>
 
         {/* Workout & Sports Hub Quick Action Card */}
-        <TouchableOpacity
-          onPress={() => router.push('/workout' as any)}
-          activeOpacity={0.8}
-          className="mb-5 rounded-2xl bg-white/95 border border-slate-200/80 p-4 shadow-sm flex-row items-center justify-between"
+        <Pressable
+          onPress={() => safeRouter.navigate('/workout')}
+          className="mb-5 rounded-2xl bg-white/95 border border-slate-200/80 p-4 shadow-sm flex-row items-center justify-between active:opacity-80"
           style={{
             shadowColor: 'rgba(15, 23, 42, 0.05)',
             shadowOffset: { width: 0, height: 2 },
@@ -252,7 +246,7 @@ export default function HomeScreen() {
           <View className="w-8 h-8 rounded-full bg-slate-100 items-center justify-center ml-2">
             <ChevronRight color="#64748B" size={18} strokeWidth={2.4} />
           </View>
-        </TouchableOpacity>
+        </Pressable>
 
         {/* AFib Screening Section */}
         <Text className="text-lg font-bold text-slate-900 tracking-tight mb-3 mt-1">

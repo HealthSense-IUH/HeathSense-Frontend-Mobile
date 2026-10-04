@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 interface GradientButtonProps {
@@ -18,11 +18,10 @@ export const GradientButton = ({
   disabled = false 
 }: GradientButtonProps) => {
   return (
-    <TouchableOpacity
-      activeOpacity={0.8}
+    <Pressable
       onPress={onPress}
       disabled={disabled}
-      className={`w-full overflow-hidden rounded-2xl ${className}`}
+      className={`w-full overflow-hidden rounded-2xl active:opacity-80 ${className}`}
       style={{
         shadowColor: 'rgba(13, 110, 253, 0.35)',
         shadowOffset: { width: 0, height: 8 },
@@ -42,6 +41,6 @@ export const GradientButton = ({
         </Text>
         {icon && <View className="ml-2">{icon}</View>}
       </LinearGradient>
-    </TouchableOpacity>
+    </Pressable>
   );
 };

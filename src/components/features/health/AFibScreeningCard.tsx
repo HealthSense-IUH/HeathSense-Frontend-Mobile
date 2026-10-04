@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Text, Pressable, View, Alert } from 'react-native';
 import { HeartPulse, CheckCircle2, AlertCircle, Play, ArrowRight, Timer } from 'lucide-react-native';
 import Svg, { Path } from 'react-native-svg';
-import { useRouter } from 'expo-router';
+import { safeRouter } from '@/utils/safeNavigation';
 import { useBleStore } from '@/services/ble-management/bleStore';
 import { LinearGradient } from 'expo-linear-gradient';
 import { getAFibScreeningAvailability, useWorkoutEngineStore } from '@/services/workout';
 
 export function AFibScreeningCard() {
-  const router = useRouter();
   const aiAnalysisResult = useBleStore(state => state.aiAnalysisResult);
   const workoutStatus = useWorkoutEngineStore(state => state.status);
   const lastWorkoutEndedAt = useWorkoutEngineStore(state => state.lastWorkoutEndedAt);
@@ -48,9 +47,7 @@ export function AFibScreeningCard() {
       }
       return;
     }
-    setTimeout(() => {
-      router.push("/afib-measure" as any);
-    }, 50);
+    safeRouter.navigate("/afib-measure");
   };
 
   return (

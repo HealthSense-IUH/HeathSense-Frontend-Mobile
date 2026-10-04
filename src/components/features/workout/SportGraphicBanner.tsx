@@ -20,10 +20,7 @@ export const SportGraphicBanner: React.FC<SportGraphicBannerProps> = ({
         className="w-[88%] h-44 rounded-3xl overflow-hidden relative items-center justify-center"
         style={{
           backgroundColor: '#1E293B',
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: 0.3,
-          shadowRadius: 16,
+          boxShadow: '0 8px 16px rgba(0, 0, 0, 0.3)',
         }}
       >
         <Svg width="100%" height="100%" viewBox="0 0 340 180" className="absolute">

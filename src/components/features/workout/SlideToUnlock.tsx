@@ -1,10 +1,13 @@
-import React, { useMemo, useState } from 'react';
-import {
-  View,
-  Animated,
-  PanResponder,
-  Vibration,
-} from 'react-native';
+import React from 'react';
+import { View, Vibration } from 'react-native';
+import { GestureDetector, Gesture } from 'react-native-gesture-handler';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
+import { scheduleOnRN } from 'react-native-worklets';
 import { Lock, Unlock, ChevronRight } from 'lucide-react-native';
 
 interface SlideToUnlockProps {
@@ -13,47 +16,39 @@ interface SlideToUnlockProps {
 }
 
 export function SlideToUnlock({ onUnlock, sliderWidth = 260 }: SlideToUnlockProps) {
-  const [pan] = useState(() => new Animated.Value(0));
   const buttonSize = 48;
   const maxSlide = sliderWidth - buttonSize - 12;
+  const translateX = useSharedValue(0);
 
-  const panResponder = useMemo(
-    () =>
-      PanResponder.create({
-        onStartShouldSetPanResponder: () => true,
-        onMoveShouldSetPanResponder: () => true,
-        onPanResponderMove: (_, gestureState) => {
-          if (gestureState.dx > 0) {
-            pan.setValue(Math.min(maxSlide, gestureState.dx));
+  const triggerUnlock = () => {
+    try {
+      Vibration.vibrate(60);
+    } catch {}
+    onUnlock();
+  };
+
+  const panGesture = Gesture.Pan()
+    .onChange((event) => {
+      if (event.translationX > 0) {
+        translateX.value = Math.min(maxSlide, event.translationX);
+      }
+    })
+    .onEnd((event) => {
+      if (event.translationX >= maxSlide * 0.65) {
+        translateX.value = withTiming(maxSlide, { duration: 90 }, (finished) => {
+          if (finished) {
+            scheduleOnRN(triggerUnlock);
+            translateX.value = 0;
           }
-        },
-        onPanResponderRelease: (_, gestureState) => {
-          if (gestureState.dx >= maxSlide * 0.65) {
-            // Completed slide to unlock
-            Animated.timing(pan, {
-              toValue: maxSlide,
-              duration: 90,
-              useNativeDriver: true,
-            }).start(() => {
-              try {
-                Vibration.vibrate(60);
-              } catch {}
-              onUnlock();
-              pan.setValue(0);
-            });
-          } else {
-            // Spring back to start
-            Animated.spring(pan, {
-              toValue: 0,
-              friction: 6,
-              tension: 50,
-              useNativeDriver: true,
-            }).start();
-          }
-        },
-      }),
-    [maxSlide, onUnlock, pan]
-  );
+        });
+      } else {
+        translateX.value = withSpring(0, { damping: 15, stiffness: 150 });
+      }
+    });
+
+  const animatedHandleStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: translateX.value }],
+  }));
 
   return (
     <View
@@ -68,23 +63,26 @@ export function SlideToUnlock({ onUnlock, sliderWidth = 260 }: SlideToUnlockProp
       }}
     >
       {/* Draggable White Lock Handle */}
-      <Animated.View
-        style={{
-          transform: [{ translateX: pan }],
-          zIndex: 20,
-        }}
-        {...panResponder.panHandlers}
-      >
-        <View className="w-12 h-12 rounded-full bg-white items-center justify-center shadow-lg active:opacity-90">
-          <Lock color="#000000" size={20} strokeWidth={2.4} />
-        </View>
-      </Animated.View>
+      <GestureDetector gesture={panGesture}>
+        <Animated.View
+          style={[
+            {
+              zIndex: 20,
+            },
+            animatedHandleStyle,
+          ]}
+        >
+          <View className="w-12 h-12 rounded-full bg-white items-center justify-center shadow-lg active:opacity-90">
+            <Lock color="#000000" size={20} strokeWidth={2.4} />
+          </View>
+        </Animated.View>
+      </GestureDetector>
 
       {/* Chevrons Guide (Exact >>>>>>> from Samsung Health) */}
       <View className="flex-row items-center justify-center flex-1 mx-1 pointer-events-none">
         {Array.from({ length: 7 }).map((_, i) => (
           <ChevronRight
-            key={i}
+            key={`chevron-${i}`}
             color="#4B5563"
             size={18}
             strokeWidth={2.4}
