@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { consultationApi } from '@/services/consultation.service';
 import { useConsultationSocket } from './useConsultationSocket';
 import { readError, type AlertState } from './useConsultationsLogic';
+import i18n from '@/i18n';
 import type { ConsultationMessageItem, ConsultationSessionItem } from '@/types/consultation';
 
 const CHAT_PAGE_SIZE = 30;
@@ -66,7 +67,7 @@ export function useConsultationChat(sessionId?: string) {
         return data;
       }
     } catch (err) {
-      setAlert({ type: 'error', text: readError(err, 'Không thể tải thông tin phiên tư vấn.') });
+      setAlert({ type: 'error', text: readError(err, i18n.t('consultation:workspace.toasts.loadSessionFailed')) });
     } finally {
       setLoadingSession(false);
     }
@@ -85,9 +86,9 @@ export function useConsultationChat(sessionId?: string) {
       if (status === 404) {
         setMessages([]);
       } else if (status === 409) {
-        setAlert({ type: 'error', text: 'Phiên tư vấn đã bị hủy hoặc không còn hoạt động.' });
+        setAlert({ type: 'error', text: i18n.t('consultation:logic.alerts.sessionCancelledOrInactive') });
       } else {
-        setAlert({ type: 'error', text: readError(err, 'Không thể tải lịch sử tin nhắn.') });
+        setAlert({ type: 'error', text: readError(err, i18n.t('consultation:logic.alerts.loadMessagesFailed')) });
       }
     }
   }, [sessionId]);
@@ -131,7 +132,7 @@ export function useConsultationChat(sessionId?: string) {
       });
       setHasMore(content.length === CHAT_PAGE_SIZE);
     } catch (err) {
-      setAlert({ type: 'error', text: readError(err, 'Không thể tải tin nhắn cũ hơn.') });
+      setAlert({ type: 'error', text: readError(err, i18n.t('consultation:logic.alerts.loadOlderMessagesFailed')) });
     } finally {
       setLoadingMore(false);
     }
@@ -155,12 +156,12 @@ export function useConsultationChat(sessionId?: string) {
         const code = (err as { response?: { data?: { code?: number } } })?.response?.data?.code;
         const msg = readError(err, '').toLowerCase();
         if (status === 409 || code === 4003) {
-          setAlert({ type: 'error', text: 'Phiên tư vấn chưa mở hoặc không còn hoạt động.' });
+          setAlert({ type: 'error', text: i18n.t('consultation:logic.alerts.sessionInactive') });
           void refreshSession();
         } else if (msg.includes('support hours') || msg.includes('support_hours')) {
-          setAlert({ type: 'error', text: 'Bạn chỉ có thể gửi tin nhắn trong khung giờ hỗ trợ của phiên tư vấn.' });
+          setAlert({ type: 'error', text: i18n.t('consultation:logic.alerts.outsideSupportHoursSend') });
         } else {
-          setAlert({ type: 'error', text: readError(err, 'Không thể gửi tin nhắn.') });
+          setAlert({ type: 'error', text: readError(err, i18n.t('consultation:logic.alerts.sendMessageFailed')) });
         }
         return false;
       } finally {

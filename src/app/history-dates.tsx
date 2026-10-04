@@ -4,16 +4,17 @@ import { useRouter } from 'expo-router';
 import { ArrowLeft, ChevronDown, ChevronRight, Calendar, Info } from 'lucide-react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import { useTranslation } from 'react-i18next';
 import { useAvailableHistoryDates } from '@/hooks/useHealthHistory';
 
 // Helper to group dates into tree: { [year]: { [month]: Set(day) } }
 const groupDates = (dates: string[]) => {
   const tree: Record<string, Record<string, Set<string>>> = {};
-  
+
   dates.forEach((dateStr) => {
     const [year, month, day] = dateStr.split('-');
     if (!year || !month || !day) return;
-    
+
     if (!tree[year]) {
       tree[year] = {};
     }
@@ -34,22 +35,17 @@ const groupDates = (dates: string[]) => {
   return result;
 };
 
-const getSubtitle = (year: string, month: string, day: string) => {
+const isToday = (year: string, month: string, day: string) => {
   const today = new Date();
   const y = today.getFullYear().toString();
   const m = (today.getMonth() + 1).toString().padStart(2, '0');
   const d = today.getDate().toString().padStart(2, '0');
 
-  const paddedMonth = month.padStart(2, '0');
-  const paddedDay = day.padStart(2, '0');
-
-  if (year === y && paddedMonth === m && paddedDay === d) {
-    return 'Hôm nay • Bản ghi gần nhất';
-  }
-  return 'Bản ghi đã lưu';
+  return year === y && month.padStart(2, '0') === m && day.padStart(2, '0') === d;
 };
 
 export default function HistoryScreen() {
+  const { t } = useTranslation('health');
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { data: dates, isLoading, isFetching, error, refetch } = useAvailableHistoryDates();
@@ -80,12 +76,14 @@ export default function HistoryScreen() {
     });
   };
 
+  const monthName = (month: string) => t(`heatmap.months.${Number(month) - 1}`);
+
   const renderContent = () => {
     if (isLoading) {
       return (
         <View className="py-20 justify-center items-center">
           <ActivityIndicator size="large" color="#0D6EFD" />
-          <Text className="mt-4 text-slate-500 font-medium text-sm">Đang tải lịch sử đo...</Text>
+          <Text className="mt-4 text-slate-500 font-medium text-sm">{t('afibHistory.loading')}</Text>
         </View>
       );
     }
@@ -94,7 +92,7 @@ export default function HistoryScreen() {
       return (
         <View className="py-20 justify-center items-center px-6">
           <View className="bg-rose-50 border border-rose-200 rounded-2xl p-4 flex-row items-center">
-            <Text className="text-rose-700 font-semibold text-sm">Lỗi tải dữ liệu. Vui lòng thử lại.</Text>
+            <Text className="text-rose-700 font-semibold text-sm">{t('common:state.loadError')}</Text>
           </View>
         </View>
       );
@@ -104,7 +102,7 @@ export default function HistoryScreen() {
       return (
         <View className="py-20 justify-center items-center">
           <Calendar color="#94A3B8" size={48} className="mb-4" />
-          <Text className="text-slate-500 font-semibold text-sm">Chưa có dữ liệu đo nào</Text>
+          <Text className="text-slate-500 font-semibold text-sm">{t('historyDates.empty')}</Text>
         </View>
       );
     }
@@ -127,7 +125,7 @@ export default function HistoryScreen() {
                 onPress={() => toggleYear(year)}
                 className="flex-row items-center justify-between pb-4 border-b border-slate-100 active:opacity-75"
               >
-                <Text className="font-bold text-base text-[#0D6EFD] tracking-tight">Năm {year}</Text>
+                <Text className="font-bold text-base text-[#0D6EFD] tracking-tight">{t('historyDates.year', { year })}</Text>
                 {isYearExpanded ? (
                   <ChevronDown color="#0D6EFD" size={20} strokeWidth={2.4} />
                 ) : (
@@ -157,7 +155,7 @@ export default function HistoryScreen() {
                           onPress={() => toggleMonth(yearMonth, isDefaultMonthExpanded)}
                           className="flex-row items-center justify-between mb-3 active:opacity-75"
                         >
-                          <Text className="font-bold text-sm text-slate-800">Tháng {Number(month)}</Text>
+                          <Text className="font-bold text-sm text-slate-800">{monthName(month)}</Text>
                           {isMonthExpanded ? (
                             <ChevronDown color="#94A3B8" size={18} strokeWidth={2.2} />
                           ) : (
@@ -169,8 +167,12 @@ export default function HistoryScreen() {
                         {isMonthExpanded && (
                           <View className="space-y-2 mt-1">
                             {days.map((day) => {
-                              const formattedDateTitle = `Ngày ${day.padStart(2, '0')} Tháng ${month.padStart(2, '0')}`;
-                              const subtitle = getSubtitle(year, month, day);
+                              const formattedDateTitle = t('historyDates.dayTitle', {
+                                day: day.padStart(2, '0'),
+                                month: month.padStart(2, '0'),
+                                monthName: monthName(month),
+                              });
+                              const subtitle = isToday(year, month, day) ? t('historyDates.subtitleToday') : t('historyDates.subtitleSaved');
 
                               return (
                                 <Pressable
@@ -217,7 +219,7 @@ export default function HistoryScreen() {
             <Info color="#0D6EFD" size={18} strokeWidth={2.2} />
           </View>
           <Text className="flex-1 text-xs font-medium text-slate-600 leading-relaxed">
-            Chọn một ngày để xem các lần đo trong ngày đó.
+            {t('historyDates.hint')}
           </Text>
         </View>
         {/* END: Notice Banner Card */}
@@ -236,12 +238,12 @@ export default function HistoryScreen() {
               onPress={() => router.back()}
               className="w-11 h-11 rounded-full bg-white border border-slate-100 items-center justify-center active:opacity-80"
               style={{ boxShadow: '0 4px 20px rgba(15, 23, 42, 0.05)' }}
-              aria-label="Quay lại"
+              aria-label={t('common:actions.back')}
             >
               <ArrowLeft color="#334155" size={20} strokeWidth={2.2} />
             </Pressable>
             <Text className="text-2xl font-bold tracking-tight text-slate-900">
-              Lịch đo theo ngày
+              {t('historyDates.title')}
             </Text>
           </View>
         </View>

@@ -15,6 +15,7 @@ import axiosClient, {
   SESSION_ID_KEY,
   USER_SESSION_KEY,
 } from '@/utils/axiosClient';
+import i18n from '@/i18n';
 
 /**
  * Lưu toàn bộ Auth Data (Tokens & Session) vào SecureStore
@@ -82,7 +83,7 @@ export const loginApi = async (data: LoginRequest): Promise<MobileLoginResponse>
 
   const result = response.data?.data || response.data?.result || (response.data as any);
   if (!result || !result.accessToken) {
-    throw new Error(response.data?.message || 'Đăng nhập không thành công');
+    throw new Error(response.data?.message || i18n.t('auth:errors.loginFailed'));
   }
 
   await saveAuthData(result);
@@ -100,7 +101,7 @@ export const registerApi = async (data: RegisterRequest): Promise<UserSession> =
 
   const result = response.data?.data || response.data?.result || (response.data as any);
   if (!result) {
-    throw new Error(response.data?.message || 'Đăng ký không thành công');
+    throw new Error(response.data?.message || i18n.t('auth:errors.registerFailed'));
   }
 
   return result;

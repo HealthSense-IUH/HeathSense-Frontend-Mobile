@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { creditsApi } from '@/services/credits.service';
 import { CREDIT_ERROR_CODE_MESSAGES } from '@/constants/credits';
+import i18n from '@/i18n';
 import type { PageResponse } from '@/types/base';
 import type {
   CreditLedgerEntry,
@@ -13,11 +14,32 @@ import type {
 
 export type PaymentDatePreset = 'all' | 'today' | 'last7days' | 'thisMonth';
 
+/** Nhãn đọc từ i18n lúc truy cập (getter) để đổi ngôn ngữ là nhãn đổi theo. */
 export const PAYMENT_DATE_PRESETS: { key: PaymentDatePreset; label: string }[] = [
-  { key: 'all', label: 'Toàn thời gian' },
-  { key: 'today', label: 'Hôm nay' },
-  { key: 'last7days', label: '7 ngày qua' },
-  { key: 'thisMonth', label: 'Tháng này' },
+  {
+    key: 'all',
+    get label() {
+      return i18n.t('credits:filters.allTime');
+    },
+  },
+  {
+    key: 'today',
+    get label() {
+      return i18n.t('credits:filters.today');
+    },
+  },
+  {
+    key: 'last7days',
+    get label() {
+      return i18n.t('credits:filters.last7days');
+    },
+  },
+  {
+    key: 'thisMonth',
+    get label() {
+      return i18n.t('credits:filters.thisMonth');
+    },
+  },
 ];
 
 const unwrap = <T,>(res: unknown): T => {
@@ -81,7 +103,7 @@ export function useCreditsData() {
     try {
       setWallet(unwrap<CreditWallet>(await creditsApi.getWallet()));
     } catch (err) {
-      setWalletError(readCreditsError(err, 'Không thể tải thông tin ví.').message);
+      setWalletError(readCreditsError(err, i18n.t('credits:data.errors.wallet')).message);
     } finally {
       setLoadingWallet(false);
     }
@@ -94,10 +116,10 @@ export function useCreditsData() {
     try {
       setPackages(unwrap<CreditPackage[]>(await creditsApi.getPackages()) || []);
     } catch (err) {
-      const parsed = readCreditsError(err, 'Không thể tải danh sách gói lượt.');
+      const parsed = readCreditsError(err, i18n.t('credits:data.errors.packages'));
       if (parsed.status === 503 || parsed.code === 4108) {
         setIsFeatureDisabled(true);
-        setPackagesError('Chức năng mua lượt tư vấn tạm thời chưa khả dụng.');
+        setPackagesError(i18n.t('credits:purchase.errors.featureDisabled'));
       } else {
         setPackagesError(parsed.message);
       }
@@ -126,7 +148,7 @@ export function useCreditsData() {
       setOrders(unwrap<PageResponse<CreditOrderSummary>>(await creditsApi.getOrders({ page, size: 10, status, ...getPaymentDateRange(preset) })));
       setOrdersPage(page);
     } catch (err) {
-      setOrdersError(readCreditsError(err, 'Không thể tải lịch sử đơn mua.').message);
+      setOrdersError(readCreditsError(err, i18n.t('credits:data.errors.orders')).message);
     } finally {
       setLoadingOrders(false);
     }
@@ -139,7 +161,7 @@ export function useCreditsData() {
       setLedger(unwrap<PageResponse<CreditLedgerEntry>>(await creditsApi.getLedger(page, 10)));
       setLedgerPage(page);
     } catch (err) {
-      setLedgerError(readCreditsError(err, 'Không thể tải lịch sử biến động lượt.').message);
+      setLedgerError(readCreditsError(err, i18n.t('credits:data.errors.ledger')).message);
     } finally {
       setLoadingLedger(false);
     }

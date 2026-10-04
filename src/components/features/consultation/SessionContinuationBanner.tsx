@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { AlertCircle, CheckCircle2, Clock, RefreshCw, XCircle } from 'lucide-react-native';
 import { consultationApi } from '@/services/consultation.service';
 import { isQueueFlow } from '@/constants/consultation';
@@ -22,11 +23,20 @@ function formatCountdown(ms: number): string {
   return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
 }
 
+/** Mã lỗi nghiệp vụ khi gửi quyết định tiếp tục → khóa i18n (giống web). */
+const DECISION_ERROR_KEYS: Record<number, string> = {
+  4031: 'chat.continuation.errors.blockNotEnded',
+  4032: 'chat.continuation.errors.graceExpired',
+  4033: 'chat.continuation.errors.decisionLocked',
+  4034: 'chat.continuation.errors.stateChanged',
+};
+
 /**
  * Khối 15 phút của phiên hàng đợi (giống web SessionContinuationBanner): đếm ngược khối hiện tại;
  * hết khối thì hỏi hai bên có tiếp tục 15 phút nữa không (5 phút để quyết định).
  */
 export function SessionContinuationBanner({ session, onSessionRefreshed }: Props) {
+  const { t } = useTranslation('consultation');
   const queueV1 = isQueueFlow(session.flowType);
   const isActive = session.status === 'ACTIVE';
   const [now, setNow] = useState(() => Date.now());
@@ -95,13 +105,8 @@ export function SessionContinuationBanner({ session, onSessionRefreshed }: Props
       refreshRef.current();
     } catch (err) {
       const code = (err as { response?: { data?: { code?: number } } })?.response?.data?.code;
-      const messages: Record<number, string> = {
-        4031: 'Block 15 phút chưa kết thúc.',
-        4032: 'Đã hết thời gian 5 phút xác nhận tiếp tục.',
-        4033: 'Lựa chọn đã được ghi nhận và không thể thay đổi.',
-        4034: 'Trạng thái tiếp tục đã thay đổi. Đang tải lại...',
-      };
-      Alert.alert('Không thể gửi quyết định', (code && messages[code]) || readError(err, 'Không thể gửi quyết định.'));
+      const key = code ? DECISION_ERROR_KEYS[code] : undefined;
+      Alert.alert(t('chat.continuation.errors.submitFailedTitle'), key ? t(key) : readError(err, t('chat.continuation.errors.submitFailed')));
       refreshRef.current();
     } finally {
       setActionLoading(false);
@@ -116,11 +121,11 @@ export function SessionContinuationBanner({ session, onSessionRefreshed }: Props
       <View className="flex-row items-center justify-between px-4 py-2 bg-muted/40 border-b border-border/60">
         <View className="flex-row items-center" style={{ gap: 6 }}>
           <Clock size={14} color="#0D6EFD" />
-          <Text className="text-xs text-muted-foreground">Thời gian block tư vấn (Lượt {session.continuationRound || 0}):</Text>
+          <Text className="text-xs text-muted-foreground">{t('chat.continuation.blockTime', { round: session.continuationRound || 0 })}</Text>
           <Text className="text-xs font-semibold text-foreground">{formatCountdown(Math.max(0, endsAtMs - now))}</Text>
         </View>
         <View className="px-2 py-0.5 rounded-full bg-primary/5 border border-primary/20">
-          <Text className="text-[10px] font-semibold text-primary">Khung 15 phút</Text>
+          <Text className="text-[10px] font-semibold text-primary">{t('chat.continuation.blockBadge')}</Text>
         </View>
       </View>
     );
@@ -136,8 +141,8 @@ export function SessionContinuationBanner({ session, onSessionRefreshed }: Props
           <View className="flex-row items-start flex-1" style={{ gap: 8 }}>
             <AlertCircle size={18} color="#D97706" />
             <View className="flex-1">
-              <Text className="text-sm font-semibold text-amber-950">Phiên tư vấn hiện tại đã kết thúc (15 phút).</Text>
-              <Text className="text-xs text-amber-800 mt-0.5 leading-4">Bạn có muốn tiếp tục thêm 15 phút không? Cả hai bên cần đồng ý để tiếp tục phiên.</Text>
+              <Text className="text-sm font-semibold text-amber-950">{t('chat.continuation.endedTitle')}</Text>
+              <Text className="text-xs text-amber-800 mt-0.5 leading-4">{t('chat.continuation.endedDescription')}</Text>
             </View>
           </View>
           <View className="flex-row items-center px-2.5 py-1 rounded-full bg-amber-200/60" style={{ gap: 4 }}>
@@ -151,27 +156,27 @@ export function SessionContinuationBanner({ session, onSessionRefreshed }: Props
             {myDecision === 'CONTINUE' ? (
               <View className="flex-row items-center" style={{ gap: 6 }}>
                 <CheckCircle2 size={16} color="#047857" />
-                <Text className="text-xs font-medium text-emerald-700 flex-1">Bạn đã chọn tiếp tục. Đang chờ người còn lại xác nhận...</Text>
+                <Text className="text-xs font-medium text-emerald-700 flex-1">{t('chat.continuation.waitingOther')}</Text>
               </View>
             ) : myDecision === 'STOP' ? (
               <View className="flex-row items-center" style={{ gap: 6 }}>
                 <XCircle size={16} color="#475569" />
-                <Text className="text-xs font-medium text-slate-600 flex-1">Bạn đã chọn kết thúc phiên. Đang hoàn tất...</Text>
+                <Text className="text-xs font-medium text-slate-600 flex-1">{t('chat.continuation.stopping')}</Text>
               </View>
             ) : isGraceExpired ? (
-              <Text className="text-xs font-medium text-rose-600">Đã hết thời gian xác nhận. Đang cập nhật trạng thái phiên...</Text>
+              <Text className="text-xs font-medium text-rose-600">{t('chat.continuation.graceExpiredUpdating')}</Text>
             ) : (
-              <Text className="text-[11px] text-muted-foreground">Vui lòng xác nhận trước khi hết thời gian 5 phút gia hạn.</Text>
+              <Text className="text-[11px] text-muted-foreground">{t('chat.continuation.confirmBeforeExpiry')}</Text>
             )}
           </View>
           {myDecision === 'PENDING' && !isGraceExpired ? (
             <View className="flex-row" style={{ gap: 8 }}>
               <Pressable onPress={() => void handleDecision('STOP')} disabled={disabled} className="h-8 px-3 rounded-lg border border-amber-300 bg-white items-center justify-center active:opacity-80" style={{ opacity: disabled ? 0.5 : 1 }}>
-                <Text className="text-xs font-medium text-amber-900">Kết thúc</Text>
+                <Text className="text-xs font-medium text-amber-900">{t('chat.continuation.stop')}</Text>
               </Pressable>
               <Pressable onPress={() => void handleDecision('CONTINUE')} disabled={disabled} className="h-8 px-3 rounded-lg bg-emerald-600 flex-row items-center justify-center active:opacity-90" style={{ gap: 4, opacity: disabled ? 0.5 : 1 }}>
                 {actionLoading ? <ActivityIndicator size="small" color="#FFFFFF" /> : null}
-                <Text className="text-xs font-bold text-white">Tiếp tục</Text>
+                <Text className="text-xs font-bold text-white">{t('chat.continuation.continue')}</Text>
               </Pressable>
             </View>
           ) : null}
@@ -186,7 +191,7 @@ export function SessionContinuationBanner({ session, onSessionRefreshed }: Props
       <View className="flex-row items-center justify-between px-4 py-2.5 bg-amber-50/70 border-b border-amber-200/50">
         <View className="flex-row items-center flex-1" style={{ gap: 6 }}>
           <RefreshCw size={13} color="#D97706" />
-          <Text className="text-xs text-amber-900 flex-1">Hết block 15 phút. Đang kiểm tra trạng thái tiếp tục phiên tư vấn...</Text>
+          <Text className="text-xs text-amber-900 flex-1">{t('chat.continuation.checking')}</Text>
         </View>
         <Pressable
           onPress={() => {
@@ -195,7 +200,7 @@ export function SessionContinuationBanner({ session, onSessionRefreshed }: Props
           }}
           hitSlop={6}
         >
-          <Text className="text-[11px] font-semibold text-amber-800">Làm mới</Text>
+          <Text className="text-[11px] font-semibold text-amber-800">{t('chat.continuation.refresh')}</Text>
         </Pressable>
       </View>
     );

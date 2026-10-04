@@ -23,9 +23,12 @@ import { SlideToUnlock } from '@/components/features/workout/SlideToUnlock';
 import { SportMapView } from '@/components/features/workout/SportMapView';
 import { useWorkoutEngineStore } from '@/services/workout/workoutEngineStore';
 import { locationTrackingService } from '@/services/workout/locationTrackingService';
+import { formatWorkoutDecimal, getExerciseName } from '@/services/workout/workoutI18n';
+import { useTranslation } from 'react-i18next';
 
 export default function ActiveWorkoutScreen() {
   const router = useRouter();
+  const { t } = useTranslation('workout');
 
   const status = useWorkoutEngineStore((state) => state.status);
   const exercise = useWorkoutEngineStore((state) => state.exercise);
@@ -52,6 +55,7 @@ export default function ActiveWorkoutScreen() {
   const [activeMetricPage, setActiveMetricPage] = useState<number>(0);
 
   const isGpsSport = exercise?.trackingType === 'DISTANCE_GPS';
+  const exerciseTitle = exercise ? getExerciseName(exercise) : t('common.workout');
 
   // Target Progress & Goal Reached Logic (DISTANCE, TIME, CALORIES)
   const hasTarget =
@@ -66,7 +70,7 @@ export default function ActiveWorkoutScreen() {
     isGoalReached = currentDistanceKm >= targetValue;
     targetProgressPercent = Math.min(100, Math.max(0, (currentDistanceKm / targetValue) * 100));
     const remainingKm = Math.max(0, targetValue - currentDistanceKm);
-    targetHeaderText = `Khoảng cách còn lại | ${remainingKm.toFixed(2).replace('.', ',')} km`;
+    targetHeaderText = t('active.remainingDistance', { value: formatWorkoutDecimal(remainingKm, 2) });
   } else if (targetType === 'TIME' && targetValue > 0) {
     isGoalReached = elapsedSeconds >= targetValue;
     targetProgressPercent = Math.min(100, Math.max(0, (elapsedSeconds / targetValue) * 100));
@@ -74,12 +78,12 @@ export default function ActiveWorkoutScreen() {
     const mins = Math.floor(remainingSecs / 60);
     const secs = remainingSecs % 60;
     const formattedRemaining = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-    targetHeaderText = `Thời gian còn lại | ${formattedRemaining}`;
+    targetHeaderText = t('active.remainingTime', { value: formattedRemaining });
   } else if (targetType === 'CALORIES' && targetValue > 0) {
     isGoalReached = currentCalories >= targetValue;
     targetProgressPercent = Math.min(100, Math.max(0, (currentCalories / targetValue) * 100));
     const remainingCal = Math.max(0, Math.round(targetValue - currentCalories));
-    targetHeaderText = `Calo còn lại | ${remainingCal} kcal`;
+    targetHeaderText = t('active.remainingCalories', { value: remainingCal });
   }
 
   // Format running pace: m'ss"
@@ -179,7 +183,7 @@ export default function ActiveWorkoutScreen() {
           {/* Top Bar: Only sport name, no exit/action buttons while locked */}
           <View className="pt-2 pb-1 px-1">
             <Text className="text-white font-bold text-xl tracking-tight">
-              {exercise?.name || 'Buổi tập'}
+              {exerciseTitle}
             </Text>
           </View>
 
@@ -188,7 +192,7 @@ export default function ActiveWorkoutScreen() {
             <View className="items-center justify-center pt-1 pb-2">
               {isGoalReached ? (
                 <Text className="text-[#8E95A2] font-bold text-[17px] tracking-tight">
-                  Đã đạt mục tiêu!
+                  {t('active.goalReached')}
                 </Text>
               ) : (
                 <>
@@ -248,7 +252,7 @@ export default function ActiveWorkoutScreen() {
               )}
 
               <Text className="text-[#8E95A2] text-sm font-medium mb-2.5">
-                Thời lượng
+                {t('active.duration')}
               </Text>
               <Text className="text-[52px] font-extrabold tracking-tight text-white">
                 {formatDuration(elapsedSeconds)}
@@ -267,11 +271,11 @@ export default function ActiveWorkoutScreen() {
               }}
             >
               <Text className="text-[#8E95A2] text-sm font-medium mb-2.5">
-                {isGpsSport && targetType !== 'CALORIES' ? 'Khoảng cách' : 'Calo'}
+                {isGpsSport && targetType !== 'CALORIES' ? t('active.distance') : t('active.calories')}
               </Text>
               <Text className="text-[52px] font-extrabold tracking-tight text-white">
                 {isGpsSport && targetType !== 'CALORIES'
-                  ? `${currentDistanceKm.toFixed(2).replace('.', ',')} km`
+                  ? `${formatWorkoutDecimal(currentDistanceKm, 2)} km`
                   : `${Math.round(currentCalories)} kcal`}
               </Text>
             </View>
@@ -305,7 +309,7 @@ export default function ActiveWorkoutScreen() {
               <ArrowLeft color="#0F172A" size={24} strokeWidth={2.2} />
             </TouchableOpacity>
             <Text className="text-slate-900 font-bold text-xl tracking-tight">
-              {exercise?.name || 'Buổi tập'}
+              {exerciseTitle}
             </Text>
           </View>
 
@@ -329,7 +333,7 @@ export default function ActiveWorkoutScreen() {
           <View className="items-center justify-center pt-1 pb-2">
             {isGoalReached ? (
               <Text className="text-[#788292] font-bold text-[17px] tracking-tight">
-                Đã đạt mục tiêu!
+                {t('active.goalReached')}
               </Text>
             ) : (
               <>
@@ -430,7 +434,7 @@ export default function ActiveWorkoutScreen() {
                       }}
                     >
                       <Text className="text-[#788292] text-xs font-medium mb-1">
-                        Thời lượng
+                        {t('active.duration')}
                       </Text>
                       <Text
                         className={`text-[26px] font-extrabold tracking-tight ${
@@ -453,7 +457,7 @@ export default function ActiveWorkoutScreen() {
                       }}
                     >
                       <Text className="text-[#788292] text-xs font-medium mb-1">
-                        Khoảng cách
+                        {t('active.distance')}
                       </Text>
                       <View className="flex-row items-baseline">
                         <Text
@@ -461,7 +465,7 @@ export default function ActiveWorkoutScreen() {
                             status === 'PAUSED' ? 'text-slate-300' : 'text-[#1E232A]'
                           }`}
                         >
-                          {currentDistanceKm.toFixed(2).replace('.', ',')}
+                          {formatWorkoutDecimal(currentDistanceKm, 2)}
                         </Text>
                         <Text className="text-sm font-semibold text-slate-800 ml-1.5">
                           km
@@ -484,7 +488,7 @@ export default function ActiveWorkoutScreen() {
                       }}
                     >
                       <Text className="text-[#788292] text-xs font-medium mb-1">
-                        Nhịp độ
+                        {t('active.pace')}
                       </Text>
                       <View className="flex-row items-baseline">
                         <Text
@@ -512,7 +516,7 @@ export default function ActiveWorkoutScreen() {
                       }}
                     >
                       <Text className="text-[#788292] text-xs font-medium mb-1">
-                        Nhịp
+                        {t('active.cadence')}
                       </Text>
                       <View className="flex-row items-baseline">
                         <Text
@@ -546,7 +550,7 @@ export default function ActiveWorkoutScreen() {
                       }}
                     >
                       <Text className="text-[#788292] text-xs font-medium mb-1">
-                        Calo
+                        {t('active.calories')}
                       </Text>
                       <View className="flex-row items-baseline">
                         <Text
@@ -574,7 +578,7 @@ export default function ActiveWorkoutScreen() {
                       }}
                     >
                       <Text className="text-[#788292] text-xs font-medium mb-1">
-                        Nhịp tim
+                        {t('active.heartRate')}
                       </Text>
                       <View className="flex-row items-baseline">
                         <Text
@@ -605,7 +609,7 @@ export default function ActiveWorkoutScreen() {
                       }}
                     >
                       <Text className="text-[#788292] text-xs font-medium mb-1">
-                        Tốc độ
+                        {t('active.speed')}
                       </Text>
                       <View className="flex-row items-baseline">
                         <Text
@@ -613,7 +617,7 @@ export default function ActiveWorkoutScreen() {
                             status === 'PAUSED' ? 'text-slate-300' : 'text-[#1E232A]'
                           }`}
                         >
-                          {currentSpeedKmh.toFixed(1).replace('.', ',')}
+                          {formatWorkoutDecimal(currentSpeedKmh, 1)}
                         </Text>
                         <Text className="text-xs font-semibold text-slate-500 ml-1.5">
                           km/h
@@ -633,7 +637,7 @@ export default function ActiveWorkoutScreen() {
                       }}
                     >
                       <Text className="text-[#788292] text-xs font-medium mb-1">
-                        Số bước
+                        {t('active.steps')}
                       </Text>
                       <View className="flex-row items-baseline">
                         <Text
@@ -644,7 +648,7 @@ export default function ActiveWorkoutScreen() {
                           {currentSteps}
                         </Text>
                         <Text className="text-xs font-semibold text-slate-500 ml-1.5">
-                          bước
+                          {t('common:units.steps')}
                         </Text>
                       </View>
                     </View>
@@ -720,7 +724,7 @@ export default function ActiveWorkoutScreen() {
               )}
 
               <Text className="text-[#788292] text-sm font-medium mb-2.5">
-                Thời lượng
+                {t('active.duration')}
               </Text>
               <Text
                 className={`text-[52px] font-extrabold tracking-tight ${
@@ -743,7 +747,7 @@ export default function ActiveWorkoutScreen() {
               }}
             >
               <Text className="text-[#788292] text-sm font-medium mb-2.5">
-                Calo
+                {t('active.calories')}
               </Text>
               <Text
                 className={`text-[52px] font-extrabold tracking-tight ${
@@ -784,7 +788,7 @@ export default function ActiveWorkoutScreen() {
             /* Disabled "Tạm dừng" button during countdown (Image 1) */
             <View className="flex-1 py-4 bg-[#EAECEF]/60 rounded-full items-center justify-center mx-3 shadow-sm">
               <Text className="text-slate-400 font-bold text-base tracking-wide">
-                Tạm dừng
+                {t('active.pause')}
               </Text>
             </View>
           ) : status === 'ACTIVE' ? (
@@ -795,7 +799,7 @@ export default function ActiveWorkoutScreen() {
               className="flex-1 py-4 bg-[#EAECEF] active:bg-slate-300 rounded-full items-center justify-center mx-3 shadow-sm"
             >
               <Text className="text-[#1E232A] font-bold text-base tracking-wide">
-                Tạm dừng
+                {t('active.pause')}
               </Text>
             </TouchableOpacity>
           ) : (
@@ -808,7 +812,7 @@ export default function ActiveWorkoutScreen() {
                 className="flex-1 py-4 bg-[#EAECEF] active:bg-slate-300 rounded-full items-center justify-center mr-2 shadow-sm"
               >
                 <Text className="text-[#1E232A] font-bold text-base tracking-wide">
-                  Tiếp tục
+                  {t('active.resume')}
                 </Text>
               </TouchableOpacity>
 
@@ -819,7 +823,7 @@ export default function ActiveWorkoutScreen() {
                 className="flex-1 py-4 bg-[#D91B1B] active:bg-red-700 rounded-full items-center justify-center ml-2 shadow-md"
               >
                 <Text className="text-white font-bold text-base tracking-wide">
-                  Hoàn tất
+                  {t('active.finish')}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -850,10 +854,10 @@ export default function ActiveWorkoutScreen() {
             >
               <Lock color="#10B981" size={40} className="mb-3" />
               <Text className="text-slate-900 font-bold text-base mb-1">
-                Màn hình đang khóa
+                {t('active.screenLocked')}
               </Text>
               <Text className="text-slate-500 text-xs">
-                Chạm vào đây để mở khóa
+                {t('active.tapToUnlock')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -870,10 +874,10 @@ export default function ActiveWorkoutScreen() {
         <View className="flex-1 bg-black/50 items-center justify-center p-6">
           <View className="bg-white rounded-3xl p-6 border border-slate-100 w-full max-w-sm shadow-2xl">
             <Text className="text-slate-900 font-bold text-lg mb-2">
-              Dừng buổi tập?
+              {t('active.exitTitle')}
             </Text>
             <Text className="text-slate-500 text-sm leading-5 mb-6">
-              Bạn có chắc chắn muốn thoát khỏi phiên tập hiện tại không? Số liệu buổi tập sẽ không được lưu nếu chưa kết thúc.
+              {t('active.exitMessage')}
             </Text>
 
             <View className="flex-row gap-3">
@@ -881,7 +885,7 @@ export default function ActiveWorkoutScreen() {
                 onPress={() => setShowExitConfirm(false)}
                 className="flex-1 py-3 rounded-2xl bg-slate-100 active:bg-slate-200 items-center justify-center"
               >
-                <Text className="text-slate-700 font-semibold">Tiếp tục tập</Text>
+                <Text className="text-slate-700 font-semibold">{t('active.keepGoing')}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -892,7 +896,7 @@ export default function ActiveWorkoutScreen() {
                 }}
                 className="flex-1 py-3 rounded-2xl bg-red-600 active:bg-red-700 items-center justify-center"
               >
-                <Text className="text-white font-bold">Thoát</Text>
+                <Text className="text-white font-bold">{t('common.exit')}</Text>
               </TouchableOpacity>
             </View>
           </View>

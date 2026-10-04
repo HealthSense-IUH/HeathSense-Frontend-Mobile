@@ -8,6 +8,7 @@ import {
   registerApi,
 } from './index';
 import { LoginRequest, RegisterRequest, UserSession } from '@/types/authentication';
+import i18n from '@/i18n';
 
 type AuthState = {
   user: UserSession | null;
@@ -42,7 +43,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
     } catch (error: any) {
       set({ 
-        error: error.message || 'Đăng nhập không thành công', 
+        error: error.message || i18n.t('auth:errors.loginFailed'),
         isLoading: false 
       });
       throw error;
@@ -56,7 +57,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ isLoading: false });
     } catch (error: any) {
       set({ 
-        error: error.message || 'Đăng ký không thành công', 
+        error: error.message || i18n.t('auth:errors.registerFailed'),
         isLoading: false 
       });
       throw error;

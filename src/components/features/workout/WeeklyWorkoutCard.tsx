@@ -2,9 +2,12 @@ import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useWorkoutCatalogStore } from '@/services/workout/workoutCatalogStore';
+import { currentIntlLocale } from '@/i18n';
+import { useTranslation } from 'react-i18next';
 
 export function WeeklyWorkoutCard() {
   const router = useRouter();
+  const { t } = useTranslation('workout');
   const getWeeklyStats = useWorkoutCatalogStore((state) => state.getWeeklyStats);
   const syncSessionsWithBackend = useWorkoutCatalogStore(
     (state) => state.syncSessionsWithBackend
@@ -59,7 +62,7 @@ export function WeeklyWorkoutCard() {
     >
       {/* Top Header Row */}
       <View className="flex-row items-center justify-between">
-        <Text className="text-sm font-bold text-slate-800">Bài tập tuần này</Text>
+        <Text className="text-sm font-bold text-slate-800">{t('weekly.title')}</Text>
         {/* Active Session Notification Indicator Dot (as seen in Image 2) */}
         {hasWorkouts && (
           <View className="w-2 h-2 rounded-full bg-orange-500" />
@@ -77,10 +80,10 @@ export function WeeklyWorkoutCard() {
           {hasWorkouts && (
             <View className="mt-1">
               <Text className="text-xs font-semibold text-slate-600">
-                {totalSessions} buổi
+                {t('weekly.sessions', { count: totalSessions })}
               </Text>
               <Text className="text-xs font-medium text-slate-500 mt-0.5">
-                {totalCalories.toLocaleString('vi-VN')} kcal
+                {totalCalories.toLocaleString(currentIntlLocale())} kcal
               </Text>
             </View>
           )}
@@ -98,10 +101,11 @@ export function WeeklyWorkoutCard() {
                 )
               : 0;
 
-            const isSunday = item.dayLabel === 'CN';
+            // dayNumber 8 = Chủ nhật (nhãn đã dịch nên không so sánh chuỗi)
+            const isSunday = item.dayNumber === 8;
 
             return (
-              <View key={item.dayLabel} className="items-center w-5">
+              <View key={item.dateStr} className="items-center w-5">
                 {/* Fixed-height track container so day labels stay aligned */}
                 <View className="h-12 justify-end items-center w-full">
                   {hasActivity ? (

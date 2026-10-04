@@ -4,6 +4,7 @@ import { Settings } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StitchBleWaveIcon } from '@/components/ui/icons/StitchIcons';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { THEME } from '@/constants/theme';
 
 interface BleRadarStatusProps {
@@ -16,6 +17,7 @@ export const BleRadarStatus: React.FC<BleRadarStatusProps> = ({
   scanStatusMessage,
 }) => {
   const router = useRouter();
+  const { t } = useTranslation('auth');
 
   // Standard React Native / React 19 Animated state (persistent across renders without ref access)
   const [pulse1] = useState(() => new Animated.Value(0));
@@ -89,7 +91,7 @@ export const BleRadarStatus: React.FC<BleRadarStatusProps> = ({
     >
       {/* Top Right Settings Gear Button */}
       <Pressable 
-        aria-label="Cài đặt kết nối"
+        aria-label={t('scan.connectionSettings')}
         onPress={() => router.push('/(tabs)/settings' as any)}
         className="absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-100/80 flex items-center justify-center active:opacity-70 z-20"
       >
@@ -180,7 +182,7 @@ export const BleRadarStatus: React.FC<BleRadarStatusProps> = ({
           <View className="flex-row items-center space-x-2 mt-2">
             <ActivityIndicator size="small" color={THEME.colors.primary} />
             <Text className="text-xs font-semibold text-primary tracking-wide ml-1.5" style={{ color: THEME.colors.primary }}>
-              Đang tự động quét BLE...
+              {t('scan.autoScanning')}
             </Text>
           </View>
         )}

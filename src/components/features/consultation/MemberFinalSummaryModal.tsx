@@ -7,8 +7,11 @@ import {
   Pressable,
   ActivityIndicator,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { FileText, X, CheckCircle, AlertCircle, HeartPulse } from 'lucide-react-native';
 import { consultationApi } from '@/services/consultation.service';
+import i18n from '@/i18n';
+import { formatShortDate } from '@/utils/formatters';
 import type { ConsultationFinalSummaryResponse } from '@/types/consultation';
 
 interface MemberFinalSummaryModalProps {
@@ -22,6 +25,7 @@ export function MemberFinalSummaryModal({
   sessionId,
   onClose,
 }: MemberFinalSummaryModalProps) {
+  const { t } = useTranslation('consultation');
   const [loading, setLoading] = useState(false);
   const [summary, setSummary] = useState<ConsultationFinalSummaryResponse | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -52,7 +56,7 @@ export function MemberFinalSummaryModal({
           if (status === 404 || code === 3000 || code === '3000' || code === 'ENTITY_NOT_FOUND') {
             setSummary(null); // Not finalized yet
           } else {
-            setErrorMsg(err.response?.data?.message || 'Không thể tải tổng kết chăm sóc lúc này.');
+            setErrorMsg(err.response?.data?.message || i18n.t('consultation:memberFinalSummaryDialog.errors.loadFailed'));
           }
           setLoading(false);
         }
@@ -81,13 +85,14 @@ export function MemberFinalSummaryModal({
                 <FileText size={22} className="text-primary" />
               </View>
               <View>
-                <Text className="font-bold text-foreground text-lg">Tổng kết Y khoa</Text>
-                <Text className="text-xs text-muted-foreground">Phiên tư vấn #{sessionId}</Text>
+                <Text className="font-bold text-foreground text-lg">{t('workspace.actions.medicalSummary')}</Text>
+                <Text className="text-xs text-muted-foreground">{t('workspace.sessionTitle', { id: sessionId })}</Text>
               </View>
             </View>
             <Pressable
               onPress={handleClose}
               className="h-8 w-8 rounded-full bg-muted items-center justify-center active:opacity-70"
+              accessibilityLabel={t('common:actions.close')}
             >
               <X size={18} className="text-foreground" />
             </Pressable>
@@ -97,7 +102,7 @@ export function MemberFinalSummaryModal({
           {loading ? (
             <View className="py-20 items-center justify-center">
               <ActivityIndicator size="large" color="#0057cd" />
-              <Text className="text-sm text-muted-foreground mt-3">Đang tải bản tổng kết...</Text>
+              <Text className="text-sm text-muted-foreground mt-3">{t('memberFinalSummaryDialog.loading')}</Text>
             </View>
           ) : errorMsg ? (
             <View className="py-12 items-center">
@@ -107,11 +112,9 @@ export function MemberFinalSummaryModal({
           ) : !summary || !isFinalized ? (
             <View className="py-16 items-center px-4">
               <HeartPulse size={48} className="text-muted-foreground/30 mb-3" />
-              <Text className="font-semibold text-foreground text-base text-center">
-                Bác sĩ chưa hoàn tất tổng kết
-              </Text>
+              <Text className="font-semibold text-foreground text-base text-center">{t('memberFinalSummaryDialog.pending.title')}</Text>
               <Text className="text-xs text-muted-foreground text-center mt-2 leading-relaxed max-w-xs">
-                Bản tóm tắt lâm sàng và khuyến nghị chăm sóc sẽ hiển thị tại đây sau khi Bác sĩ phụ trách kết thúc đợt tư vấn.
+                {t('memberFinalSummaryDialog.pending.memberDescription')}
               </Text>
             </View>
           ) : (
@@ -120,12 +123,10 @@ export function MemberFinalSummaryModal({
               <View className="bg-emerald-500/10 border border-emerald-500/20 p-3.5 rounded-2xl mb-4 flex-row items-center gap-3">
                 <CheckCircle size={20} color="#10b981" />
                 <View className="flex-1">
-                  <Text className="text-xs font-bold text-emerald-800">
-                    Bác sĩ đã hoàn tất tổng kết chuyên môn
-                  </Text>
+                  <Text className="text-xs font-bold text-emerald-800">{t('memberFinalSummaryDialog.finalized.title')}</Text>
                   {summary.finalizedAt && (
                     <Text className="text-[11px] text-emerald-700 mt-0.5">
-                      Ngày hoàn tất: {new Date(summary.finalizedAt).toLocaleDateString('vi-VN')}
+                      {t('memberFinalSummaryDialog.finalized.date', { date: formatShortDate(summary.finalizedAt) })}
                     </Text>
                   )}
                 </View>
@@ -134,7 +135,7 @@ export function MemberFinalSummaryModal({
               {/* Summary note */}
               {summary.summary && (
                 <View className="bg-card border border-border p-4 rounded-2xl mb-3">
-                  <Text className="text-xs font-bold text-primary mb-1">Tóm tắt quá trình theo dõi</Text>
+                  <Text className="text-xs font-bold text-primary mb-1">{t('memberFinalSummaryDialog.sections.summary')}</Text>
                   <Text className="text-xs text-foreground leading-relaxed">{summary.summary}</Text>
                 </View>
               )}
@@ -142,7 +143,7 @@ export function MemberFinalSummaryModal({
               {/* Observations */}
               {summary.observations && (
                 <View className="bg-card border border-border p-4 rounded-2xl mb-3">
-                  <Text className="text-xs font-bold text-primary mb-1">Đánh giá & Quan sát lâm sàng</Text>
+                  <Text className="text-xs font-bold text-primary mb-1">{t('memberFinalSummaryDialog.sections.observations')}</Text>
                   <Text className="text-xs text-foreground leading-relaxed">{summary.observations}</Text>
                 </View>
               )}
@@ -150,7 +151,7 @@ export function MemberFinalSummaryModal({
               {/* Recommendations */}
               {summary.recommendations && (
                 <View className="bg-card border border-border p-4 rounded-2xl mb-3">
-                  <Text className="text-xs font-bold text-primary mb-1">Khuyến nghị điều trị & lối sống</Text>
+                  <Text className="text-xs font-bold text-primary mb-1">{t('memberFinalSummaryDialog.sections.recommendations')}</Text>
                   <Text className="text-xs text-foreground leading-relaxed">{summary.recommendations}</Text>
                 </View>
               )}
@@ -158,7 +159,7 @@ export function MemberFinalSummaryModal({
               {/* Follow-up */}
               {summary.followUpRecommendation && (
                 <View className="bg-card border border-border p-4 rounded-2xl mb-6">
-                  <Text className="text-xs font-bold text-primary mb-1">Lời dặn & Hẹn tái khám</Text>
+                  <Text className="text-xs font-bold text-primary mb-1">{t('memberFinalSummaryDialog.sections.followUp')}</Text>
                   <Text className="text-xs text-foreground leading-relaxed">{summary.followUpRecommendation}</Text>
                 </View>
               )}
@@ -171,7 +172,7 @@ export function MemberFinalSummaryModal({
               onPress={handleClose}
               className="py-3.5 rounded-xl bg-primary items-center justify-center active:opacity-90"
             >
-              <Text className="font-bold text-white text-sm">Đóng</Text>
+              <Text className="font-bold text-white text-sm">{t('memberFinalSummaryDialog.close')}</Text>
             </Pressable>
           </View>
         </View>

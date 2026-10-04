@@ -12,6 +12,7 @@ import { useRouter } from "expo-router";
 import { AlertCircle, HelpCircle, RefreshCw } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 import BleManager from "react-native-ble-manager";
 import {
   HUY_WATCH_DEVICE_NAME,
@@ -28,7 +29,18 @@ import { StitchSmartwatchIcon } from "@/components/ui/icons/StitchIcons";
 import { ScreenWrapper } from "@/components/layout/ScreenWrapper";
 import { THEME } from "@/constants/theme";
 
+/** Khóa i18n (namespace auth) của dòng trạng thái quét; dịch lúc render để đổi ngôn ngữ vẫn đúng. */
+type ScanStatusKey =
+  | "scan.status.searching"
+  | "scan.status.checkingPermission"
+  | "scan.status.permissionRequired"
+  | "scan.status.activateFailed"
+  | "scan.status.bluetoothNotEnabled"
+  | "scan.status.bluetoothOff"
+  | "scan.status.stopped";
+
 export default function BleScanScreen() {
+  const { t } = useTranslation("auth");
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { isConnecting, connectToDevice, isPaired } = useBLE();
@@ -38,8 +50,8 @@ export default function BleScanScreen() {
 
   const [isScanning, setIsScanning] = useState(false);
   const [devices, setDevices] = useState<BlePeripheral[]>([]);
-  const [scanStatusMessage, setScanStatusMessage] = useState(
-    "Đang dò tìm thiết bị đeo ở gần..."
+  const [scanStatusKey, setScanStatusKey] = useState<ScanStatusKey>(
+    "scan.status.searching"
   );
   const [connectingDeviceId, setConnectingDeviceId] = useState<string | null>(
     null
@@ -53,18 +65,18 @@ export default function BleScanScreen() {
   // Bắt đầu quét tự động
   const startAutoScan = useCallback(async () => {
     setIsScanning(true);
-    setScanStatusMessage("Đang kiểm tra quyền Bluetooth...");
+    setScanStatusKey("scan.status.checkingPermission");
 
     const permResult = await requestBluetoothPermissions();
     if (!permResult.ok) {
       setIsScanning(false);
-      setScanStatusMessage("Vui lòng cấp quyền Bluetooth để tiếp tục.");
+      setScanStatusKey("scan.status.permissionRequired");
       Alert.alert(
-        "Cần cấp quyền Bluetooth & Vị trí",
-        "Ứng dụng cần quyền Bluetooth để tìm và kết nối với đồng hồ. Vui lòng cho phép quyền Bluetooth trong Cài đặt ứng dụng.",
+        t("scan.permissionAlert.title"),
+        t("scan.permissionAlert.message"),
         [
-          { text: "Hủy", style: "cancel" },
-          { text: "Mở Cài đặt", onPress: () => void Linking.openSettings() },
+          { text: t("common:actions.cancel"), style: "cancel" },
+          { text: t("scan.permissionAlert.openSettings"), onPress: () => void Linking.openSettings() },
         ]
       );
       return;
@@ -73,7 +85,7 @@ export default function BleScanScreen() {
     try {
       setDevices([]);
       lastSeenRef.current.clear();
-      setScanStatusMessage("Đang dò tìm thiết bị đeo ở gần...");
+      setScanStatusKey("scan.status.searching");
       await BleManager.scan({
         serviceUUIDs: [],
         seconds: 0,
@@ -83,9 +95,9 @@ export default function BleScanScreen() {
     } catch (error) {
       console.error("Lỗi khi quét BLE:", error);
       setIsScanning(false);
-      setScanStatusMessage("Không thể kích hoạt Bluetooth. Thử quét lại.");
+      setScanStatusKey("scan.status.activateFailed");
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     let isMounted = true;
@@ -99,7 +111,7 @@ export default function BleScanScreen() {
       } catch (error) {
         if (isMounted) {
           console.error("Không thể khởi tạo BleManager:", error);
-          setScanStatusMessage("Chưa bật Bluetooth trên điện thoại.");
+          setScanStatusKey("scan.status.bluetoothNotEnabled");
         }
       }
     };
@@ -112,7 +124,7 @@ export default function BleScanScreen() {
         void startAutoScan();
       } else if (state === "off") {
         setIsScanning(false);
-        setScanStatusMessage("Bluetooth đang tắt. Hãy bật Bluetooth để quét.");
+        setScanStatusKey("scan.status.bluetoothOff");
       }
     });
 
@@ -154,7 +166,7 @@ export default function BleScanScreen() {
 
     stopScanListenerRef.current = BleManager.onStopScan?.(() => {
       setIsScanning(false);
-      setScanStatusMessage("Đã dừng quét thiết bị.");
+      setScanStatusKey("scan.status.stopped");
     });
 
     const cleanupInterval = setInterval(() => {
@@ -195,15 +207,15 @@ export default function BleScanScreen() {
       } catch (error) {
         console.error("Lỗi khi kết nối thiết bị:", error);
         Alert.alert(
-          "Kết nối không thành công",
-          "Vui lòng đảm bảo thiết bị đang ở gần và chưa kết nối với điện thoại khác."
+          t("scan.connectFailed.title"),
+          t("scan.connectFailed.message")
         );
         void startAutoScan();
       } finally {
         setConnectingDeviceId(null);
       }
     },
-    [connectToDevice, router, startAutoScan]
+    [connectToDevice, router, startAutoScan, t]
   );
 
   useEffect(() => {
@@ -214,9 +226,9 @@ export default function BleScanScreen() {
 
   const handleShowTroubleshooting = () => {
     Alert.alert(
-      "Hướng dẫn tìm & kết nối đồng hồ",
-      "1. Đảm bảo đồng hồ HealthSense đã được bật nguồn.\n2. Bật Bluetooth và Dịch vụ định vị trên điện thoại.\n3. Đưa đồng hồ lại gần điện thoại (trong phạm vi 1 mét).\n4. Đảm bảo đồng hồ chưa được ghép đôi với một thiết bị điện thoại khác.\n5. Bấm nút Làm mới trên góc phải để quét lại.",
-      [{ text: "Đã hiểu", style: "default" }]
+      t("scan.troubleshooting.title"),
+      t("scan.troubleshooting.steps"),
+      [{ text: t("scan.troubleshooting.ok"), style: "default" }]
     );
   };
 
@@ -290,7 +302,7 @@ export default function BleScanScreen() {
               <Pressable
                 onPress={() => void startAutoScan()}
                 disabled={isScanning}
-                aria-label="Làm mới tìm kiếm"
+                aria-label={t("scan.refresh")}
                 className="w-9 h-9 rounded-full bg-white border border-slate-200/80 items-center justify-center shadow-sm active:opacity-80 mr-2"
                 style={{
                   shadowColor: "rgba(13, 110, 253, 0.08)",
@@ -320,7 +332,7 @@ export default function BleScanScreen() {
                   elevation: 2,
                 }}
               >
-                <Text className="text-xs font-bold text-slate-800">Vào App</Text>
+                <Text className="text-xs font-bold text-slate-800">{t("scan.enterApp")}</Text>
               </Pressable>
             </View>
           </View>
@@ -329,10 +341,10 @@ export default function BleScanScreen() {
           {/* BEGIN: TitleSection */}
           <View className="mb-5">
             <Text className="text-2xl sm:text-[26px] font-extrabold text-slate-900 tracking-tight leading-snug">
-              Thiết bị đeo
+              {t("scan.title")}
             </Text>
             <Text className="text-slate-500 text-[13.5px] leading-relaxed mt-1 font-medium">
-              Đưa thiết bị đồng hồ sức khỏe lại gần điện thoại để tự động kết nối và đồng bộ dữ liệu.
+              {t("scan.subtitle")}
             </Text>
           </View>
           {/* END: TitleSection */}
@@ -340,7 +352,7 @@ export default function BleScanScreen() {
           {/* BEGIN: BleRadarScanningCard */}
           <BleRadarStatus
             isScanning={isScanning}
-            scanStatusMessage={scanStatusMessage}
+            scanStatusMessage={t(scanStatusKey)}
           />
           {/* END: BleRadarScanningCard */}
         </View>
@@ -350,12 +362,12 @@ export default function BleScanScreen() {
           {/* Section Header */}
           <View className="flex-row items-center justify-between mb-3 px-1">
             <Text className="text-[12px] font-bold text-slate-500 tracking-wider uppercase">
-              THIẾT BỊ KHẢ DỤNG ({devices.length})
+              {t("scan.availableDevices", { count: devices.length })}
             </Text>
             <View className="flex-row items-center">
               <View className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-ping" />
               <Text className="text-[11px] font-medium text-slate-400">
-                Sẵn sàng ghép đôi
+                {t("scan.readyToPair")}
               </Text>
             </View>
           </View>
@@ -367,10 +379,10 @@ export default function BleScanScreen() {
                 <AlertCircle color="#94A3B8" size={20} strokeWidth={2} />
               </View>
               <Text className="text-[13.5px] font-bold text-slate-700">
-                Chưa tìm thấy thiết bị đeo nào ở gần.
+                {t("scan.empty.title")}
               </Text>
               <Text className="text-[12px] text-slate-500 font-medium mt-1 max-w-[280px] leading-relaxed text-center">
-                Hãy đảm bảo đồng hồ đã được bật nguồn và bật Bluetooth.
+                {t("scan.empty.hint")}
               </Text>
 
               <Pressable
@@ -379,7 +391,7 @@ export default function BleScanScreen() {
               >
                 <HelpCircle color={THEME.colors.primary} size={14} strokeWidth={2} />
                 <Text className="text-[11.5px] text-primary font-semibold" style={{ color: THEME.colors.primary }}>
-                  Cách khắc phục nếu không tìm thấy
+                  {t("scan.empty.help")}
                 </Text>
               </Pressable>
             </View>

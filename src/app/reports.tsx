@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, Text, View, type LayoutChangeEvent } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import Svg, { Circle, Line, Polyline, Text as SvgText } from 'react-native-svg';
 import { Activity, BarChart3, ChevronLeft, ChevronRight, Droplets, HeartPulse, RefreshCw } from 'lucide-react-native';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
@@ -90,6 +91,7 @@ function TrendChart({ points, width }: { points: DayPoint[]; width: number }) {
 
 /** Báo cáo sức khỏe — tương ứng trang Báo cáo của web: trung bình các chỉ số, tầm soát 30 ngày, xu hướng nhịp tim. */
 export default function ReportsScreen() {
+  const { t } = useTranslation('health');
   const router = useRouter();
   const [chartWidth, setChartWidth] = useState(0);
   const [statsDate] = useState(() => new Date());
@@ -97,7 +99,7 @@ export default function ReportsScreen() {
     queryKey: [QUERY_KEYS.HEALTH_RECORDS, 'reports', 100],
     queryFn: () => getMyRecordsApi(1, 100),
   });
-  const { data: stats } = useHealthStatistics('Tháng', statsDate);
+  const { data: stats } = useHealthStatistics('MONTH', statsDate);
 
   const completed = useMemo(() => (page?.content ?? []).filter((r) => r.status === 'COMPLETED'), [page]);
   const avg = (pick: (r: HealthRecordResponse) => number | undefined) => {
@@ -111,28 +113,28 @@ export default function ReportsScreen() {
   const screeningTotal = (stats?.totalNormal || 0) + (stats?.totalUncertain || 0) + (stats?.totalAfibSuspected || 0) + (stats?.totalAfibRisk || 0);
 
   const cards = [
-    { label: 'Nhịp tim trung bình', value: avgHr != null ? formatHrvNumber(avgHr, 0) : '--', unit: 'BPM', hint: 'Dải tham chiếu: 60 - 100 BPM', Icon: HeartPulse, color: '#EF4444' },
-    { label: 'SpO2 trung bình', value: avgSpo2 != null ? formatHrvNumber(avgSpo2, 1) : '--', unit: '%', hint: avgSpo2 != null ? 'Mức tham khảo (đo tại thiết bị)' : 'Chưa có dữ liệu SpO2 từ thiết bị', Icon: Droplets, color: '#0EA5E9' },
-    { label: 'HRV trung bình (RMSSD)', value: avgRmssd != null ? formatHrvNumber(avgRmssd, 1) : '--', unit: 'ms', hint: 'Độ biến thiên nhịp tim — cao hơn thường tốt hơn', Icon: Activity, color: '#0D6EFD' },
+    { label: t('reports.avgHeartRate'), value: avgHr != null ? formatHrvNumber(avgHr, 0) : '--', unit: t('common:units.bpm'), hint: t('reports.heartRateReference'), Icon: HeartPulse, color: '#EF4444' },
+    { label: t('reports.avgSpo2'), value: avgSpo2 != null ? formatHrvNumber(avgSpo2, 1) : '--', unit: t('common:units.percent'), hint: avgSpo2 != null ? t('reports.spo2Reference') : t('reports.spo2NoData'), Icon: Droplets, color: '#0EA5E9' },
+    { label: t('reports.avgHrv'), value: avgRmssd != null ? formatHrvNumber(avgRmssd, 1) : '--', unit: t('common:units.ms'), hint: t('reports.hrvHint'), Icon: Activity, color: '#0D6EFD' },
   ];
   const screening = [
-    { label: 'Bình thường', value: stats?.totalNormal || 0, color: '#059669' },
-    { label: 'Chưa chắc chắn', value: stats?.totalUncertain || 0, color: '#D97706' },
-    { label: 'Nghi ngờ rung nhĩ', value: stats?.totalAfibSuspected || 0, color: '#D97706' },
-    { label: 'Rung nhĩ', value: stats?.totalAfibRisk || 0, color: '#DC2626' },
+    { label: t('reports.screening.normal'), value: stats?.totalNormal || 0, color: '#059669' },
+    { label: t('reports.screening.uncertain'), value: stats?.totalUncertain || 0, color: '#D97706' },
+    { label: t('reports.screening.afibSuspected'), value: stats?.totalAfibSuspected || 0, color: '#D97706' },
+    { label: t('reports.screening.afib'), value: stats?.totalAfibRisk || 0, color: '#DC2626' },
   ];
 
   return (
     <ScreenWrapper
-      title="Báo cáo sức khỏe"
-      description={`Tổng hợp từ ${completed.length} phép đo gần nhất của bạn`}
+      title={t('reports.title')}
+      description={t('reports.description', { count: completed.length })}
       headerLeft={
-        <Pressable onPress={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/history' as any))} className="h-10 w-10 items-center justify-center bg-muted rounded-full active:opacity-70" aria-label="Quay lại">
+        <Pressable onPress={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/history' as any))} className="h-10 w-10 items-center justify-center bg-muted rounded-full active:opacity-70" aria-label={t('common:actions.back')}>
           <ChevronLeft size={24} color="#0F172A" />
         </Pressable>
       }
       headerRight={
-        <Pressable onPress={() => refetch()} className="h-10 w-10 items-center justify-center bg-white border border-slate-200/80 rounded-full active:opacity-70" aria-label="Làm mới">
+        <Pressable onPress={() => refetch()} className="h-10 w-10 items-center justify-center bg-white border border-slate-200/80 rounded-full active:opacity-70" aria-label={t('common:actions.refresh')}>
           {isFetching && !isLoading ? <ActivityIndicator size="small" color="#0D6EFD" /> : <RefreshCw size={18} color="#64748B" />}
         </Pressable>
       }
@@ -140,7 +142,7 @@ export default function ReportsScreen() {
       <View className="px-5 pb-10 mt-2" style={{ gap: 14 }}>
         {error ? (
           <View className="bg-rose-50 border border-rose-200 rounded-2xl p-4">
-            <Text className="text-rose-700 text-xs font-semibold">Không thể tải dữ liệu báo cáo. Vui lòng thử lại.</Text>
+            <Text className="text-rose-700 text-xs font-semibold">{t('reports.loadError')}</Text>
           </View>
         ) : null}
 
@@ -171,27 +173,27 @@ export default function ReportsScreen() {
                   <View key={s.label} className="bg-white rounded-2xl border border-slate-200/70 p-3.5" style={{ width: '48%', flexGrow: 1, ...shadow }}>
                     <Text className="text-[11px] font-semibold text-slate-500">{s.label}</Text>
                     <Text className="text-2xl font-bold mt-1" style={{ color: s.color }}>{s.value}</Text>
-                    <Text className="text-[10px] text-slate-500">phép đo / 30 ngày</Text>
+                    <Text className="text-[10px] text-slate-500">{t('reports.screening.per30Days')}</Text>
                   </View>
                 ))}
               </View>
             ) : null}
 
             <View className="bg-white rounded-2xl border border-slate-200/70 p-4" style={shadow}>
-              <Text className="text-base font-bold text-slate-900">Xu hướng Nhịp tim theo ngày</Text>
-              <Text className="text-xs text-slate-500 mt-0.5">Trung bình / thấp nhất / cao nhất mỗi ngày, tính từ các phép đo thực tế</Text>
+              <Text className="text-base font-bold text-slate-900">{t('reports.trend.title')}</Text>
+              <Text className="text-xs text-slate-500 mt-0.5">{t('reports.trend.description')}</Text>
               <View className="mt-3" onLayout={(e: LayoutChangeEvent) => setChartWidth(Math.floor(e.nativeEvent.layout.width))}>
                 {trend.length === 0 ? (
-                  <Text className="text-xs text-slate-500 text-center py-10">Chưa có phép đo nào — hãy đo bằng thiết bị HealthSense để xem xu hướng.</Text>
+                  <Text className="text-xs text-slate-500 text-center py-10">{t('reports.trend.empty')}</Text>
                 ) : (
                   <TrendChart points={trend} width={chartWidth} />
                 )}
               </View>
               <View className="flex-row justify-center mt-2" style={{ gap: 14 }}>
                 {[
-                  { label: 'Cao nhất', color: '#EF4444' },
-                  { label: 'Trung bình', color: '#0D6EFD' },
-                  { label: 'Thấp nhất', color: '#94A3B8' },
+                  { label: t('reports.trend.max'), color: '#EF4444' },
+                  { label: t('reports.trend.avg'), color: '#0D6EFD' },
+                  { label: t('reports.trend.min'), color: '#94A3B8' },
                 ].map((l) => (
                   <View key={l.label} className="flex-row items-center" style={{ gap: 4 }}>
                     <View className="w-3 h-1 rounded-full" style={{ backgroundColor: l.color }} />
@@ -206,8 +208,8 @@ export default function ReportsScreen() {
                 <BarChart3 size={20} color="#0D6EFD" />
               </View>
               <View className="flex-1">
-                <Text className="text-sm font-bold text-slate-900">Phân tích tầm soát theo kỳ</Text>
-                <Text className="text-xs text-slate-500">Biểu đồ số lần đo theo ngày / tuần / tháng / năm</Text>
+                <Text className="text-sm font-bold text-slate-900">{t('reports.periodAnalysis.title')}</Text>
+                <Text className="text-xs text-slate-500">{t('reports.periodAnalysis.description')}</Text>
               </View>
               <ChevronRight size={18} color="#94A3B8" />
             </Pressable>

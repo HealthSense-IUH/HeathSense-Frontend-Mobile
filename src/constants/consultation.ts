@@ -1,6 +1,9 @@
+import i18n from '@/i18n';
+
 /**
  * Nhãn + màu trạng thái yêu cầu / phiên tư vấn — cùng nội dung với web
  * (consultations/components/shared.tsx statusBadge + locales consultation.json "status").
+ * Nhãn đọc từ i18n lúc truy cập (getter) để đổi ngôn ngữ là nhãn đổi theo.
  */
 export interface ConsultationStatusConfig {
   label: string;
@@ -9,36 +12,45 @@ export interface ConsultationStatusConfig {
   border: string;
 }
 
-const SUCCESS = { bg: '#ECFDF5', text: '#047857', border: '#A7F3D0' };
-const WARNING = { bg: '#FFFBEB', text: '#B45309', border: '#FDE68A' };
-const DANGER = { bg: '#FEF2F2', text: '#B91C1C', border: '#FECACA' };
-const PRIMARY = { bg: '#EFF6FF', text: '#1D4ED8', border: '#BFDBFE' };
-const PRIMARY_SOLID = { bg: '#0D6EFD', text: '#FFFFFF', border: '#0D6EFD' };
-const SLATE = { bg: '#F1F5F9', text: '#475569', border: '#E2E8F0' };
+type StatusColors = Omit<ConsultationStatusConfig, 'label'>;
+
+const SUCCESS: StatusColors = { bg: '#ECFDF5', text: '#047857', border: '#A7F3D0' };
+const WARNING: StatusColors = { bg: '#FFFBEB', text: '#B45309', border: '#FDE68A' };
+const DANGER: StatusColors = { bg: '#FEF2F2', text: '#B91C1C', border: '#FECACA' };
+const PRIMARY: StatusColors = { bg: '#EFF6FF', text: '#1D4ED8', border: '#BFDBFE' };
+const PRIMARY_SOLID: StatusColors = { bg: '#0D6EFD', text: '#FFFFFF', border: '#0D6EFD' };
+const SLATE: StatusColors = { bg: '#F1F5F9', text: '#475569', border: '#E2E8F0' };
+
+const status = (key: string, colors: StatusColors): ConsultationStatusConfig => ({
+  get label() {
+    return i18n.t(`consultation:status.${key}`);
+  },
+  ...colors,
+});
 
 export const CONSULTATION_STATUS_CONFIG: Record<string, ConsultationStatusConfig> = {
-  PENDING_REVIEW: { label: 'Chờ xem xét', ...SLATE },
-  NEED_MORE_INFO: { label: 'Cần bổ sung TT', ...WARNING },
-  WAITING_ACCEPTANCE: { label: 'Chờ xác nhận thỏa thuận', ...WARNING },
-  WAITING_PAYMENT: { label: 'Chờ thanh toán', ...PRIMARY },
-  QUEUED: { label: 'Đang trong hàng đợi', ...PRIMARY },
-  WAITING: { label: 'Đang chờ bác sĩ', ...PRIMARY },
-  OFFERING_DOCTOR: { label: 'Đang kết nối bác sĩ', ...WARNING },
-  WAITING_MEMBER_CONFIRMATION: { label: 'Chờ bạn xác nhận', ...SUCCESS },
-  TIMED_OUT: { label: 'Hết thời gian xác nhận', ...SLATE },
-  FULFILLED: { label: 'Đã kích hoạt tư vấn', ...SUCCESS },
-  SCHEDULED: { label: 'Đã lên lịch', ...PRIMARY },
-  COMPLETED: { label: 'Đã hoàn thành', ...SLATE },
-  REJECTED: { label: 'Đã từ chối', ...DANGER },
-  CANCELLED: { label: 'Đã hủy', ...DANGER },
-  EXPIRED: { label: 'Đã hết hạn', ...DANGER },
-  ACTIVE: { label: 'Đang hoạt động', ...PRIMARY_SOLID },
-  APPROVED: { label: 'Đã duyệt', ...PRIMARY_SOLID },
-  PENDING: { label: 'Đang chờ', ...SLATE },
-  PROCESSING: { label: 'Đang xử lý', ...SLATE },
-  IN_PROGRESS: { label: 'Đang xử lý', ...SLATE },
-  FAILED: { label: 'Thất bại', ...DANGER },
-  CLOSED: { label: 'Đã đóng', ...DANGER },
+  PENDING_REVIEW: status('pendingReview', SLATE),
+  NEED_MORE_INFO: status('needMoreInfo', WARNING),
+  WAITING_ACCEPTANCE: status('waitingAcceptance', WARNING),
+  WAITING_PAYMENT: status('waitingPayment', PRIMARY),
+  QUEUED: status('queued', PRIMARY),
+  WAITING: status('waiting', PRIMARY),
+  OFFERING_DOCTOR: status('offeringDoctor', WARNING),
+  WAITING_MEMBER_CONFIRMATION: status('waitingMemberConfirmation', SUCCESS),
+  TIMED_OUT: status('timedOut', SLATE),
+  FULFILLED: status('fulfilled', SUCCESS),
+  SCHEDULED: status('scheduled', PRIMARY),
+  COMPLETED: status('completed', SLATE),
+  REJECTED: status('rejected', DANGER),
+  CANCELLED: status('cancelled', DANGER),
+  EXPIRED: status('expired', DANGER),
+  ACTIVE: status('active', PRIMARY_SOLID),
+  APPROVED: status('approved', PRIMARY_SOLID),
+  PENDING: status('pending', SLATE),
+  PROCESSING: status('processing', SLATE),
+  IN_PROGRESS: status('processing', SLATE),
+  FAILED: status('failed', DANGER),
+  CLOSED: status('closed', DANGER),
 };
 
 export function getConsultationStatusConfig(status?: string | null): ConsultationStatusConfig {

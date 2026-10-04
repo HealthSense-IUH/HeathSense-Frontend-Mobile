@@ -2,6 +2,7 @@ import { Directory, File, Paths } from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import type { HealthRecordResponse } from "@/types/response";
 import { useBleStore } from "@/services/ble-management/bleStore";
+import i18n from "@/i18n";
 
 export type PpgSample = {
   deviceMillis: number | null;
@@ -114,7 +115,7 @@ class PpgRecorder {
       recordingSampleCount: 0,
       lastRecordingFileUri: null,
       lastRecordingFileName: null,
-      recordingError: reason || "Đã hủy phiên ghi PPG.",
+      recordingError: reason || i18n.t("health:ppg.cancelled"),
     });
 
     console.log("[PpgRecorder] Hủy phiên ghi PPG:", reason);
@@ -127,12 +128,12 @@ class PpgRecorder {
     const store = useBleStore.getState();
 
     if (!store.isRecordingPpg) {
-      throw new Error("Chưa có phiên ghi dữ liệu PPG đang chạy.");
+      throw new Error(i18n.t("health:ppg.noActiveSession"));
     }
 
     // Kiểm tra đủ số lượng mẫu cho 1 phút đo Pha 1 hợp lệ
     if (this.sampleIndex < PpgRecorder.MIN_VALID_SAMPLES) {
-      const msg = `Dữ liệu không đủ 1 phút (${this.sampleIndex}/${PpgRecorder.MIN_VALID_SAMPLES} mẫu). Hủy xuất file.`;
+      const msg = i18n.t("health:ppg.notEnoughData", { samples: this.sampleIndex, required: PpgRecorder.MIN_VALID_SAMPLES });
       this.cancelRecording(msg);
       throw new Error(msg);
     }
@@ -159,7 +160,7 @@ class PpgRecorder {
           await Sharing.shareAsync(file.uri, {
             mimeType: "text/csv",
             UTI: "public.comma-separated-values-text",
-            dialogTitle: "Xuất dữ liệu PPG CSV",
+            dialogTitle: i18n.t("health:ppg.shareTitle"),
           }).catch(() => undefined);
         }
       }
@@ -184,7 +185,7 @@ class PpgRecorder {
       return result;
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Không thể xuất file CSV.";
+        error instanceof Error ? error.message : i18n.t("health:ppg.exportFailed");
 
       store.setRecordingState({
         isRecordingPpg: false,
@@ -225,7 +226,7 @@ class PpgRecorder {
       console.error("[PpgRecorder] Lỗi khi upload PPG record lên Backend/S3:", err);
       store.setRecordingState({
         isAnalyzing: false,
-        recordingError: err instanceof Error ? err.message : "Lỗi phân tích AI"
+        recordingError: err instanceof Error ? err.message : i18n.t("health:ppg.analysisError")
       });
     }
 

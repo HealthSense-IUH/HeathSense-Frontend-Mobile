@@ -4,6 +4,7 @@ import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import { HeartPulse } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 
 import { Box } from '@/components/ui/box';
 import { HStack } from '@/components/ui/hstack';
@@ -13,6 +14,7 @@ import { THEME } from '@/constants/theme';
 const { width } = Dimensions.get('window');
 
 export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+  const { t } = useTranslation();
   const tabHeight = THEME.layout.dockHeight;
   // Chừa vùng an toàn phía dưới (thanh điều hướng Android / home indicator iOS) để thanh tab không nằm đè lên
   const { bottom: bottomInset } = useSafeAreaInsets();
@@ -55,7 +57,7 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
             ...THEME.shadows.fab,
           }}
           onPress={() => router.push('/afib-measure' as any)}
-          accessibilityLabel="Đo tầm soát rung nhĩ"
+          accessibilityLabel={t('tabs.measure')}
         >
           <HeartPulse color="#FFFFFF" size={26} strokeWidth={2.2} />
         </Pressable>

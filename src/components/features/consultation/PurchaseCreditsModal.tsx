@@ -1,6 +1,7 @@
 import React from 'react';
 import { ActivityIndicator, Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
+import { useTranslation } from 'react-i18next';
 import { AlertCircle, CheckCircle2, Clock, Coins, CreditCard, RefreshCw, ShieldCheck, X } from 'lucide-react-native';
 import { formatCreditQuantity, getCreditOrderStatusConfig, getCreditPaymentProviderLabel } from '@/constants/credits';
 import { formatVND } from '@/utils/formatters';
@@ -44,6 +45,7 @@ function Notice({ icon, title, text, tone }: { icon: React.ReactNode; title: str
 
 /** Hộp xác nhận mua gói lượt (giống web PurchaseDialog): xác nhận → kết quả (thành công / chờ PayOS). */
 export function PurchaseCreditsModal({ visible, purchase, onClose, onPurchased, onViewOrder }: PurchaseCreditsModalProps) {
+  const { t } = useTranslation('credits');
   const { selectedPackage, idempotencyKey, isSubmitting, isFeatureDisabled, lastError, hasPendingRetry, successResult, pendingOrder } = purchase;
   if (!selectedPackage) return null;
 
@@ -67,17 +69,17 @@ export function PurchaseCreditsModal({ visible, purchase, onClose, onPurchased, 
           <View className="h-14 w-14 rounded-full bg-emerald-100 items-center justify-center">
             <CheckCircle2 size={32} color="#059669" />
           </View>
-          <Text className="text-lg font-bold text-foreground text-center">Mua lượt tư vấn thành công!</Text>
-          <Text className="text-xs text-muted-foreground text-center">Lượt tư vấn đã được cộng vào ví của bạn.</Text>
+          <Text className="text-lg font-bold text-foreground text-center">{t('purchaseDialog.successTitle')}</Text>
+          <Text className="text-xs text-muted-foreground text-center">{t('purchaseDialog.creditsAdded')}</Text>
         </View>
         <View className="rounded-xl border border-border bg-muted/30 p-4" style={{ gap: 8 }}>
-          <Row label="Mã đơn hàng:" value={`#${successResult.order.id}`} />
-          <Row label="Gói đã mua:" value={successResult.order.packageName} />
-          <Row label="Số lượt nhận:" value={`+${formatCreditQuantity(successResult.order.creditQuantity)}`} valueClass="text-emerald-600" bold />
-          <Row label="Tổng thanh toán:" value={formatVND(successResult.order.amountVnd)} bold />
-          <Row label="Phương thức:" value={getCreditPaymentProviderLabel(successResult.payment?.provider)} />
+          <Row label={t('purchaseDialog.orderId')} value={`#${successResult.order.id}`} />
+          <Row label={t('purchaseDialog.packagePurchased')} value={successResult.order.packageName} />
+          <Row label={t('purchaseDialog.creditsReceived')} value={`+${formatCreditQuantity(successResult.order.creditQuantity)}`} valueClass="text-emerald-600" bold />
+          <Row label={t('purchaseDialog.totalPaid')} value={formatVND(successResult.order.amountVnd)} bold />
+          <Row label={t('purchaseDialog.method')} value={getCreditPaymentProviderLabel(successResult.payment?.provider)} />
           <View className="flex-row items-center justify-between">
-            <Text className="text-xs text-muted-foreground">Trạng thái:</Text>
+            <Text className="text-xs text-muted-foreground">{t('purchaseDialog.status')}</Text>
             <View className="px-2 py-0.5 rounded-full border" style={{ backgroundColor: status.bg, borderColor: status.border }}>
               <Text className="text-[11px] font-bold" style={{ color: status.text }}>{status.label}</Text>
             </View>
@@ -87,9 +89,9 @@ export function PurchaseCreditsModal({ visible, purchase, onClose, onPurchased, 
           <View className="flex-row items-center flex-1" style={{ gap: 10 }}>
             <Coins size={20} color="#059669" />
             <View className="flex-1">
-              <Text className="text-xs font-medium text-emerald-900">Số dư khả dụng hiện tại</Text>
+              <Text className="text-xs font-medium text-emerald-900">{t('purchaseDialog.currentAvailable')}</Text>
               <Text className="text-[11px] text-emerald-700">
-                Tổng: {successResult.wallet.balance} | Tạm giữ: {successResult.wallet.reserved}
+                {t('purchaseDialog.walletBreakdown', { balance: successResult.wallet.balance, reserved: successResult.wallet.reserved })}
               </Text>
             </View>
           </View>
@@ -104,10 +106,10 @@ export function PurchaseCreditsModal({ visible, purchase, onClose, onPurchased, 
             }}
             className="flex-1 h-11 rounded-xl border border-border bg-white items-center justify-center active:opacity-80"
           >
-            <Text className="text-xs font-semibold text-foreground">Xem chi tiết đơn</Text>
+            <Text className="text-xs font-semibold text-foreground">{t('purchaseDialog.viewOrder')}</Text>
           </Pressable>
           <Pressable onPress={handleClose} className="flex-1 h-11 rounded-xl bg-primary items-center justify-center active:opacity-90">
-            <Text className="text-xs font-bold text-white">Hoàn tất</Text>
+            <Text className="text-xs font-bold text-white">{t('purchaseDialog.done')}</Text>
           </Pressable>
         </View>
       </View>
@@ -124,17 +126,15 @@ export function PurchaseCreditsModal({ visible, purchase, onClose, onPurchased, 
           <View className="h-14 w-14 rounded-full bg-amber-100 items-center justify-center">
             <Clock size={30} color="#D97706" />
           </View>
-          <Text className="text-lg font-bold text-foreground text-center">Đang chờ thanh toán</Text>
-          <Text className="text-xs text-muted-foreground text-center leading-5">
-            Hệ thống đang tự động đồng bộ khi nhận được giao dịch từ PayOS. Nếu bạn đã thanh toán, bấm “Kiểm tra lại”.
-          </Text>
+          <Text className="text-lg font-bold text-foreground text-center">{t('paymentResult.pending.title')}</Text>
+          <Text className="text-xs text-muted-foreground text-center leading-5">{t('purchaseDialog.pendingDescription')}</Text>
         </View>
         <View className="rounded-xl border border-border bg-muted/30 p-4" style={{ gap: 8 }}>
-          <Row label="Mã đơn hàng:" value={`#${pendingOrder.order.id}`} />
-          <Row label="Tên gói lượt:" value={pendingOrder.order.packageName} />
-          <Row label="Tổng tiền:" value={formatVND(pendingOrder.order.amountVnd)} bold />
+          <Row label={t('purchaseDialog.orderId')} value={`#${pendingOrder.order.id}`} />
+          <Row label={t('paymentResult.packageName')} value={pendingOrder.order.packageName} />
+          <Row label={`${t('ordersTable.columns.amount')}:`} value={formatVND(pendingOrder.order.amountVnd)} bold />
           <View className="flex-row items-center justify-between">
-            <Text className="text-xs text-muted-foreground">Trạng thái đơn:</Text>
+            <Text className="text-xs text-muted-foreground">{t('paymentResult.orderStatus')}</Text>
             <View className="px-2 py-0.5 rounded-full border" style={{ backgroundColor: status.bg, borderColor: status.border }}>
               <Text className="text-[11px] font-bold" style={{ color: status.text }}>{status.label}</Text>
             </View>
@@ -142,12 +142,12 @@ export function PurchaseCreditsModal({ visible, purchase, onClose, onPurchased, 
         </View>
         {checkoutUrl?.startsWith('https://') ? (
           <Pressable onPress={() => void WebBrowser.openBrowserAsync(checkoutUrl)} className="h-11 rounded-xl bg-primary items-center justify-center active:opacity-90">
-            <Text className="text-xs font-bold text-white">Mở trang thanh toán PayOS</Text>
+            <Text className="text-xs font-bold text-white">{t('paymentResult.openPayos')}</Text>
           </Pressable>
         ) : null}
         <View className="flex-row" style={{ gap: 10 }}>
           <Pressable onPress={handleClose} className="flex-1 h-11 rounded-xl border border-border bg-white items-center justify-center active:opacity-80">
-            <Text className="text-xs font-semibold text-foreground">Đóng</Text>
+            <Text className="text-xs font-semibold text-foreground">{t('common:actions.close')}</Text>
           </Pressable>
           <Pressable
             onPress={async () => {
@@ -161,7 +161,7 @@ export function PurchaseCreditsModal({ visible, purchase, onClose, onPurchased, 
             }}
             className="flex-1 h-11 rounded-xl border border-primary/40 bg-primary/5 items-center justify-center active:opacity-80"
           >
-            <Text className="text-xs font-semibold text-primary">Kiểm tra lại</Text>
+            <Text className="text-xs font-semibold text-primary">{t('packagesGrid.checkAgain')}</Text>
           </Pressable>
         </View>
       </View>
@@ -173,24 +173,24 @@ export function PurchaseCreditsModal({ visible, purchase, onClose, onPurchased, 
       <View>
         <View className="flex-row items-center self-start px-2.5 py-1 rounded-full bg-primary/10 mb-2" style={{ gap: 6 }}>
           <CreditCard size={13} color="#0D6EFD" />
-          <Text className="text-xs font-semibold text-primary">Xác nhận mua lượt tư vấn</Text>
+          <Text className="text-xs font-semibold text-primary">{t('purchaseDialog.confirmBadge')}</Text>
         </View>
         <Text className="text-lg font-bold text-foreground">{selectedPackage.name}</Text>
-        <Text className="text-xs text-muted-foreground mt-0.5">Vui lòng kiểm tra lại thông tin gói trước khi tiến hành thanh toán.</Text>
+        <Text className="text-xs text-muted-foreground mt-0.5">{t('purchaseDialog.reviewBeforePayment')}</Text>
       </View>
 
       <Notice
         tone="primary"
         icon={<ShieldCheck size={16} color="#2563EB" />}
-        title="Giao dịch được bảo vệ"
-        text="Hệ thống tự động bảo toàn mã giao dịch duy nhất (Idempotency-Key) nhằm đảm bảo an toàn tuyệt đối, không phát sinh trùng lặp."
+        title={t('purchaseDialog.protectedTitle')}
+        text={t('purchaseDialog.protectedDescription')}
       />
 
       <View className="rounded-xl border border-border bg-card p-4" style={{ gap: 8 }}>
-        <Row label="Mã gói tham chiếu:" value={selectedPackage.code || `#${selectedPackage.id}`} />
-        <Row label="Số lượt tư vấn nhận:" value={`+${formatCreditQuantity(selectedPackage.creditQuantity)}`} valueClass="text-emerald-600" bold />
+        <Row label={t('purchaseDialog.packageRef')} value={selectedPackage.code || `#${selectedPackage.id}`} />
+        <Row label={t('purchaseDialog.consultationCreditsReceived')} value={`+${formatCreditQuantity(selectedPackage.creditQuantity)}`} valueClass="text-emerald-600" bold />
         <View className="flex-row items-center justify-between pt-2 border-t border-border/60">
-          <Text className="text-xs font-medium text-muted-foreground">Giá gói (VND):</Text>
+          <Text className="text-xs font-medium text-muted-foreground">{t('purchaseDialog.packagePrice')}</Text>
           <Text className="text-lg font-black text-foreground">{formatVND(selectedPackage.priceVnd)}</Text>
         </View>
       </View>
@@ -199,13 +199,18 @@ export function PurchaseCreditsModal({ visible, purchase, onClose, onPurchased, 
         <Notice
           tone="warning"
           icon={<RefreshCw size={16} color="#D97706" />}
-          title="Tiếp tục yêu cầu trước đó"
-          text="Lần kết nối trước bị gián đoạn mạng hoặc chưa nhận được kết quả. Hệ thống sẽ tiếp tục kiểm tra lại với cùng mã giao dịch an toàn."
+          title={t('purchaseDialog.pendingRetryTitle')}
+          text={t('purchaseDialog.pendingRetryDescription')}
         />
       ) : null}
 
       {lastError ? (
-        <Notice tone="danger" icon={<AlertCircle size={16} color="#DC2626" />} title={isFeatureDisabled ? 'Chức năng chưa mở' : 'Không thể hoàn tất giao dịch'} text={lastError} />
+        <Notice
+          tone="danger"
+          icon={<AlertCircle size={16} color="#DC2626" />}
+          title={isFeatureDisabled ? t('purchaseDialog.featureNotOpen') : t('purchaseDialog.cannotComplete')}
+          text={lastError}
+        />
       ) : null}
 
       <View className="flex-row items-center justify-between px-1">
@@ -215,7 +220,7 @@ export function PurchaseCreditsModal({ visible, purchase, onClose, onPurchased, 
 
       <View className="flex-row" style={{ gap: 10 }}>
         <Pressable onPress={handleClose} disabled={isSubmitting} className="flex-1 h-11 rounded-xl border border-border bg-white items-center justify-center active:opacity-80">
-          <Text className="text-xs font-semibold text-foreground">Đóng</Text>
+          <Text className="text-xs font-semibold text-foreground">{t('common:actions.close')}</Text>
         </Pressable>
         <Pressable
           onPress={handleExecute}
@@ -224,7 +229,9 @@ export function PurchaseCreditsModal({ visible, purchase, onClose, onPurchased, 
           style={{ gap: 6, opacity: isSubmitting || isFeatureDisabled ? 0.6 : 1 }}
         >
           {isSubmitting ? <ActivityIndicator size="small" color="#FFFFFF" /> : hasPendingRetry ? <RefreshCw size={15} color="#FFFFFF" /> : <ShieldCheck size={15} color="#FFFFFF" />}
-          <Text className="text-xs font-bold text-white">{isSubmitting ? 'Đang xử lý mua...' : hasPendingRetry ? 'Thử lại giao dịch' : 'Xác nhận mua lượt'}</Text>
+          <Text className="text-xs font-bold text-white">
+            {isSubmitting ? t('purchaseDialog.processing') : hasPendingRetry ? t('purchaseDialog.retryTransaction') : t('purchaseDialog.confirmPurchase')}
+          </Text>
         </Pressable>
       </View>
     </View>
@@ -235,7 +242,12 @@ export function PurchaseCreditsModal({ visible, purchase, onClose, onPurchased, 
       <View className="flex-1 justify-end bg-black/60">
         <View className="bg-background rounded-t-3xl max-h-[90%] px-5 pt-4 pb-6">
           <View className="flex-row justify-end mb-1">
-            <Pressable onPress={handleClose} disabled={isSubmitting} className="h-8 w-8 rounded-full bg-muted items-center justify-center active:opacity-70">
+            <Pressable
+              onPress={handleClose}
+              disabled={isSubmitting}
+              className="h-8 w-8 rounded-full bg-muted items-center justify-center active:opacity-70"
+              accessibilityLabel={t('common:actions.close')}
+            >
               <X size={18} color="#0F172A" />
             </Pressable>
           </View>

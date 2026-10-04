@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Pressable, ActivityIndicator } from 'react-native';
 import { ChevronRight, Wifi } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { StitchSmartwatchIcon } from '@/components/ui/icons/StitchIcons';
 import { THEME } from '@/constants/theme';
 
@@ -27,8 +28,9 @@ export const DiscoveredDeviceCard: React.FC<DiscoveredDeviceCardProps> = ({
   isConnecting,
   onConnect,
 }) => {
+  const { t } = useTranslation('auth');
   const displayName =
-    device.name || device.advertising?.localName || `Thiết bị BLE (${device.id.slice(-5)})`;
+    device.name || device.advertising?.localName || t('scan.deviceFallbackName', { id: device.id.slice(-5) });
 
   return (
     <View 
@@ -82,7 +84,7 @@ export const DiscoveredDeviceCard: React.FC<DiscoveredDeviceCardProps> = ({
           <ActivityIndicator color="#ffffff" size="small" />
         ) : (
           <>
-            <Text className="text-white font-bold text-xs mr-1">Kết nối</Text>
+            <Text className="text-white font-bold text-xs mr-1">{t('scan.connect')}</Text>
             <ChevronRight color="#ffffff" size={14} strokeWidth={2.5} />
           </>
         )}

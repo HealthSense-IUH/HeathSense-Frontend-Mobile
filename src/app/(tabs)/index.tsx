@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, Pressable, Text, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import {
   Activity,
   Battery,
@@ -30,12 +32,12 @@ import { useMyRecords } from '@/hooks/useHealthHistory';
 import { useHealthStatistics } from '@/hooks/useHealthStatistics';
 import { getPredictionMeta } from '@/constants/healthRecords';
 import { formatHrvNumber, formatRecordDate } from '@/utils/formatters';
+import { currentIntlLocale } from '@/i18n';
 
 /** Lời chào theo giờ trong ngày (giống web MemberGreetingBanner). */
-function greetingByHour(hour: number): { text: string; sub: string } {
-  if (hour >= 5 && hour < 12) return { text: 'Chào buổi sáng', sub: 'Bắt đầu ngày mới với nhịp tim ổn định nhé.' };
-  if (hour >= 12 && hour < 18) return { text: 'Chào buổi chiều', sub: 'Hãy dành vài phút đo nhịp tim để theo dõi sức khỏe.' };
-  return { text: 'Chào buổi tối', sub: 'Nghỉ ngơi và đo lại khi cơ thể thư giãn nhé.' };
+function greetingByHour(hour: number, t: TFunction<'health'>): { text: string; sub: string } {
+  const slot = hour >= 5 && hour < 12 ? 'morning' : hour >= 12 && hour < 18 ? 'afternoon' : 'evening';
+  return { text: t(`greeting.${slot}.text`), sub: t(`greeting.${slot}.subtext`) };
 }
 
 const cardShadow = { boxShadow: '0 2px 8px rgba(15, 23, 42, 0.05)' };
@@ -59,6 +61,7 @@ function StatCard({ label, icon, iconBg, value, unit, children }: { label: strin
 }
 
 export default function HomeScreen() {
+  const { t } = useTranslation('health');
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
   const currentBPM = useBleStore((state) => state.currentBPM);
@@ -73,7 +76,7 @@ export default function HomeScreen() {
   // Tổng quan như web: 5 lần đo gần nhất + thống kê tầm soát cả năm
   const { data: recentPage, isLoading: loadingRecent } = useMyRecords(1, 5);
   const [statsDate] = useState(() => new Date());
-  const { data: stats } = useHealthStatistics('Năm', statsDate);
+  const { data: stats } = useHealthStatistics('YEAR', statsDate);
   const recentRecords = recentPage?.content ?? [];
   const latest = recentRecords[0] ?? null;
   const latestMeta = latest ? getPredictionMeta(latest.predictionLabel, latest.status) : null;
@@ -85,8 +88,9 @@ export default function HomeScreen() {
   const totalScreenings = totalNormal + totalWarning + (stats?.totalUncertain || 0);
 
   const isConnected = Boolean(connectedDevice);
-  const greeting = greetingByHour(statsDate.getHours());
-  const displayName = user?.fullName || user?.email?.split('@')[0] || 'Bạn';
+  const greeting = greetingByHour(statsDate.getHours(), t);
+  const displayName = user?.fullName || user?.email?.split('@')[0] || t('greeting.fallbackName');
+  const locale = currentIntlLocale();
 
   return (
     <ScreenWrapper
@@ -108,7 +112,7 @@ export default function HomeScreen() {
         >
           <Bluetooth color={isConnected ? THEME.colors.statusNormal : THEME.colors.primary} size={14} strokeWidth={2.4} />
           <Text className="text-xs font-semibold" style={{ color: isConnected ? THEME.colors.statusNormal : THEME.colors.primary }}>
-            {isConnected ? 'Đã kết nối' : 'Chờ kết nối'}
+            {isConnected ? t('home.ble.connected') : t('home.ble.waiting')}
           </Text>
         </TouchableOpacity>
       }
@@ -133,7 +137,7 @@ export default function HomeScreen() {
               </View>
               <View className="flex-1 min-w-0">
                 <View className="flex-row items-center justify-between">
-                  <Text className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">KẾT NỐI BLE</Text>
+                  <Text className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">{t('home.ble.sectionLabel')}</Text>
                   {isConnected && batteryLevel !== null && (
                     <View className="flex-row items-center bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
                       <Battery color={THEME.colors.statusNormal} size={13} className="mr-1" />
@@ -142,10 +146,14 @@ export default function HomeScreen() {
                   )}
                 </View>
                 <Text className="text-sm font-bold text-slate-800" numberOfLines={1}>
-                  {isConnected ? `${knownDevice?.name || 'Thiết bị đeo'}: Đã kết nối` : knownDevice ? 'Đang kết nối lại...' : 'Chưa ghép đôi thiết bị'}
+                  {isConnected
+                    ? t('home.ble.deviceConnected', { name: knownDevice?.name || t('home.ble.defaultDeviceName') })
+                    : knownDevice
+                    ? t('home.ble.reconnecting')
+                    : t('home.ble.notPaired')}
                 </Text>
                 <Text className="text-[12px] text-slate-500 mt-0.5" numberOfLines={1}>
-                  {isConnected ? 'Đang nhận dữ liệu nhịp tim & SpO2' : 'Chạm vào đây để quét & kết nối ...'}
+                  {isConnected ? t('home.ble.receiving') : t('home.ble.tapToScan')}
                 </Text>
               </View>
             </View>
@@ -164,7 +172,7 @@ export default function HomeScreen() {
               }}
             >
               <View className="w-2 h-2 rounded-full bg-emerald-300 mr-1.5 border-radius-4" />
-              <Text className="text-white text-xs font-semibold">{isConnected ? 'Đổi' : 'Kết nối'}</Text>
+              <Text className="text-white text-xs font-semibold">{isConnected ? t('home.ble.change') : t('home.ble.connect')}</Text>
             </LinearGradient>
           </View>
         </TouchableOpacity>
@@ -172,43 +180,43 @@ export default function HomeScreen() {
         {/* Tổng quan sức khỏe (4 thẻ như Tổng quan trên web) */}
         <View className="flex-row items-center justify-between mb-3">
           <View>
-            <Text className="text-lg font-bold text-slate-900 tracking-tight">Tổng quan sức khỏe</Text>
-            <Text className="text-xs text-slate-500">Chỉ số tim mạch mới nhất và các lần tầm soát rung nhĩ</Text>
+            <Text className="text-lg font-bold text-slate-900 tracking-tight">{t('dashboard.title')}</Text>
+            <Text className="text-xs text-slate-500">{t('dashboard.description')}</Text>
           </View>
         </View>
         <View className="flex-row flex-wrap justify-between">
-          <StatCard label="Lần đo gần nhất" icon={<HeartPulse size={16} color="#EF4444" />} iconBg="rgba(239, 68, 68, 0.1)" value={latestHr ? String(latestHr) : '--'} unit="BPM">
-            <Text className="text-[11px] text-slate-500" numberOfLines={1}>{latest ? formatRecordDate(latest.createdAt) : loadingRecent ? 'Đang tải...' : 'Chưa có dữ liệu'}</Text>
+          <StatCard label={t('memberDashboard.latestMeasurement')} icon={<HeartPulse size={16} color="#EF4444" />} iconBg="rgba(239, 68, 68, 0.1)" value={latestHr ? String(latestHr) : '--'} unit={t('common:units.bpm')}>
+            <Text className="text-[11px] text-slate-500" numberOfLines={1}>{latest ? formatRecordDate(latest.createdAt) : loadingRecent ? t('common:state.loading') : t('common:state.noData')}</Text>
           </StatCard>
           <StatCard
-            label="Khả năng bị rung nhĩ"
+            label={t('memberDashboard.afibProbability')}
             icon={<TrendingUp size={16} color="#0D6EFD" />}
             iconBg="rgba(13, 110, 253, 0.1)"
             value={latest?.confidence !== null && latest?.confidence !== undefined ? `${(latest.confidence * 100).toFixed(1)}%` : '--'}
           >
-            {latestMeta ? <PredictionBadge meta={latestMeta} size="sm" /> : <Text className="text-[11px] text-slate-500">Chưa có đánh giá</Text>}
+            {latestMeta ? <PredictionBadge meta={latestMeta} size="sm" /> : <Text className="text-[11px] text-slate-500">{t('memberDashboard.noAssessment')}</Text>}
           </StatCard>
-          <StatCard label="Biến thiên nhịp (RMSSD)" icon={<Sliders size={16} color="#0D6EFD" />} iconBg="rgba(13, 110, 253, 0.1)" value={latestRmssd ? formatHrvNumber(latestRmssd, 1) : '--'} unit="ms">
-            <Text className="text-[11px] text-slate-500">SDNN: {latestSdnn ? `${formatHrvNumber(latestSdnn, 1)} ms` : '--'}</Text>
+          <StatCard label={t('memberDashboard.hrvRmssd')} icon={<Sliders size={16} color="#0D6EFD" />} iconBg="rgba(13, 110, 253, 0.1)" value={latestRmssd ? formatHrvNumber(latestRmssd, 1) : '--'} unit={t('common:units.ms')}>
+            <Text className="text-[11px] text-slate-500">{t('memberDashboard.sdnn', { value: latestSdnn ? `${formatHrvNumber(latestSdnn, 1)} ${t('common:units.ms')}` : '--' })}</Text>
           </StatCard>
-          <StatCard label="Tổng lượt tầm soát" icon={<Activity size={16} color="#10B981" />} iconBg="rgba(16, 185, 129, 0.1)" value={String(totalScreenings)} unit="lần">
-            <Text className="text-[11px] text-slate-500" numberOfLines={1}>{totalNormal} bình thường • {totalWarning} cảnh báo</Text>
+          <StatCard label={t('memberDashboard.totalScreenings')} icon={<Activity size={16} color="#10B981" />} iconBg="rgba(16, 185, 129, 0.1)" value={String(totalScreenings)} unit={t('common:units.times')}>
+            <Text className="text-[11px] text-slate-500" numberOfLines={1}>{t('memberDashboard.screeningsBreakdown', { normal: totalNormal, warning: totalWarning })}</Text>
           </StatCard>
         </View>
 
         {/* Tầm soát rung nhĩ */}
-        <Text className="text-lg font-bold text-slate-900 tracking-tight mb-3 mt-1">Tầm soát Rung nhĩ (AFib)</Text>
+        <Text className="text-lg font-bold text-slate-900 tracking-tight mb-3 mt-1">{t('home.afibSection')}</Text>
         <AFibScreeningCard />
 
         {/* Lịch sử đo gần đây (5 lần mới nhất, như web) */}
         <View className="mt-5 rounded-2xl bg-white/95 border border-slate-200/80 overflow-hidden" style={cardShadow}>
           <View className="flex-row items-center justify-between px-4 py-3.5 border-b border-slate-100">
             <View className="flex-1">
-              <Text className="text-base font-bold text-slate-900">Lịch sử Đo Gần Đây</Text>
-              <Text className="text-xs text-slate-500 mt-0.5">5 lần đo mới nhất của bạn trên hệ thống</Text>
+              <Text className="text-base font-bold text-slate-900">{t('memberDashboard.recent.title')}</Text>
+              <Text className="text-xs text-slate-500 mt-0.5">{t('memberDashboard.recent.description')}</Text>
             </View>
             <Pressable onPress={() => router.push('/(tabs)/history' as any)} className="flex-row items-center active:opacity-70" style={{ gap: 2 }}>
-              <Text className="text-xs font-semibold text-[#0D6EFD]">Xem tất cả</Text>
+              <Text className="text-xs font-semibold text-[#0D6EFD]">{t('common:actions.viewAll')}</Text>
               <ChevronRight size={14} color="#0D6EFD" />
             </Pressable>
           </View>
@@ -219,7 +227,7 @@ export default function HomeScreen() {
           ) : recentRecords.length === 0 ? (
             <View className="py-8 items-center px-4" style={{ gap: 6 }}>
               <Activity size={28} color="#CBD5E1" />
-              <Text className="text-xs text-slate-500 text-center">Chưa có bản ghi đo nào. Hãy đo bằng thiết bị HealthSense để bắt đầu!</Text>
+              <Text className="text-xs text-slate-500 text-center">{t('memberDashboard.recent.empty')}</Text>
             </View>
           ) : (
             recentRecords.map((record, idx) => {
@@ -238,7 +246,7 @@ export default function HomeScreen() {
                     <Text className="text-xs font-semibold text-slate-900">{formatRecordDate(record.createdAt)}</Text>
                     <View className="flex-row items-center mt-1" style={{ gap: 6 }}>
                       <PredictionBadge meta={meta} size="sm" />
-                      <Text className="text-[11px] text-slate-500">{pct !== null ? `${pct}%` : '--'}{hr ? ` • ${hr} BPM` : ''}</Text>
+                      <Text className="text-[11px] text-slate-500">{pct !== null ? `${pct}%` : '--'}{hr ? ` • ${hr} ${t('common:units.bpm')}` : ''}</Text>
                     </View>
                   </View>
                   <Eye size={16} color="#94A3B8" />
@@ -250,14 +258,14 @@ export default function HomeScreen() {
 
         {/* Chỉ số trực tiếp từ thiết bị + vận động (riêng của app) */}
         <View className="flex-row items-center justify-between mb-3 mt-6">
-          <Text className="text-lg font-bold text-slate-900 tracking-tight">Chỉ số hôm nay</Text>
+          <Text className="text-lg font-bold text-slate-900 tracking-tight">{t('home.todayMetrics.title')}</Text>
         </View>
         <View className="flex-row flex-wrap justify-between">
           <View className="w-[48%] mb-3.5">
             <MetricCard
-              title="Nhịp tim hiện tại"
+              title={t('home.todayMetrics.currentHeartRate')}
               value={currentBPM > 0 ? currentBPM : '--'}
-              unit="BPM"
+              unit={t('common:units.bpm')}
               icon={<Heart size={18} fill="rgba(255, 255, 255, 0.25)" strokeWidth={2} />}
               colors={['#F43F5E', '#E11D48']}
               unitBgColor="rgba(190, 18, 60, 0.45)"
@@ -266,9 +274,9 @@ export default function HomeScreen() {
           </View>
           <View className="w-[48%] mb-3.5">
             <MetricCard
-              title="Nồng độ Oxy (SpO2)"
+              title={t('home.todayMetrics.spo2')}
               value={currentSpO2 > 0 ? currentSpO2 : '--'}
-              unit="%"
+              unit={t('common:units.percent')}
               icon={<Activity size={18} strokeWidth={2.4} />}
               colors={['#0EA5E9', '#2563EB']}
               unitBgColor="rgba(30, 58, 138, 0.45)"
@@ -277,9 +285,9 @@ export default function HomeScreen() {
           </View>
           <View className="w-[48%] mb-3.5">
             <MetricCard
-              title="Số bước chân"
-              value={todayStats.totalSteps.toLocaleString('vi-VN')}
-              unit="Bước"
+              title={t('home.todayMetrics.steps')}
+              value={todayStats.totalSteps.toLocaleString(locale)}
+              unit={t('common:units.steps')}
               icon={<Footprints size={18} strokeWidth={2.2} />}
               colors={['#10B981', '#0D9488']}
               unitBgColor="rgba(15, 118, 110, 0.45)"
@@ -288,9 +296,9 @@ export default function HomeScreen() {
           </View>
           <View className="w-[48%] mb-3.5">
             <MetricCard
-              title="Calo tiêu thụ"
-              value={todayStats.caloriesBurned.toLocaleString('vi-VN')}
-              unit="Kcal"
+              title={t('home.todayMetrics.calories')}
+              value={todayStats.caloriesBurned.toLocaleString(locale)}
+              unit={t('common:units.kcal')}
               icon={<Flame size={18} strokeWidth={2.2} />}
               colors={['#F59E0B', '#EA580C']}
               unitBgColor="rgba(194, 65, 12, 0.45)"
@@ -310,8 +318,8 @@ export default function HomeScreen() {
               <UtensilsCrossed color="#D97706" size={24} strokeWidth={2.2} />
             </View>
             <View className="flex-1 min-w-0">
-              <Text className="text-base font-bold text-slate-900 tracking-tight">Ăn uống & Dinh dưỡng</Text>
-              <Text className="text-xs text-slate-500 mt-0.5" numberOfLines={1}>Gợi ý thực phẩm tốt cho tim mạch và đơn ăn uống</Text>
+              <Text className="text-base font-bold text-slate-900 tracking-tight">{t('home.nutrition.title')}</Text>
+              <Text className="text-xs text-slate-500 mt-0.5" numberOfLines={1}>{t('home.nutrition.description')}</Text>
             </View>
           </View>
           <View className="w-8 h-8 rounded-full bg-slate-100 items-center justify-center ml-2">
@@ -330,8 +338,8 @@ export default function HomeScreen() {
               <Dumbbell color="#059669" size={24} strokeWidth={2.2} />
             </View>
             <View className="flex-1 min-w-0">
-              <Text className="text-base font-bold text-slate-900 tracking-tight">Trung tâm luyện tập</Text>
-              <Text className="text-xs text-slate-500 mt-0.5" numberOfLines={1}>Bắt đầu buổi tập, theo dõi nhịp tim & calo</Text>
+              <Text className="text-base font-bold text-slate-900 tracking-tight">{t('home.workout.title')}</Text>
+              <Text className="text-xs text-slate-500 mt-0.5" numberOfLines={1}>{t('home.workout.description')}</Text>
             </View>
           </View>
           <View className="w-8 h-8 rounded-full bg-slate-100 items-center justify-center ml-2">

@@ -1,0 +1,251 @@
+{
+  "common": {
+    "workout": "Buổi tập",
+    "exercise": "Bài tập",
+    "all": "Tất cả",
+    "exit": "Thoát",
+    "decimalSeparator": ","
+  },
+  "weekdays": {
+    "short": {
+      "0": "CN",
+      "1": "2",
+      "2": "3",
+      "3": "4",
+      "4": "5",
+      "5": "6",
+      "6": "7"
+    },
+    "abbr": {
+      "0": "CN",
+      "1": "T.2",
+      "2": "T.3",
+      "3": "T.4",
+      "4": "T.5",
+      "5": "T.6",
+      "6": "T.7"
+    }
+  },
+  "months": {
+    "short": {
+      "1": "Th1",
+      "2": "Th2",
+      "3": "Th3",
+      "4": "Th4",
+      "5": "Th5",
+      "6": "Th6",
+      "7": "Th7",
+      "8": "Th8",
+      "9": "Th9",
+      "10": "Th10",
+      "11": "Th11",
+      "12": "Th12"
+    },
+    "long": {
+      "1": "tháng 1",
+      "2": "tháng 2",
+      "3": "tháng 3",
+      "4": "tháng 4",
+      "5": "tháng 5",
+      "6": "tháng 6",
+      "7": "tháng 7",
+      "8": "tháng 8",
+      "9": "tháng 9",
+      "10": "tháng 10",
+      "11": "tháng 11",
+      "12": "tháng 12"
+    }
+  },
+  "date": {
+    "dayMonth": "Ngày {{day}} tháng {{month}}",
+    "weekRange": "Ngày {{startDay}} - Ngày {{endDay}} tháng {{month}}",
+    "monthYear": "{{monthLong}} năm {{year}}",
+    "dayHeader": "{{prefix}}, {{day}} {{monthShort}}",
+    "dateTime": "{{weekday}}, {{day}} {{monthShort}}, {{year}} {{time}}"
+  },
+  "categories": {
+    "GENERAL": "Chung",
+    "AEROBIC": "Hiếu khí",
+    "FREE_WEIGHT": "Tập tạ tự do",
+    "MACHINE_WEIGHT": "Tập tạ với máy",
+    "WILDERNESS": "Vùng hoang dã",
+    "WATER": "Nước",
+    "WINTER": "Mùa đông",
+    "BALL": "Bóng"
+  },
+  "trackingTypes": {
+    "TIME_CALORIES": "T.gian và calo tiêu hao (không GPS)",
+    "DISTANCE_GPS": "K.cách, tốc độ và lộ trình (có GPS)",
+    "SETS_REST": "Số hiệp và nghỉ ngơi"
+  },
+  "exercises": {
+    "walking": "Đi bộ",
+    "combined_workout": "Bài tập kết hợp",
+    "stretching": "Giãn cơ",
+    "yoga": "Yoga",
+    "calisthenics": "Thể dục tại chỗ",
+    "running": "Chạy bộ",
+    "cycling": "Đạp xe",
+    "treadmill": "Máy chạy bộ",
+    "elliptical": "Máy tập elip",
+    "jump_rope": "Nhảy dây",
+    "burpee": "Burpee",
+    "aerobic_dance": "Aerobic",
+    "push_up": "Hít đất",
+    "squats": "Squats",
+    "lunges": "Bài tập chùng chân",
+    "crunches": "Gập bụng",
+    "dumbbell_curl": "Tập tạ tay",
+    "pull_up": "Hít xà đơn",
+    "lat_pulldown": "Kéo xô với máy",
+    "leg_press": "Đạp đùi với máy",
+    "chest_press_machine": "Đẩy ngực với máy",
+    "hiking": "Đi bộ đường dài",
+    "trail_running": "Chạy địa hình",
+    "pool_swimming": "Bơi hồ bơi",
+    "open_water_swimming": "Bơi ngoài trời",
+    "skiing": "Trượt tuyết",
+    "ice_skating": "Trượt băng",
+    "badminton": "Cầu lông",
+    "table_tennis": "Bóng bàn",
+    "soccer": "Bóng đá",
+    "volleyball": "Bóng chuyền"
+  },
+  "hub": {
+    "title": "Trung Tâm Luyện Tập",
+    "banner": "Theo dõi mức độ thể lực để được cung cấp nội dung cũng như mục tiêu dựa trên trọng tâm luyện tập của bạn.",
+    "steps": "Bước",
+    "stepsTarget": "{{value}} bước",
+    "runningCoach": "H.luyện chạy",
+    "beta": "Beta",
+    "runningLevelTitle": "Xác định cấp độ chạy bộ",
+    "runningLevelDescription": "Nhận kế hoạch tập chi tiết để đạt mục tiêu chạy bộ của bạn."
+  },
+  "weekly": {
+    "title": "Bài tập tuần này",
+    "sessions_one": "{{count}} buổi",
+    "sessions_other": "{{count}} buổi"
+  },
+  "favorites": {
+    "title": "Tập thể dục",
+    "more": "Nhiều hơn",
+    "empty": "Chọn các bài tập thể dục yêu thích của bạn để bạn có thể truy cập chúng một cách dễ dàng."
+  },
+  "catalog": {
+    "title": "Bài tập thể dục của bạn",
+    "favorites": "Yêu thích",
+    "others": "Bài tập khác",
+    "addMenuTitle": "Thêm bài tập thể dục",
+    "chooseFromList": "Chọn từ danh sách bài tập",
+    "createExercise": "Tạo bài tập thể dục mới",
+    "createRoutine": "Tạo lịch trình tập luyện",
+    "maxFavorites": "Không thể đặt nhiều hơn 3 bài tập làm mục yêu thích."
+  },
+  "select": {
+    "title": "Chọn bài tập",
+    "searchPlaceholder": "Tìm kiếm bài tập...",
+    "empty": "Không tìm thấy bài tập phù hợp"
+  },
+  "createExercise": {
+    "nameLabel": "Tên bài tập",
+    "namePlaceholder": "Tên bài tập thể dục",
+    "nameRequired": "Vui lòng nhập tên bài tập thể dục",
+    "trackingLabel": "Dữ liệu cần ghi",
+    "categoryLabel": "Thể loại",
+    "customDescription": "Bài tập thể dục tùy chỉnh do người dùng tạo."
+  },
+  "createRoutine": {
+    "defaultName": "Lịch trình của bạn {{n}}",
+    "subtitle": "Kết hợp một loạt các bài tập thể dục cho một lịch trình tập luyện tùy chỉnh.",
+    "namePlaceholder": "Nhập tên lịch trình...",
+    "nameRequired": "Vui lòng nhập tên lịch trình",
+    "savedTitle": "Thành công",
+    "savedMessage": "Đã lưu lịch trình tập luyện của bạn.",
+    "exercisesSection": "Tập thể dục",
+    "warmup": "Khởi động",
+    "warmupHint": "3 phút làm nóng khớp",
+    "cooldown": "Hạ nhiệt",
+    "cooldownHint": "3 phút giãn cơ & hồi phục",
+    "setsReps": "{{sets}} hiệp • {{reps}} reps",
+    "seconds": "{{value}} giây",
+    "addExercise": "Thêm bài tập thể dục",
+    "pickerTitle": "Chọn bài tập vào lịch trình"
+  },
+  "preWorkout": {
+    "target": {
+      "none": "Không có mục tiêu",
+      "distance": "Mục tiêu quãng đường",
+      "time": "Mục tiêu thời gian",
+      "calories": "Mục tiêu calo"
+    },
+    "noTargetHint": "Thúc đẩy việc tập luyện của bạn bằng mục tiêu tập luyện.",
+    "pauseOnTarget": "Tạm dừng khi đạt mục tiêu",
+    "start": "Bắt đầu"
+  },
+  "active": {
+    "remainingDistance": "Khoảng cách còn lại | {{value}} km",
+    "remainingTime": "Thời gian còn lại | {{value}}",
+    "remainingCalories": "Calo còn lại | {{value}} kcal",
+    "goalReached": "Đã đạt mục tiêu!",
+    "duration": "Thời lượng",
+    "distance": "Khoảng cách",
+    "calories": "Calo",
+    "pace": "Nhịp độ",
+    "cadence": "Nhịp",
+    "heartRate": "Nhịp tim",
+    "speed": "Tốc độ",
+    "steps": "Số bước",
+    "pause": "Tạm dừng",
+    "resume": "Tiếp tục",
+    "finish": "Hoàn tất",
+    "screenLocked": "Màn hình đang khóa",
+    "tapToUnlock": "Chạm vào đây để mở khóa",
+    "exitTitle": "Dừng buổi tập?",
+    "exitMessage": "Bạn có chắc chắn muốn thoát khỏi phiên tập hiện tại không? Số liệu buổi tập sẽ không được lưu nếu chưa kết thúc.",
+    "keepGoing": "Tiếp tục tập"
+  },
+  "summary": {
+    "details": "Chi tiết tập luyện",
+    "totalTime": "Tổng thời gian",
+    "distance": "Khoảng cách",
+    "activeCalories": "Calo tập luyện",
+    "totalCalories": "Tổng lượng calo",
+    "avgHeartRate": "Nhịp tim TB",
+    "notePlaceholder": "Ghi chú"
+  },
+  "history": {
+    "title": "Tập thể dục",
+    "tabs": {
+      "days": "Số ngày",
+      "weeks": "Tuần",
+      "months": "Tháng"
+    },
+    "monthRange": "Tháng {{startMonth}} - Tháng {{endMonth}} năm {{year}}",
+    "monthColumn": "T.{{month}}",
+    "caloriesLabel": "Calo",
+    "sessionsLabel": "phiên",
+    "axisDuration": "(g:p)",
+    "axisDistance": "(km)",
+    "otherData": "Các dữ liệu khác trong khoảng thời gian này",
+    "avgHeartRate": "Nhịp tim TB",
+    "steps": "Bước",
+    "caloriesBurned": "Calo tiêu hao"
+  },
+  "calendar": {
+    "monthYear": "{{monthLong}} năm {{year}}"
+  },
+  "map": {
+    "gpsDetected": "Đã phát hiện",
+    "gpsSearching": "Đang tìm kiếm..."
+  },
+  "afib": {
+    "workoutInProgress": {
+      "title": "Tạm dừng đo Rung nhĩ",
+      "message": "Bạn đang trong phiên tập luyện thể dục. Để đảm bảo độ chính xác y khoa và tránh cảnh báo sai do vận động, chức năng đo AFib tạm dừng trong lúc tập. Vui lòng hoàn thành buổi tập trước khi đo."
+    },
+    "cooldown": {
+      "title": "Thời gian phục hồi tim (10 phút)",
+      "message": "Bạn vừa hoàn thành buổi tập thể dục. Để nhịp tim ổn định và tránh cảnh báo sai do nhịp xoang phục hồi sau gắng sức, vui lòng ngồi nghỉ tĩnh thêm {{time}} trước khi bắt đầu đo tầm soát Rung nhĩ (AFib)."
+    }
+  }
+}

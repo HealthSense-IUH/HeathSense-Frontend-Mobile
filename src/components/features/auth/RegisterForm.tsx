@@ -7,6 +7,7 @@ import {
   View,
 } from 'react-native';
 import { AlertCircle, Eye, EyeOff, Lock, Mail, User } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { RegisterRequest } from '@/types/authentication';
 
 interface RegisterFormProps {
@@ -22,6 +23,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   error,
   onNavigateToLogin,
 }) => {
+  const { t } = useTranslation('auth');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -36,19 +38,19 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   const handleSubmit = async () => {
     setLocalError(null);
     if (!fullName.trim()) {
-      setLocalError('Vui lòng nhập Họ và Tên.');
+      setLocalError(t('validation.fullNameRequired'));
       return;
     }
     if (!email.trim()) {
-      setLocalError('Vui lòng nhập Email.');
+      setLocalError(t('validation.emailRequired'));
       return;
     }
     if (!password || password.length < 8) {
-      setLocalError('Mật khẩu phải có ít nhất 8 ký tự.');
+      setLocalError(t('validation.passwordMinLength'));
       return;
     }
     if (password !== confirmPassword) {
-      setLocalError('Mật khẩu nhập lại không khớp.');
+      setLocalError(t('validation.passwordMismatch'));
       return;
     }
 
@@ -73,10 +75,10 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           <User size={28} color="#0F67FE" />
         </View>
         <Text className="text-2xl font-bold text-foreground text-center">
-          Tạo tài khoản mới
+          {t('register.title')}
         </Text>
         <Text className="text-sm text-muted-foreground text-center mt-1">
-          Theo dõi và chăm sóc sức khỏe thông minh với HealthSense
+          {t('register.subtitle')}
         </Text>
       </View>
 
@@ -94,14 +96,14 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
       <View className="space-y-3">
         {/* Full Name */}
         <View className="space-y-1 mb-3">
-          <Text className="text-xs font-semibold text-muted-foreground mb-1">
-            HỌ VÀ TÊN
+          <Text className="text-xs font-semibold text-muted-foreground mb-1 uppercase">
+            {t('register.fullNameLabel')}
           </Text>
           <View className="flex-row items-center bg-background border border-border rounded-2xl px-3.5 py-3">
             <User size={18} color="#9EA7B8" className="mr-2.5" />
             <TextInput
               className="flex-1 text-sm text-foreground font-medium p-0"
-              placeholder="Nguyễn Văn A"
+              placeholder={t('register.fullNamePlaceholder')}
               placeholderTextColor="#9EA7B8"
               value={fullName}
               onChangeText={setFullName}
@@ -114,15 +116,15 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
 
         {/* Email */}
         <View className="space-y-1 mb-3">
-          <Text className="text-xs font-semibold text-muted-foreground mb-1">
-            EMAIL
+          <Text className="text-xs font-semibold text-muted-foreground mb-1 uppercase">
+            {t('register.emailLabel')}
           </Text>
           <View className="flex-row items-center bg-background border border-border rounded-2xl px-3.5 py-3">
             <Mail size={18} color="#9EA7B8" className="mr-2.5" />
             <TextInput
               ref={emailInputRef}
               className="flex-1 text-sm text-foreground font-medium p-0"
-              placeholder="email@example.com"
+              placeholder={t('register.emailPlaceholder')}
               placeholderTextColor="#9EA7B8"
               keyboardType="email-address"
               autoCapitalize="none"
@@ -138,8 +140,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
 
         {/* Password */}
         <View className="space-y-1 mb-3">
-          <Text className="text-xs font-semibold text-muted-foreground mb-1">
-            MẬT KHẨU (TỐI THIỂU 8 KÝ TỰ)
+          <Text className="text-xs font-semibold text-muted-foreground mb-1 uppercase">
+            {t('register.passwordLabel')}
           </Text>
           <View className="flex-row items-center bg-background border border-border rounded-2xl px-3.5 py-3">
             <Lock size={18} color="#9EA7B8" className="mr-2.5" />
@@ -158,6 +160,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             <Pressable
               onPress={() => setShowPassword(!showPassword)}
               hitSlop={8}
+              accessibilityLabel={showPassword ? t('password.hide') : t('password.show')}
               className="ml-2"
             >
               {showPassword ? (
@@ -171,8 +174,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
 
         {/* Confirm Password */}
         <View className="space-y-1 mb-5">
-          <Text className="text-xs font-semibold text-muted-foreground mb-1">
-            XÁC NHẬN MẬT KHẨU
+          <Text className="text-xs font-semibold text-muted-foreground mb-1 uppercase">
+            {t('register.confirmPasswordLabel')}
           </Text>
           <View className="flex-row items-center bg-background border border-border rounded-2xl px-3.5 py-3">
             <Lock size={18} color="#9EA7B8" className="mr-2.5" />
@@ -203,7 +206,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             <ActivityIndicator size="small" color="#FFFFFF" />
           ) : (
             <Text className="text-base font-bold text-primary-foreground">
-              Đăng ký tài khoản
+              {t('register.submit')}
             </Text>
           )}
         </Pressable>
@@ -213,11 +216,11 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
       {onNavigateToLogin && (
         <View className="flex-row items-center justify-center mt-6 pt-4 border-t border-border/40">
           <Text className="text-xs text-muted-foreground">
-            Đã có tài khoản?{' '}
+            {t('register.hasAccount')}{' '}
           </Text>
           <Pressable onPress={onNavigateToLogin} hitSlop={8}>
             <Text className="text-xs font-bold text-primary">
-              Đăng nhập ngay
+              {t('register.loginNow')}
             </Text>
           </Pressable>
         </View>

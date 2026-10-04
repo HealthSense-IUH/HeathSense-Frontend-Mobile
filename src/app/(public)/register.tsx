@@ -1,11 +1,13 @@
 import React from 'react';
 import { Alert, KeyboardAvoidingView, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/services/authentication/authStore';
 import { RegisterForm } from '@/components/features/auth/RegisterForm';
 import { RegisterRequest } from '@/types/authentication';
 
 export default function RegisterScreen() {
+  const { t } = useTranslation('auth');
   const router = useRouter();
   const { register, isLoading, error, clearError } = useAuthStore();
 
@@ -14,11 +16,11 @@ export default function RegisterScreen() {
     try {
       await register(data);
       Alert.alert(
-        'Đăng ký thành công!',
-        'Tài khoản của bạn đã được khởi tạo. Vui lòng đăng nhập để bắt đầu trải nghiệm.',
+        t('register.successTitle'),
+        t('register.successMessage'),
         [
           {
-            text: 'Đăng nhập ngay',
+            text: t('register.loginNow'),
             onPress: () => router.replace('/(public)/login' as any),
           },
         ]
@@ -47,7 +49,7 @@ export default function RegisterScreen() {
               Health<Text className="text-foreground">Sense</Text>
             </Text>
             <Text className="text-xs text-muted-foreground mt-1">
-              Tạo tài khoản mới để kết nối và quản lý dữ liệu sức khỏe
+              {t('register.screenSubtitle')}
             </Text>
           </View>
 

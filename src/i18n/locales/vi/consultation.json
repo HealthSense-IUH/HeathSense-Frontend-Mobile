@@ -1,0 +1,405 @@
+{
+  "status": {
+    "pendingReview": "Chờ xem xét",
+    "needMoreInfo": "Cần bổ sung TT",
+    "waitingAcceptance": "Chờ xác nhận thỏa thuận",
+    "waitingPayment": "Chờ thanh toán",
+    "queued": "Đang trong hàng đợi",
+    "waiting": "Đang chờ bác sĩ",
+    "offeringDoctor": "Đang kết nối bác sĩ",
+    "waitingMemberConfirmation": "Chờ bạn xác nhận",
+    "timedOut": "Hết thời gian xác nhận",
+    "fulfilled": "Đã kích hoạt tư vấn",
+    "scheduled": "Đã lên lịch",
+    "completed": "Đã hoàn thành",
+    "rejected": "Đã từ chối",
+    "cancelled": "Đã hủy",
+    "expired": "Đã hết hạn",
+    "active": "Đang hoạt động",
+    "approved": "Đã duyệt",
+    "pending": "Đang chờ",
+    "processing": "Đang xử lý",
+    "failed": "Thất bại",
+    "closed": "Đã đóng"
+  },
+  "page": {
+    "title": "Tư vấn & Chăm sóc",
+    "description": "Quản lý các buổi và phiên tư vấn 1-1 của bạn.",
+    "refresh": "Làm mới",
+    "dismissAlert": "Đóng thông báo",
+    "loadingQueue": "Đang tải hàng đợi tư vấn...",
+    "tabs": {
+      "queue": "Hàng đợi tư vấn",
+      "queueShort": "Hàng đợi",
+      "waitingBadge": "Đang chờ",
+      "sessions": "Phiên tư vấn",
+      "credits": "Lượt tư vấn"
+    }
+  },
+  "queuePanel": {
+    "activeSession": {
+      "badge": "Phiên tư vấn đang diễn ra",
+      "title": "Bác sĩ đang đợi bạn trong phòng tư vấn",
+      "activated": "Phiên tư vấn #{{id}} đã được kích hoạt thành công.",
+      "sessionCode": "Mã phiên tư vấn:",
+      "startTime": "Thời gian bắt đầu:",
+      "blockEndTime": "Thời gian kết thúc block 15 phút:",
+      "reservationStatus": "Trạng thái lượt:",
+      "enterRoom": "Vào phòng tư vấn ngay (Mở Chat)"
+    },
+    "confirmation": {
+      "badge": "Bác sĩ đã sẵn sàng",
+      "title": "Bác sĩ đã nhận lượt tư vấn của bạn!",
+      "subtitle": "Vui lòng xác nhận để bắt đầu phiên tư vấn trực tiếp.",
+      "timeLeft": "Thời gian còn lại",
+      "yourNumber": "Số thứ tự của bạn:",
+      "status": "Trạng thái:",
+      "doctorAccepted": "Bác sĩ đã chấp nhận kết nối",
+      "creditInfo": "Thông tin lượt:",
+      "insufficientTitle": "Không còn đủ lượt tại thời điểm bắt đầu phiên",
+      "insufficientDescription": "Màn hình xác nhận vẫn được giữ. Vui lòng nạp thêm lượt tư vấn để tiếp tục.",
+      "buyCredits": "Mua thêm lượt tư vấn",
+      "expired": "Đã hết thời gian xác nhận. Hệ thống đang làm mới trạng thái hàng đợi...",
+      "hintPerSession": "Bạn có tối đa 15 phút để xác nhận. Sau khi bạn xác nhận, 1 lượt tư vấn sẽ được trừ và phiên tư vấn sẽ được bắt đầu ngay lập tức.",
+      "hintDefault": "Bạn có tối đa 15 phút để xác nhận. Sau khi bạn xác nhận, phiên tư vấn và khung chat trực tiếp sẽ được mở ngay lập tức.",
+      "creatingSession": "Đang tạo phiên tư vấn...",
+      "join": "Tham gia tư vấn",
+      "cancelTitle": "Hủy lượt tư vấn",
+      "cancelConfirm": "Bạn có chắc chắn muốn hủy lượt tư vấn này?",
+      "cancel": "Hủy lượt"
+    },
+    "queue": {
+      "title": "Hàng đợi Tư vấn Sức khỏe",
+      "connecting": "Hệ thống đang kết nối bạn với bác sĩ...",
+      "inQueue": "Bạn đang trong hàng đợi trực tuyến (FIFO)",
+      "refresh": "Làm mới",
+      "yourNumber": "Số thứ tự của bạn",
+      "queueDate": "Ngày tiếp nhận: {{date}}",
+      "connectingDoctor": "Đang kết nối bác sĩ",
+      "waitingTurn": "Đang chờ đến lượt",
+      "peopleAhead_one": "Còn <strong>{{count}}</strong> người trước bạn",
+      "peopleAhead_other": "Còn <strong>{{count}}</strong> người trước bạn",
+      "connectingNotice": "Hệ thống đang kết nối bạn với bác sĩ... Vui lòng giữ màn hình này và chờ phản hồi từ bác sĩ.",
+      "noDoctorsTitle": "Hiện chưa có bác sĩ sẵn sàng.",
+      "noDoctorsDescription": "Yêu cầu của bạn đã được xếp hàng và sẽ được xử lý khi có bác sĩ trực. Bạn không cần gửi lại yêu cầu.",
+      "doctorStats": "Thống kê đội ngũ bác sĩ:",
+      "onDuty": "Đang trực",
+      "available": "Sẵn sàng",
+      "busy": "Đang bận",
+      "cancelHint": "Bạn có thể hủy lượt bất cứ lúc nào trước khi phiên bắt đầu.",
+      "leaveTitle": "Rời hàng đợi",
+      "leaveConfirm": "Bạn có chắc chắn muốn rời khỏi hàng đợi tư vấn?",
+      "stay": "Ở lại",
+      "leave": "Hủy lượt chờ"
+    },
+    "timedOut": {
+      "title": "Bạn đã bỏ lỡ lượt tư vấn",
+      "description": "Thời hạn xác nhận lượt tư vấn trước đó đã hết. Nếu bạn vẫn muốn được bác sĩ tư vấn, vui lòng đăng ký lại để nhận số thứ tự mới."
+    },
+    "cancelled": {
+      "title": "Yêu cầu tư vấn đã được hủy",
+      "description": "Lượt xếp hàng trước đó của bạn đã kết thúc. Bạn có thể tạo yêu cầu tư vấn mới bất cứ lúc nào."
+    },
+    "empty": {
+      "title": "Bạn chưa có yêu cầu tư vấn đang hoạt động",
+      "description": "Đăng ký để được xếp vào hàng đợi tư vấn trực tiếp 1-1 với bác sĩ chuyên khoa.",
+      "register": "Đăng ký tư vấn ngay"
+    },
+    "registerNew": "Đăng ký tư vấn mới"
+  },
+  "createRequestPanel": {
+    "title": "Đăng ký Tư vấn Sức khỏe",
+    "screenTitle": "Đăng ký tư vấn",
+    "screenDescription": "Xếp vào hàng đợi, ghép tự động với bác sĩ đang trực",
+    "description": "Yêu cầu của bạn sẽ được xếp vào hàng đợi trực tiếp (FIFO) và ghép nối tự động với bác sĩ đang trực.",
+    "back": "Quay lại",
+    "activeQueue": {
+      "title": "Bạn đang có yêu cầu tư vấn trong hàng đợi",
+      "description": "Hệ thống ghi nhận bạn đã có yêu cầu tư vấn đang chờ xử lý. Mỗi hội viên chỉ có thể tham gia 1 yêu cầu tư vấn tại một thời điểm.",
+      "viewQueue": "Xem hàng đợi hiện tại"
+    },
+    "insufficient": {
+      "title": "Bạn không đủ lượt tư vấn để vào hàng đợi",
+      "description_one": "Số dư khả dụng hiện tại: <strong>{{count}} lượt</strong>. Vui lòng mua thêm gói lượt để tiếp tục.",
+      "description_other": "Số dư khả dụng hiện tại: <strong>{{count}} lượt</strong>. Vui lòng mua thêm gói lượt để tiếp tục.",
+      "buyCredits": "Mua thêm lượt tư vấn"
+    },
+    "records": {
+      "label": "Hồ sơ đo đạc tim mạch đính kèm",
+      "emptyTitle": "Chưa có dữ liệu đo điện tim (ECG)",
+      "emptyDescription": "Để bác sĩ có cơ sở chẩn đoán tình trạng tim mạch của bạn, bạn cần thực hiện ít nhất một lần đo điện tim bằng thiết bị trước khi đăng ký tư vấn.",
+      "measureNow": "Đo điện tim ngay",
+      "autoAttached": "Tự động đính kèm mới nhất",
+      "measuredAt": "Thời gian đo: {{time}}",
+      "shareNotice": "Dữ liệu dạng sóng ECG này sẽ được chia sẻ cho bác sĩ"
+    },
+    "form": {
+      "reasonLabel": "Lý do đăng ký chăm sóc / tư vấn",
+      "reasonPlaceholder": "VD: Nhịp tim không đều sau khi tập thể dục, cần tư vấn chuyên khoa tim mạch...",
+      "concernLabel": "Triệu chứng & Vấn đề lo ngại hiện tại",
+      "concernPlaceholder": "Mô tả cụ thể triệu chứng: thời điểm xuất hiện, tần suất, cảm giác hồi hộp, khó thở, chóng mặt..."
+    },
+    "policy": {
+      "perSessionConfirm_one": "Phiên tư vấn cần {{count}} lượt. Lượt chỉ được trừ khi bạn xác nhận bắt đầu phiên.",
+      "perSessionConfirm_other": "Phiên tư vấn cần {{count}} lượt. Lượt chỉ được trừ khi bạn xác nhận bắt đầu phiên.",
+      "perSession_one": "Mỗi phiên tư vấn sử dụng {{count}} lượt. Lượt sẽ được tạm giữ khi vào hàng đợi và chỉ trừ khi bắt đầu phiên khám.",
+      "perSession_other": "Mỗi phiên tư vấn sử dụng {{count}} lượt. Lượt sẽ được tạm giữ khi vào hàng đợi và chỉ trừ khi bắt đầu phiên khám.",
+      "free": "Phiên tư vấn miễn phí, không trừ lượt.",
+      "default": "Yêu cầu của bạn sẽ nhận số thứ tự cố định và được xếp vào hàng đợi trực tiếp (FIFO)."
+    },
+    "submitting": "Đang gửi yêu cầu...",
+    "submit": "Gửi yêu cầu & Vào hàng đợi",
+    "creditsCount_one": "{{count}} lượt",
+    "creditsCount_other": "{{count}} lượt",
+    "confirmDialog": {
+      "title": "Xác nhận vào hàng đợi tư vấn",
+      "description": "Vui lòng kiểm tra lại thông tin trước khi hệ thống xếp bạn vào hàng đợi gặp bác sĩ.",
+      "reason": "Lý do tư vấn:",
+      "attachedEcg": "Bản ghi ECG đính kèm:",
+      "availableCredits": "Lượt tư vấn khả dụng:",
+      "minimumCredits": "Để tham gia hàng đợi, bạn cần có tối thiểu <strong>1 lượt tư vấn</strong>.",
+      "deductionRule": "<label>Quy định trừ lượt:</label> Lượt của bạn chỉ được trừ khi bác sĩ tiếp nhận và bạn bấm <strong>Xác nhận bắt đầu phiên tư vấn</strong>.",
+      "review": "Kiểm tra lại",
+      "sending": "Đang gửi...",
+      "confirm": "Xác nhận & Vào hàng đợi"
+    }
+  },
+  "pendingConflictDialog": {
+    "title": "Bạn đang có yêu cầu tư vấn chưa hoàn thành",
+    "description": "Mỗi tài khoản hội viên chỉ được tham gia một phiên tư vấn tại một thời điểm.",
+    "alertBody": "Mỗi tài khoản hội viên chỉ được tham gia một phiên tư vấn tại một thời điểm. Vui lòng theo dõi hàng đợi hiện tại hoặc hủy yêu cầu cũ trước khi tạo yêu cầu mới.",
+    "alertBodyWithNumber": "Mỗi tài khoản hội viên chỉ được tham gia một phiên tư vấn tại một thời điểm. Bạn đang có yêu cầu trong hàng đợi (Số thứ tự #{{number}}). Vui lòng theo dõi hàng đợi hiện tại hoặc hủy yêu cầu cũ trước khi tạo yêu cầu mới.",
+    "close": "Đóng",
+    "viewQueue": "Xem hàng đợi hiện tại"
+  },
+  "sessionsPanel": {
+    "titleMember": "Phiên Tư vấn của tôi",
+    "descriptionMember": "Chỉ các phiên đang hoạt động (ACTIVE) mới có thể gửi tin nhắn.",
+    "activeBanner": {
+      "title": "Bạn đang có phiên tư vấn trực tiếp đang diễn ra!",
+      "doctor": "Bác sĩ:",
+      "sessionId": "Mã phiên: #{{id}}",
+      "latestMessage": "Tin nhắn mới nhất: “{{message}}”",
+      "enterNow": "Vào phòng tư vấn ngay"
+    },
+    "table": {
+      "createdAt": "Ngày tạo",
+      "lastMessage": "Tin nhắn gần nhất"
+    },
+    "loading": "Đang tải danh sách...",
+    "empty": "Không có phiên tư vấn nào.",
+    "noMessages": "Chưa có tin nhắn",
+    "actions": {
+      "enterRoom": "Vào phòng tư vấn",
+      "viewMessages": "Xem tin nhắn",
+      "renew": "Gia hạn",
+      "viewSummary": "Xem tổng kết"
+    }
+  },
+  "memberFinalSummaryDialog": {
+    "errors": {
+      "loadFailed": "Không thể tải tổng kết chăm sóc."
+    },
+    "loading": "Đang tải bản tổng kết...",
+    "pending": {
+      "title": "Bác sĩ đang hoàn tất tổng kết phiên tư vấn.",
+      "memberDescription": "Tổng kết y khoa sẽ xuất hiện tại đây ngay sau khi bác sĩ hoàn tất."
+    },
+    "finalized": {
+      "title": "Bản tổng kết đã được hoàn tất",
+      "date": "Ngày hoàn tất: {{date}}"
+    },
+    "sections": {
+      "summary": "Tổng kết",
+      "observations": "Nhận xét",
+      "recommendations": "Khuyến nghị",
+      "followUp": "Khuyến nghị theo dõi"
+    },
+    "close": "Đóng"
+  },
+  "shareHealthRecordDialog": {
+    "toast": {
+      "successDescription": "Hồ sơ #{{id}} đã được cấp quyền cho bác sĩ phụ trách xem xét.",
+      "shareErrorDescription": "Không thể chia sẻ hồ sơ lúc này."
+    },
+    "title": "Chia sẻ Hồ sơ Sức khỏe",
+    "selectPrompt": "Chọn 1 hồ sơ đo đạc của bạn để chia sẻ:",
+    "emptyTitle": "Chưa có hồ sơ đo đạc nào",
+    "recordLabel": "Hồ sơ #{{id}}",
+    "recordFallbackDescription": "Đo lường nhịp tim / ECG",
+    "share": "Chia sẻ hồ sơ này"
+  },
+  "renewalDialog": {
+    "renewalStatus": {
+      "requested": "Chờ tiếp nhận",
+      "underReview": "Đang xem xét",
+      "pendingAcceptance": "Chờ xác nhận thỏa thuận",
+      "waitingPayment": "Chờ thanh toán",
+      "paid": "Đã gia hạn thành công",
+      "rejected": "Bị từ chối",
+      "cancelled": "Đã hủy",
+      "expired": "Đã hết hạn",
+      "requiresReview": "Cần kiểm tra thủ công"
+    },
+    "toast": {
+      "requestSuccessDescription": "Yêu cầu gia hạn của bạn đã được gửi đến Điều phối viên chăm sóc.",
+      "requestErrorDescription": "Không thể gửi yêu cầu gia hạn vào lúc này.",
+      "cancelSuccessDescription": "Yêu cầu gia hạn đã được hủy. Thời hạn phiên chăm sóc hiện tại giữ nguyên.",
+      "cancelErrorDescription": "Không thể hủy yêu cầu gia hạn lúc này.",
+      "paymentLinkErrorDescription": "Không thể tạo liên kết thanh toán PayOS.",
+      "paymentInitErrorDescription": "Không thể tạo giao dịch thanh toán gia hạn."
+    },
+    "title": "Gia hạn Phiên Chăm sóc",
+    "sessionNumber": "Phiên #{{id}}",
+    "doctorFallback": "Bác sĩ #{{id}}",
+    "tabs": {
+      "manage": "Quản lý Gia hạn",
+      "history": "Lịch sử Thời hạn ({{total}})"
+    },
+    "currentTermLabel": "Thông tin thời hạn hiện tại:",
+    "startedAt": "Bắt đầu: {{date}}",
+    "currentEndsAtLabel": "Thời hạn hiệu lực hiện tại:",
+    "unknown": "Không xác định",
+    "pendingRequestTitle": "Yêu cầu gia hạn #{{id}} đang xử lý",
+    "proposedEndsAtLabel": "Thời hạn sau khi gia hạn:",
+    "renewalPackageLabel": "Gói dịch vụ gia hạn:",
+    "packageFallback_one": "Gói +{{count}} ngày",
+    "packageFallback_other": "Gói +{{count}} ngày",
+    "paymentDeadlineLabel": "Hạn chót thanh toán:",
+    "rejectionReasonLabel": "Lý do từ chối:",
+    "actions": {
+      "viewAgreement": "Xem & Chấp nhận thỏa thuận",
+      "pay": "Tiến hành thanh toán",
+      "cancelRequest": "Hủy yêu cầu"
+    },
+    "cancelConfirmTitle": "Hủy yêu cầu gia hạn",
+    "cancelConfirmDescription": "Thời hạn phiên chăm sóc hiện tại sẽ giữ nguyên.",
+    "requestCard": {
+      "title": "Gia hạn thêm thời gian chăm sóc",
+      "description": "Gia hạn chăm sóc giúp bạn tiếp tục đồng hành cùng <strong>{{doctor}}</strong> trong cùng phiên tư vấn này mà không bị gián đoạn dữ liệu và lịch sử trò chuyện.",
+      "submitting": "Đang gửi yêu cầu...",
+      "submit": "Gửi yêu cầu Gia hạn Chăm sóc"
+    },
+    "sessionInactive": "Phiên chăm sóc đã kết thúc hoặc không còn hoạt động, không thể yêu cầu gia hạn.",
+    "pastRequestsTitle": "Lịch sử các yêu cầu gia hạn",
+    "loadingHistory": "Đang tải lịch sử...",
+    "noRequests": "Chưa có yêu cầu gia hạn nào cho phiên này.",
+    "requestNumber": "Yêu cầu #{{id}}",
+    "proposedDeadlineLabel": "Hạn đề xuất:",
+    "historyIntro": "Dưới đây là các mốc gia hạn thời gian chăm sóc đã được áp dụng thành công vào phiên tư vấn này:",
+    "noExtensions": "Chưa có mốc gia hạn nào được ghi nhận",
+    "noExtensionsHint": "Thời hạn phiên hiện tại là thời hạn ban đầu khi kích hoạt gói dịch vụ.",
+    "extensionNumber": "Gia hạn lần #{{number}}",
+    "appliedAt": "Đã áp dụng: {{date}}",
+    "packageLabel": "Gói:"
+  },
+  "renewalAgreementDialog": {
+    "toast": {
+      "acceptSuccessDescription": "Bạn đã chấp nhận thỏa thuận gia hạn. Vui lòng tiến hành thanh toán để áp dụng thời hạn mới.",
+      "acceptErrorDescription": "Không thể xác nhận thỏa thuận gia hạn lúc này."
+    },
+    "packageFallback": "Gói gia hạn chăm sóc",
+    "title": "Thỏa thuận Gia hạn Dịch vụ Chăm sóc",
+    "feeLabel": "Phí:",
+    "validity": {
+      "label": "Thời hạn chấp nhận & thanh toán:"
+    },
+    "packageCard": {
+      "duration_one": "/ +{{count}} ngày đồng hành",
+      "duration_other": "/ +{{count}} ngày đồng hành"
+    },
+    "acceptTerms": "Tôi đã đọc, hiểu rõ và đồng ý với các điều khoản gia hạn, mức phí và cam kết tiếp tục đồng hành chăm sóc cùng bác sĩ phụ trách trong phiên tư vấn này.",
+    "close": "Đóng",
+    "confirmAndPay": "Xác nhận & Tiến hành thanh toán"
+  },
+  "workspace": {
+    "toasts": {
+      "loadSessionFailed": "Không thể tải thông tin phiên tư vấn."
+    },
+    "doctorFallback": "Bác sĩ #{{id}}",
+    "doctorInCharge": "Bác sĩ phụ trách",
+    "readOnly": {
+      "completed": "Phiên tư vấn đã hoàn tất. Bạn chỉ có thể xem lại lịch sử trao đổi.",
+      "cancelled": "Phiên tư vấn đã bị hủy.",
+      "outsideHours": "Hiện ngoài khung giờ làm việc của bác sĩ. Bạn có thể gửi tin nhắn trong khung giờ hỗ trợ tiếp theo.",
+      "notStarted": "Phiên tư vấn chưa bắt đầu."
+    },
+    "sessionTitle": "Phiên tư vấn #{{id}}",
+    "loading": "Đang tải không gian tư vấn...",
+    "endsAt": "Hạn kết thúc: {{date}}",
+    "actions": {
+      "renew": "Gia hạn",
+      "shareRecord": "Chia sẻ hồ sơ",
+      "medicalSummary": "Tổng kết y khoa"
+    }
+  },
+  "chat": {
+    "composer": {
+      "readOnlyDefault": "Bạn không thể gửi tin nhắn trong phiên này.",
+      "sessionInactive": "Phiên tư vấn chưa mở hoặc không còn hoạt động.",
+      "loading": "Đang tải phòng chat...",
+      "placeholder": "Nhập tin nhắn...",
+      "send": "Gửi tin nhắn"
+    },
+    "header": {
+      "connecting": "Đang kết nối...",
+      "realtimeLost": "Mất kết nối realtime",
+      "online": "Đang trực tuyến",
+      "ended": "Đã kết thúc",
+      "sessionNumber": "Phiên #{{id}}"
+    },
+    "bubble": {
+      "viewAttachment": "Xem tệp đính kèm"
+    },
+    "messageList": {
+      "empty": "Chưa có tin nhắn nào.",
+      "emptyHint": "Gửi tin nhắn để bắt đầu cuộc trò chuyện.",
+      "loadOlder": "Tải tin nhắn cũ hơn"
+    },
+    "continuation": {
+      "errors": {
+        "blockNotEnded": "Block 15 phút chưa kết thúc.",
+        "graceExpired": "Đã hết thời gian 5 phút xác nhận tiếp tục.",
+        "decisionLocked": "Lựa chọn đã được ghi nhận và không thể thay đổi.",
+        "stateChanged": "Trạng thái tiếp tục đã thay đổi. Đang tải lại...",
+        "submitFailedTitle": "Không thể gửi quyết định",
+        "submitFailed": "Không thể gửi quyết định."
+      },
+      "blockTime": "Thời gian block tư vấn (Lượt {{round}}):",
+      "blockBadge": "Khung 15 phút",
+      "endedTitle": "Phiên tư vấn hiện tại đã kết thúc (15 phút).",
+      "endedDescription": "Bạn có muốn tiếp tục thêm 15 phút không? Cả hai bên cần đồng ý để tiếp tục phiên.",
+      "waitingOther": "Bạn đã chọn tiếp tục. Đang chờ người còn lại xác nhận...",
+      "stopping": "Bạn đã chọn kết thúc phiên. Đang hoàn tất...",
+      "graceExpiredUpdating": "Đã hết thời gian xác nhận. Đang cập nhật trạng thái phiên...",
+      "confirmBeforeExpiry": "Vui lòng xác nhận trước khi hết thời gian 5 phút gia hạn.",
+      "stop": "Kết thúc",
+      "continue": "Tiếp tục",
+      "checking": "Hết block 15 phút. Đang kiểm tra trạng thái tiếp tục phiên tư vấn...",
+      "refresh": "Làm mới"
+    }
+  },
+  "logic": {
+    "alerts": {
+      "loadDataFailed": "Không thể tải dữ liệu tư vấn.",
+      "sessionInactive": "Phiên tư vấn chưa mở hoặc không còn hoạt động.",
+      "sessionCancelledOrInactive": "Phiên tư vấn đã bị hủy hoặc không còn hoạt động.",
+      "loadMessagesFailed": "Không thể tải lịch sử tin nhắn.",
+      "loadOlderMessagesFailed": "Không thể tải tin nhắn cũ hơn.",
+      "reasonForCareRequired": "Vui lòng nhập lý do đăng ký chăm sóc.",
+      "currentConcernRequired": "Vui lòng nhập triệu chứng & vấn đề lo ngại hiện tại.",
+      "ecgRequired": "Bạn cần thực hiện đo điện tim trước khi gửi yêu cầu tư vấn.",
+      "noCreditsForQueue": "Bạn không có đủ lượt tư vấn khả dụng để vào hàng đợi.",
+      "queueJoined": "Đã vào hàng đợi tư vấn thành công. Số thứ tự của bạn:{{queueNumber}}.",
+      "insufficientCreditsForQueue": "Bạn chưa đủ lượt để xếp hàng tư vấn. Vui lòng nạp thêm lượt.",
+      "createRequestFailed": "Không thể gửi yêu cầu tư vấn.",
+      "queueConfirmed": "Đã xác nhận thành công. Phiên tư vấn đã được kích hoạt!",
+      "insufficientCreditsAtStart": "Không còn đủ lượt tại thời điểm bắt đầu phiên. Vui lòng nạp thêm lượt.",
+      "confirmQueueFailed": "Không thể xác nhận lượt tư vấn.",
+      "leftQueue": "Đã rời khỏi hàng đợi tư vấn.",
+      "cancelQueueFailed": "Không thể hủy lượt chờ tư vấn.",
+      "outsideSupportHoursSend": "Bạn chỉ có thể gửi tin nhắn trong khung giờ hỗ trợ của phiên tư vấn.",
+      "sendMessageFailed": "Không thể gửi tin nhắn."
+    }
+  }
+}

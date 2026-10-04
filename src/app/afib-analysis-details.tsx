@@ -5,13 +5,13 @@ import { ChevronLeft, Settings, Info, Plus } from 'lucide-react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { BarChart } from 'react-native-gifted-charts';
+import { Trans, useTranslation } from 'react-i18next';
 import { TimeFilterTabs } from '@/components/features/health/statistics/TimeFilterTabs';
 import { PeriodSelector } from '@/components/features/health/statistics/PeriodSelector';
 import { ChartLegend } from '@/components/features/health/statistics/ChartLegend';
 import { SummaryDonutChart } from '@/components/features/health/statistics/SummaryDonutChart';
-import { useHealthStatistics } from '@/hooks/useHealthStatistics';
-
-type FilterType = 'Ngày' | 'Tuần' | 'Tháng' | 'Năm';
+import { useHealthStatistics, type StatisticsPeriod } from '@/hooks/useHealthStatistics';
+import { currentIntlLocale } from '@/i18n';
 
 const STAT_COLORS = {
   NORMAL: '#10B981',
@@ -21,9 +21,10 @@ const STAT_COLORS = {
 };
 
 export default function AFibAnalysisDetailsScreen() {
+  const { t } = useTranslation('health');
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const [activeFilter, setActiveFilter] = useState<FilterType>('Ngày');
+  const [activeFilter, setActiveFilter] = useState<StatisticsPeriod>('DAY');
   const [referenceDate, setReferenceDate] = useState(new Date());
   const [isReady, setIsReady] = useState(false);
 
@@ -39,36 +40,40 @@ export default function AFibAnalysisDetailsScreen() {
 
   const handlePrev = () => {
     const newDate = new Date(referenceDate);
-    if (activeFilter === 'Ngày') newDate.setDate(newDate.getDate() - 1);
-    else if (activeFilter === 'Tuần') newDate.setDate(newDate.getDate() - 7);
-    else if (activeFilter === 'Tháng') newDate.setMonth(newDate.getMonth() - 1);
-    else if (activeFilter === 'Năm') newDate.setFullYear(newDate.getFullYear() - 1);
+    if (activeFilter === 'DAY') newDate.setDate(newDate.getDate() - 1);
+    else if (activeFilter === 'WEEK') newDate.setDate(newDate.getDate() - 7);
+    else if (activeFilter === 'MONTH') newDate.setMonth(newDate.getMonth() - 1);
+    else if (activeFilter === 'YEAR') newDate.setFullYear(newDate.getFullYear() - 1);
     setReferenceDate(newDate);
   };
 
   const handleNext = () => {
     const newDate = new Date(referenceDate);
-    if (activeFilter === 'Ngày') newDate.setDate(newDate.getDate() + 1);
-    else if (activeFilter === 'Tuần') newDate.setDate(newDate.getDate() + 7);
-    else if (activeFilter === 'Tháng') newDate.setMonth(newDate.getMonth() + 1);
-    else if (activeFilter === 'Năm') newDate.setFullYear(newDate.getFullYear() + 1);
+    if (activeFilter === 'DAY') newDate.setDate(newDate.getDate() + 1);
+    else if (activeFilter === 'WEEK') newDate.setDate(newDate.getDate() + 7);
+    else if (activeFilter === 'MONTH') newDate.setMonth(newDate.getMonth() + 1);
+    else if (activeFilter === 'YEAR') newDate.setFullYear(newDate.getFullYear() + 1);
     setReferenceDate(newDate);
   };
 
   // Nhãn kỳ đang xem tính từ referenceDate (không cố định "Hôm nay/Tuần này" khi đã lùi sang kỳ trước)
   const periodText = useMemo(() => {
     const d = referenceDate;
-    if (activeFilter === 'Ngày') return `Ngày ${d.getDate()}/${d.getMonth() + 1}`;
-    if (activeFilter === 'Tuần') {
+    const locale = currentIntlLocale();
+    const dayMonth = (x: Date) => x.toLocaleDateString(locale, { day: 'numeric', month: 'numeric' });
+    if (activeFilter === 'DAY') return t('analysis.period.day', { date: dayMonth(d) });
+    if (activeFilter === 'WEEK') {
       const monday = new Date(d);
       monday.setDate(d.getDate() - ((d.getDay() + 6) % 7));
       const sunday = new Date(monday);
       sunday.setDate(monday.getDate() + 6);
-      return `${monday.getDate()}/${monday.getMonth() + 1} - ${sunday.getDate()}/${sunday.getMonth() + 1}`;
+      return `${dayMonth(monday)} - ${dayMonth(sunday)}`;
     }
-    if (activeFilter === 'Tháng') return `Tháng ${d.getMonth() + 1}/${d.getFullYear()}`;
-    return `Năm ${d.getFullYear()}`;
-  }, [activeFilter, referenceDate]);
+    if (activeFilter === 'MONTH') {
+      return t('analysis.period.month', { month: d.getMonth() + 1, year: d.getFullYear(), monthName: t(`heatmap.months.${d.getMonth()}`) });
+    }
+    return t('analysis.period.year', { year: d.getFullYear() });
+  }, [activeFilter, referenceDate, t]);
 
   const badgeLabel = useMemo(() => {
     const now = new Date();
@@ -80,11 +85,11 @@ export default function AFibAnalysisDetailsScreen() {
       m.setDate(m.getDate() - ((m.getDay() + 6) % 7));
       return m.getTime();
     };
-    if (activeFilter === 'Ngày') return sameMonth && d.getDate() === now.getDate() ? 'Hôm nay' : periodText;
-    if (activeFilter === 'Tuần') return startOfWeek(d) === startOfWeek(now) ? 'Tuần này' : periodText;
-    if (activeFilter === 'Tháng') return sameMonth ? 'Tháng này' : periodText;
-    return sameYear ? 'Năm nay' : periodText;
-  }, [activeFilter, referenceDate, periodText]);
+    if (activeFilter === 'DAY') return sameMonth && d.getDate() === now.getDate() ? t('common:date.today') : periodText;
+    if (activeFilter === 'WEEK') return startOfWeek(d) === startOfWeek(now) ? t('analysis.badge.thisWeek') : periodText;
+    if (activeFilter === 'MONTH') return sameMonth ? t('analysis.badge.thisMonth') : periodText;
+    return sameYear ? t('analysis.badge.thisYear') : periodText;
+  }, [activeFilter, referenceDate, periodText, t]);
 
   const { chartData, maxValue } = useMemo(() => {
     if (!data?.chartData || data.chartData.length === 0) return { chartData: [], maxValue: 10 };
@@ -117,7 +122,7 @@ export default function AFibAnalysisDetailsScreen() {
       if (stackSum > max) max = stackSum;
 
       let displayLabel = item.label;
-      if (activeFilter === 'Tháng') {
+      if (activeFilter === 'MONTH') {
         const day = parseInt(item.label, 10);
         if (day !== 1 && day % 5 !== 0) {
           displayLabel = '';
@@ -138,14 +143,14 @@ export default function AFibAnalysisDetailsScreen() {
 
   const handleSettingsPress = () => {
     Alert.alert(
-      'Cài đặt phân tích',
-      'Hệ thống AI tự động đồng bộ và phân loại bất thường nhịp tim qua PPG 60s theo chuẩn y khoa.',
+      t('analysis.settingsAlert.title'),
+      t('analysis.settingsAlert.message'),
       [
         {
-          text: 'Đo lâm sàng ngay',
+          text: t('analysis.settingsAlert.measureNow'),
           onPress: () => router.push('/afib-measure' as any),
         },
-        { text: 'Đóng', style: 'cancel' },
+        { text: t('common:actions.close'), style: 'cancel' },
       ]
     );
   };
@@ -155,7 +160,7 @@ export default function AFibAnalysisDetailsScreen() {
       return (
         <View className="py-20 justify-center items-center">
           <ActivityIndicator size="large" color="#0D6EFD" />
-          <Text className="mt-4 text-slate-500 font-medium text-sm">Đang tải dữ liệu...</Text>
+          <Text className="mt-4 text-slate-500 font-medium text-sm">{t('common:state.loading')}</Text>
         </View>
       );
     }
@@ -174,7 +179,7 @@ export default function AFibAnalysisDetailsScreen() {
       return (
         <View className="py-20 justify-center items-center">
           <ActivityIndicator size="large" color="#0D6EFD" />
-          <Text className="mt-4 text-slate-500 font-medium text-sm">Đang chuẩn bị biểu đồ...</Text>
+          <Text className="mt-4 text-slate-500 font-medium text-sm">{t('analysis.preparingChart')}</Text>
         </View>
       );
     }
@@ -187,8 +192,8 @@ export default function AFibAnalysisDetailsScreen() {
           isAnimated
           animationDuration={800}
           stackData={chartData}
-          barWidth={activeFilter === 'Tháng' ? 6 : (activeFilter === 'Ngày' ? 8 : 12)}
-          spacing={activeFilter === 'Tháng' ? 4 : (activeFilter === 'Ngày' ? 8 : 16)}
+          barWidth={activeFilter === 'MONTH' ? 6 : (activeFilter === 'DAY' ? 8 : 12)}
+          spacing={activeFilter === 'MONTH' ? 4 : (activeFilter === 'DAY' ? 8 : 16)}
           xAxisThickness={1}
           xAxisColor="#CBD5E1"
           yAxisThickness={0}
@@ -207,7 +212,7 @@ export default function AFibAnalysisDetailsScreen() {
       chartAreaContent = (
         <View style={{ height: 180, justifyContent: 'center', alignItems: 'center' }}>
           <View className="w-full h-0.5 border-b border-dashed border-slate-300 mb-3" />
-          <Text className="text-slate-400 font-medium text-xs">Chưa có bản ghi đo nào trong khoảng thời gian này</Text>
+          <Text className="text-slate-400 font-medium text-xs">{t('analysis.emptyRange')}</Text>
         </View>
       );
     }
@@ -221,7 +226,12 @@ export default function AFibAnalysisDetailsScreen() {
               {totalResults}
             </Text>
             <Text className="text-sm font-medium text-slate-700">
-              kết quả, bao gồm <Text className="font-bold text-slate-900">{data?.totalAfibRisk || 0}</Text> có nguy cơ rung tâm nhĩ
+              <Trans
+                t={t}
+                i18nKey="analysis.summary"
+                values={{ riskCount: data?.totalAfibRisk || 0 }}
+                components={{ b: <Text className="font-bold text-slate-900" /> }}
+              />
             </Text>
           </View>
         </View>
@@ -270,7 +280,7 @@ export default function AFibAnalysisDetailsScreen() {
             <Info color="#FFFFFF" size={14} strokeWidth={3} />
           </View>
           <Text className="flex-1 text-xs text-blue-900 leading-relaxed ml-2">
-            Thuật toán phân tích nhịp tim tự động qua cảm biến PPG. Khi phát hiện các dấu hiệu bất thường lặp lại, hãy liên hệ bác sĩ chuyên khoa tim mạch để được tư vấn đo ECG lâm sàng 12 đạo trình.
+            {t('analysis.clinicalNote')}
           </Text>
         </View>
         {/* END: ClinicalNoteCard */}
@@ -290,7 +300,7 @@ export default function AFibAnalysisDetailsScreen() {
           >
             <Plus color="#FFFFFF" size={20} strokeWidth={2.5} />
             <Text className="text-white font-bold text-base tracking-wide ml-2">
-              Tiến hành đo lâm sàng ngay
+              {t('analysis.measureNowCta')}
             </Text>
           </Pressable>
         </View>
@@ -316,14 +326,14 @@ export default function AFibAnalysisDetailsScreen() {
               shadowRadius: 12,
               elevation: 2,
             }}
-            aria-label="Quay lại"
+            aria-label={t('common:actions.back')}
           >
             <ChevronLeft color="#334155" size={20} strokeWidth={2.4} />
           </Pressable>
 
           {/* Main Title */}
           <Text className="text-xl font-extrabold text-slate-900 tracking-tight text-center flex-1 pr-1">
-            Chi tiết phân tích
+            {t('analysis.title')}
           </Text>
 
           {/* Settings Action Button */}
@@ -337,7 +347,7 @@ export default function AFibAnalysisDetailsScreen() {
               shadowRadius: 12,
               elevation: 2,
             }}
-            aria-label="Cài đặt"
+            aria-label={t('common:tabs.settings')}
           >
             <Settings color="#64748B" size={18} strokeWidth={2.2} />
           </Pressable>

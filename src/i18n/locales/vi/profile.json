@@ -1,0 +1,137 @@
+{
+  "page": {
+    "title": "Hồ sơ tài khoản",
+    "subtitle": "Thông tin liên hệ, định danh và bảo mật tài khoản",
+    "description": "Xem và quản lý thông tin liên hệ cá nhân, thông tin định danh và bảo mật tài khoản.",
+    "loading": "Đang tải thông tin tài khoản...",
+    "loadErrorTitle": "Không thể tải thông tin hồ sơ",
+    "loadErrorFallback": "Không thể tải thông tin hồ sơ tài khoản từ máy chủ.",
+    "retry": "Thử kết nối lại"
+  },
+  "doctor": {
+    "title": "Hồ sơ Trực & Lịch làm việc Bác sĩ",
+    "activated": "Đã kích hoạt",
+    "notInitialized": "Chưa khởi tạo",
+    "summary": "Chuyên khoa: {{specialty}} • Lịch trực: {{count}} khung giờ/tuần • Múi giờ: {{timezone}}",
+    "summary_one": "Chuyên khoa: {{specialty}} • Lịch trực: {{count}} khung giờ/tuần • Múi giờ: {{timezone}}",
+    "notConfigured": "Tài khoản bác sĩ chưa được quản trị viên cấu hình chuyên khoa. Bạn vẫn có thể mở xem thông tin lịch trực.",
+    "updateSchedule": "Cập nhật Lịch trực & Múi giờ"
+  },
+  "status": {
+    "ACTIVE": "Đang hoạt động",
+    "PENDING_VERIFY": "Chờ xác thực",
+    "INACTIVE": "Không hoạt động",
+    "LOCKED": "Đã khóa",
+    "BANNED": "Bị cấm"
+  },
+  "role": {
+    "SUPER_ADMIN": "Quản trị cấp cao",
+    "ADMIN": "Quản trị viên",
+    "DOCTOR": "Bác sĩ",
+    "MEMBER": "Hội viên"
+  },
+  "gender": {
+    "MALE": "Nam",
+    "FEMALE": "Nữ",
+    "OTHER": "Khác"
+  },
+  "card": {
+    "notProvided": "Chưa cung cấp",
+    "defaultUser": "Người dùng",
+    "notUpdated": "Chưa cập nhật",
+    "notSpecified": "Chưa xác định",
+    "noAddress": "Chưa thiết lập địa chỉ",
+    "noEmail": "Chưa liên kết email",
+    "changeAvatar": "Đổi ảnh đại diện",
+    "changePhoto": "Đổi ảnh",
+    "edit": "Chỉnh sửa hồ sơ & Định danh",
+    "editing": "Đang chỉnh sửa"
+  },
+  "fields": {
+    "displayName": "Tên hiển thị",
+    "phone": "Số điện thoại",
+    "dateOfBirth": "Ngày sinh",
+    "gender": "Giới tính",
+    "address": "Địa chỉ liên hệ",
+    "citizenId": "Số CCCD / CMND",
+    "bankAccount": "Tài khoản ngân hàng",
+    "healthInsurance": "Mã số Thẻ BHYT"
+  },
+  "view": {
+    "personalTitle": "Thông tin cá nhân & Liên hệ",
+    "identityTitle": "Thông tin định danh (CCCD / CMND)",
+    "hideSensitive": "Ẩn thông tin bảo mật",
+    "showSensitive": "Hiện thông tin bảo mật",
+    "citizenId": "Số Căn cước công dân (CCCD)",
+    "securityTitle": "Bảo mật & Thời gian hệ thống",
+    "joinedAt": "Ngày tham gia",
+    "lastUpdated": "Cập nhật lần cuối"
+  },
+  "cccd": {
+    "front": "CCCD Mặt Trước",
+    "back": "CCCD Mặt Sau",
+    "viewDetail": "Xem chi tiết",
+    "notUploaded": "Chưa tải ảnh",
+    "webOnlyNote": "Tải ảnh CCCD và đổi ảnh đại diện hiện thực hiện trên web.",
+    "frontNotUploaded": "Chưa tải ảnh mặt trước",
+    "backNotUploaded": "Chưa tải ảnh mặt sau",
+    "rotation": "Xoay: {{deg}}°",
+    "uploading": "Đang tải lên S3...",
+    "frontEmpty": "Chưa có ảnh mặt trước",
+    "backEmpty": "Chưa có ảnh mặt sau",
+    "fileHint": "Chọn file ảnh JPG, PNG, WEBP, HEIC",
+    "upload": "Tải ảnh lên",
+    "rotateLeft90": "Xoay trái 90°",
+    "rotateRight90": "Xoay phải 90°",
+    "remove": "Xóa ảnh này",
+    "rotateLeft": "Xoay trái",
+    "rotateRight": "Xoay phải",
+    "close": "Đóng"
+  },
+  "form": {
+    "title": "Cập nhật hồ sơ & Định danh cá nhân",
+    "requiredNote": "Các trường đánh dấu <mark>*</mark> là bắt buộc.",
+    "section1": "1. Thông tin cá nhân cơ bản",
+    "displayNamePlaceholder": "Nhập họ và tên hiển thị",
+    "phonePlaceholder": "VD: 0909 123 456",
+    "dateOfBirthLabel": "Ngày sinh (YYYY-MM-DD)",
+    "dateOfBirthPlaceholder": "VD: 1990-05-20",
+    "addressPlaceholder": "Nhập địa chỉ, số nhà, phường/xã, quận/huyện, tỉnh/thành phố",
+    "section2": "2. Thông tin định danh & Bảo mật",
+    "citizenIdPlaceholder": "VD: 079204001234",
+    "bankAccountPlaceholder": "VD: 1029384756 - Vietcombank",
+    "healthInsurancePlaceholder": "VD: DN4790123456789",
+    "section3": "3. Tải lên ảnh Căn cước công dân (CCCD 2 mặt)",
+    "section3Hint": "Hỗ trợ xoay ảnh và xem phóng to chi tiết",
+    "cancel": "Hủy bỏ",
+    "save": "Lưu thay đổi"
+  },
+  "validation": {
+    "missingTitle": "Thiếu thông tin",
+    "invalidTitle": "Không hợp lệ",
+    "displayNameRequired": "Vui lòng nhập tên hiển thị.",
+    "displayNameTooLong": "Tên hiển thị không được vượt quá 120 ký tự.",
+    "phoneTooLong": "Số điện thoại không được vượt quá 30 ký tự.",
+    "dateOfBirthFormat": "Ngày sinh phải có định dạng YYYY-MM-DD.",
+    "citizenIdTooLong": "Số CCCD không được vượt quá 20 ký tự."
+  },
+  "toast": {
+    "fileTooLarge": "Tệp quá lớn",
+    "avatarTooLarge": "Kích thước ảnh đại diện không được vượt quá 5MB.",
+    "avatarPresignError": "Không thể lấy liên kết tải lên từ máy chủ.",
+    "avatarSuccessTitle": "Cập nhật ảnh đại diện thành công!",
+    "avatarSuccessDescription": "Ảnh đại diện mới của bạn đã được lưu.",
+    "uploadFailed": "Tải lên thất bại",
+    "avatarUploadError": "Không thể cập nhật ảnh đại diện.",
+    "cccdTooLarge": "Tệp căn cước công dân không được vượt quá 10MB.",
+    "cccdPresignError": "Không thể lấy liên kết tải ảnh CCCD từ máy chủ.",
+    "cccdFrontSuccess": "CCCD Mặt trước tải lên thành công!",
+    "cccdBackSuccess": "CCCD Mặt sau tải lên thành công!",
+    "cccdSuccessDescription": "Bấm 'Lưu thay đổi' bên dưới để lưu cập nhật vào hồ sơ.",
+    "cccdUploadError": "Không thể tải lên ảnh CCCD.",
+    "saveSuccessMessage": "Cập nhật thông tin hồ sơ và định danh thành công.",
+    "saveSuccessTitle": "Cập nhật hồ sơ thành công",
+    "saveSuccessDescription": "Thông tin cá nhân và CCCD của bạn đã được lưu.",
+    "saveFailed": "Cập nhật hồ sơ thất bại."
+  }
+}

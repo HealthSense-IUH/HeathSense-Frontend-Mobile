@@ -1,0 +1,49 @@
+{
+  "page": {
+    "description": "Manage your account and connections"
+  },
+  "device": {
+    "sectionTitle": "Bluetooth (BLE) connection",
+    "wearable": "Wearable device",
+    "notPaired": "No device paired",
+    "statusConnected": "Status: Connected",
+    "statusDisconnected": "Status: Not connected",
+    "tapToScan": "Tap the button below to scan",
+    "rescan": "Scan & change device",
+    "findAndConnect": "Find & connect a device",
+    "unpair": "Unpair"
+  },
+  "account": {
+    "sectionTitle": "Account",
+    "profile": "My profile"
+  },
+  "about": {
+    "appName": "HealthSense app",
+    "version": "Version {{version}}"
+  },
+  "ble": {
+    "channelName": "HuyWatch background health monitoring",
+    "notification": {
+      "titleIdle": "HuyWatch is running in the background",
+      "titleVitals": "HuyWatch: {{bpm}} BPM | SpO2 {{spo2}}%",
+      "restoring": "Restoring connection to HuyWatch",
+      "lostReconnecting": "Connection lost, reconnecting automatically",
+      "recording": "Recording PPG data: {{count}} samples",
+      "receiving": "Receiving data from device {{deviceId}}",
+      "monitoring": "Monitoring data from device {{deviceId}}"
+    },
+    "errors": {
+      "initFailed": "Could not initialise the BLE manager.",
+      "permissionMissing": "Bluetooth permission is missing.",
+      "connectTimeout": "BLE connection timed out.",
+      "connectFailed": "Could not connect via BLE.",
+      "notConnected": "No device connected",
+      "reconnectScanFailed": "Could not scan to reconnect."
+    },
+    "recording": {
+      "notEnoughSamples": "Not enough samples for the 1-minute Phase 1. Recording cancelled.",
+      "interruptedMotion": "The AFib measurement was interrupted by hand movement.",
+      "interruptedRemoved": "The measurement was interrupted because the device was removed."
+    }
+  }
+}

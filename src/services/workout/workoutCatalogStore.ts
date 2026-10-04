@@ -9,6 +9,8 @@ import {
   DailyActivityStats,
 } from './workoutTypes';
 import { SEED_EXERCISES } from './exerciseSeedData';
+import i18n from '@/i18n';
+import { getMonthShort, getWeekdayShort } from './workoutI18n';
 
 const storage = createMMKV({
   id: 'healthsense-workout-storage',
@@ -137,7 +139,7 @@ export const useWorkoutCatalogStore = create<WorkoutCatalogState>((set, get) => 
       if (favoriteIds.length >= 3) {
         return {
           success: false,
-          message: 'Không thể đặt nhiều hơn 3 bài tập làm mục yêu thích.',
+          message: i18n.t('workout:catalog.maxFavorites'),
         };
       }
 
@@ -253,7 +255,7 @@ export const useWorkoutCatalogStore = create<WorkoutCatalogState>((set, get) => 
             const item: WorkoutSession = {
               id: s.id ? String(s.id) : `session_${parsedStarted}`,
               exerciseId: s.exerciseCode || s.exerciseId || 'other',
-              exerciseName: s.exerciseName || 'Bài tập',
+              exerciseName: s.exerciseName || i18n.t('workout:common.exercise'),
               category: s.category || 'OTHER',
               trackingType: s.trackingType || 'TIME_ONLY',
               iconName: s.iconName || 'Activity',
@@ -376,7 +378,8 @@ export const useWorkoutCatalogStore = create<WorkoutCatalogState>((set, get) => 
         999
       );
 
-      const dayLabels = ['2', '3', '4', '5', '6', '7', 'CN'];
+      // Thứ 2 → Chủ nhật theo JS getDay() (1..6, 0); nhãn theo ngôn ngữ đang chọn
+      const dayLabels = [1, 2, 3, 4, 5, 6, 0].map(getWeekdayShort);
       const dailyDistribution = dayLabels.map((label, index) => {
         const dayStart = new Date(
           monday.getFullYear(),
@@ -433,9 +436,12 @@ export const useWorkoutCatalogStore = create<WorkoutCatalogState>((set, get) => 
         0
       );
 
-      const formatD = (d: Date) => `Ngày ${d.getDate()}`;
-      const formatMonth = (d: Date) => `tháng ${d.getMonth() + 1}`;
-      const weekRangeLabel = `${formatD(monday)} - ${formatD(sunday)} ${formatMonth(sunday)}`;
+      const weekRangeLabel = i18n.t('workout:date.weekRange', {
+        startDay: monday.getDate(),
+        endDay: sunday.getDate(),
+        month: sunday.getMonth() + 1,
+        monthShort: getMonthShort(sunday.getMonth() + 1),
+      });
 
       return {
         weekRangeLabel,

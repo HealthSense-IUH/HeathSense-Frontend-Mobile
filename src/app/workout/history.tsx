@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -29,6 +29,14 @@ import { useWorkoutCatalogStore } from '@/services/workout/workoutCatalogStore';
 import { WorkoutSession } from '@/services/workout/workoutTypes';
 import { getExerciseIconComponent } from '@/components/features/workout/FavoriteWorkoutSection';
 import { WorkoutCalendarModal } from '@/components/features/workout/WorkoutCalendarModal';
+import {
+  formatWorkoutDecimal,
+  getExerciseName,
+  getMonthShort,
+  getWeekdayAbbr,
+} from '@/services/workout/workoutI18n';
+import { currentIntlLocale } from '@/i18n';
+import { useTranslation } from 'react-i18next';
 
 type TabView = 'DAYS' | 'WEEKS' | 'MONTHS';
 
@@ -46,6 +54,7 @@ interface ChartColumnItem {
 
 export default function WorkoutHistoryScreen() {
   const router = useRouter();
+  const { t } = useTranslation('workout');
   const sessions = useWorkoutCatalogStore((state) => state.sessions);
   const syncSessionsWithBackend = useWorkoutCatalogStore(
     (state) => state.syncSessionsWithBackend
@@ -82,8 +91,16 @@ export default function WorkoutHistoryScreen() {
     return set;
   }, [sessions]);
 
-  // Format date helper: "Ngày DD tháng MM"
-  const formatDayMonth = (d: Date) => `Ngày ${d.getDate()} tháng ${d.getMonth() + 1}`;
+  // Format date helper: "Ngày DD tháng MM" / "Oct 4"
+  const formatDayMonth = useCallback(
+    (d: Date) =>
+      t('date.dayMonth', {
+        day: d.getDate(),
+        month: d.getMonth() + 1,
+        monthShort: getMonthShort(d.getMonth() + 1),
+      }),
+    [t]
+  );
 
   // Build the time period range, range label, and columns depending on activeTab
   const { rangeLabel, columns } = useMemo(() => {
@@ -213,9 +230,13 @@ export default function WorkoutHistoryScreen() {
         59
       );
 
-      const rangeLabel = `Tháng ${startMonthDate.getMonth() + 1} - Tháng ${
-        endMonthDate.getMonth() + 1
-      } năm ${endMonthDate.getFullYear()}`;
+      const rangeLabel = t('history.monthRange', {
+        startMonth: startMonthDate.getMonth() + 1,
+        endMonth: endMonthDate.getMonth() + 1,
+        startMonthShort: getMonthShort(startMonthDate.getMonth() + 1),
+        endMonthShort: getMonthShort(endMonthDate.getMonth() + 1),
+        year: endMonthDate.getFullYear(),
+      });
 
       const cols: ChartColumnItem[] = Array.from({ length: 6 }, (_, i) => {
         const mStart = new Date(
@@ -241,7 +262,10 @@ export default function WorkoutHistoryScreen() {
 
         return {
           id: `month_${i}`,
-          label: `T.${mStart.getMonth() + 1}`,
+          label: t('history.monthColumn', {
+            month: mStart.getMonth() + 1,
+            monthShort: getMonthShort(mStart.getMonth() + 1),
+          }),
           startDate: mStart,
           endDate: mEnd,
           durationSeconds: dur,
@@ -253,7 +277,7 @@ export default function WorkoutHistoryScreen() {
 
       return { rangeLabel, columns: cols };
     }
-  }, [activeTab, anchorDate, sessions, selectedSportFilter]);
+  }, [activeTab, anchorDate, sessions, selectedSportFilter, t, formatDayMonth]);
 
   // Active / Selected column in the chart (defaults to the latest column)
   const activeColumnIndex = useMemo(() => {
@@ -329,19 +353,16 @@ export default function WorkoutHistoryScreen() {
       let group = groups.find((g) => g.dateKey === dateKey);
       if (!group) {
 
-        let headerLabel = '';
         const dayOfMonth = sessionDate.getDate();
-        const monthNum = sessionDate.getMonth() + 1;
-        const dayOfWeek = sessionDate.getDay();
-        const dayOfWeekNames = ['CN', 'T.2', 'T.3', 'T.4', 'T.5', 'T.6', 'T.7'];
+        const monthShort = getMonthShort(sessionDate.getMonth() + 1);
 
-        if (dateKey === todayStr) {
-          headerLabel = `Hôm nay, ${dayOfMonth} Th${monthNum}`;
-        } else if (dateKey === yesterdayStr) {
-          headerLabel = `Hôm qua, ${dayOfMonth} Th${monthNum}`;
-        } else {
-          headerLabel = `${dayOfWeekNames[dayOfWeek]}, ${dayOfMonth} Th${monthNum}`;
-        }
+        const prefix =
+          dateKey === todayStr
+            ? t('common:date.today')
+            : dateKey === yesterdayStr
+            ? t('common:date.yesterday')
+            : getWeekdayAbbr(sessionDate.getDay());
+        const headerLabel = t('date.dayHeader', { prefix, day: dayOfMonth, monthShort });
 
         group = {
           dateKey,
@@ -359,7 +380,7 @@ export default function WorkoutHistoryScreen() {
     });
 
     return groups;
-  }, [activeColumn]);
+  }, [activeColumn, t]);
 
   // When a date is selected from Calendar Modal
   const handleSelectDateFromCalendar = (date: Date) => {
@@ -372,22 +393,22 @@ export default function WorkoutHistoryScreen() {
     const map = new Map<string, string>();
     sessions.forEach((s) => {
       if (s.exerciseId && s.exerciseName) {
-        map.set(s.exerciseId, s.exerciseName);
+        map.set(s.exerciseId, getExerciseName({ id: s.exerciseId, name: s.exerciseName }));
       }
     });
 
 
     return [
-      { id: 'ALL', name: 'Tất cả' },
+      { id: 'ALL', name: t('common.all') },
       ...Array.from(map.entries()).map(([id, name]) => ({ id, name })),
     ];
-  }, [sessions]);
+  }, [sessions, t]);
 
   const currentFilterLabel = useMemo(() => {
-    if (selectedSportFilter === 'ALL') return 'Tất cả';
+    if (selectedSportFilter === 'ALL') return t('common.all');
     const found = filterOptions.find((o) => o.id === selectedSportFilter);
-    return found ? found.name : 'Tất cả';
-  }, [selectedSportFilter, filterOptions]);
+    return found ? found.name : t('common.all');
+  }, [selectedSportFilter, filterOptions, t]);
 
   const isDistanceSport = useMemo(() => {
     return (
@@ -412,7 +433,7 @@ export default function WorkoutHistoryScreen() {
 
   return (
     <ScreenWrapper
-      title="Tập thể dục"
+      title={t('history.title')}
       statusBarStyle="dark"
       className="bg-slate-50"
       headerLeft={
@@ -457,7 +478,7 @@ export default function WorkoutHistoryScreen() {
                     : 'font-medium text-slate-500'
                 }`}
               >
-                Số ngày
+                {t('history.tabs.days')}
               </Text>
             </TouchableOpacity>
 
@@ -474,7 +495,7 @@ export default function WorkoutHistoryScreen() {
                     : 'font-medium text-slate-500'
                 }`}
               >
-                Tuần
+                {t('history.tabs.weeks')}
               </Text>
             </TouchableOpacity>
 
@@ -491,7 +512,7 @@ export default function WorkoutHistoryScreen() {
                     : 'font-medium text-slate-500'
                 }`}
               >
-                Tháng
+                {t('history.tabs.months')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -559,14 +580,14 @@ export default function WorkoutHistoryScreen() {
               </Text>
               <View className="flex-row items-center gap-2 mt-1">
                 <Text className="text-xs font-semibold text-slate-500">
-                  Calo{' '}
+                  {t('history.caloriesLabel')}{' '}
                   <Text className="text-purple-600 font-bold">
-                    {(activeColumn.calories || 0).toLocaleString('vi-VN')} kcal
+                    {(activeColumn.calories || 0).toLocaleString(currentIntlLocale())} kcal
                   </Text>
                 </Text>
                 <Text className="text-xs text-slate-300">|</Text>
                 <Text className="text-xs font-semibold text-slate-500">
-                  phiên{' '}
+                  {t('history.sessionsLabel')}{' '}
                   <Text className="text-slate-800 font-bold">{activeColumn.count || 0}</Text>
                 </Text>
               </View>
@@ -586,18 +607,18 @@ export default function WorkoutHistoryScreen() {
             {/* Y-axis Labels on Right (matching Images 3, 4, 6 and latest screenshot) */}
             <View className="absolute right-0 top-[-4px] items-end">
               <Text className="text-[10px] text-slate-400 font-medium">
-                {isDistanceSport ? '(km)' : '(g:p)'}
+                {isDistanceSport ? t('history.axisDistance') : t('history.axisDuration')}
               </Text>
               <Text className="text-[10px] text-slate-400 font-medium mt-3.5">
                 {isDistanceSport
-                  ? maxDistanceAcrossColumns.toFixed(2).replace('.', ',')
+                  ? formatWorkoutDecimal(maxDistanceAcrossColumns, 2)
                   : maxDurationAcrossColumns > 0
                   ? formatDurationDisplay(maxDurationAcrossColumns)
                   : '00:00'}
               </Text>
               <Text className="text-[10px] text-slate-400 font-medium mt-3.5">
                 {isDistanceSport
-                  ? (maxDistanceAcrossColumns / 2).toFixed(2).replace('.', ',')
+                  ? formatWorkoutDecimal(maxDistanceAcrossColumns / 2, 2)
                   : maxDurationAcrossColumns > 0
                   ? formatDurationDisplay(Math.round(maxDurationAcrossColumns / 2))
                   : '00:00'}
@@ -685,7 +706,7 @@ export default function WorkoutHistoryScreen() {
                   {/* Sessions in this day */}
                   {group.items.map((session) => {
                     const sessionTimeStr = new Date(session.startedAt).toLocaleTimeString(
-                      'vi-VN',
+                      currentIntlLocale(),
                       {
                         hour: '2-digit',
                         minute: '2-digit',
@@ -730,7 +751,7 @@ export default function WorkoutHistoryScreen() {
                           <View className="flex-row items-center gap-2">
                             {session.distanceKm !== undefined && session.distanceKm > 0 ? (
                               <Text className="text-sm font-bold text-amber-500">
-                                {session.distanceKm.toFixed(2).replace('.', ',')} km
+                                {formatWorkoutDecimal(session.distanceKm, 2)} km
                               </Text>
                             ) : null}
 
@@ -746,7 +767,7 @@ export default function WorkoutHistoryScreen() {
                           </View>
 
                           <Text className="text-xs font-semibold text-slate-500 mt-1">
-                            {session.exerciseName}
+                            {getExerciseName({ id: session.exerciseId, name: session.exerciseName })}
                           </Text>
                         </View>
 
@@ -766,29 +787,29 @@ export default function WorkoutHistoryScreen() {
         {/* BOTTOM SECTION: CÁC DỮ LIỆU KHÁC TRONG KHOẢNG THỜI GIAN NÀY (Images 3, 4, 5) */}
         <View className="mt-2 mb-10 px-4">
           <Text className="text-xs font-bold text-slate-500 mb-3 px-1">
-            Các dữ liệu khác trong khoảng thời gian này
+            {t('history.otherData')}
           </Text>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row">
             {[
               {
                 key: 'hr',
-                label: 'Nhịp tim TB',
+                label: t('history.avgHeartRate'),
                 value: periodStats.avgHeartRate ? `${periodStats.avgHeartRate} bpm` : '--',
                 icon: <Timer color="#3B82F6" size={18} />,
                 bg: 'bg-blue-50',
               },
               {
                 key: 'steps',
-                label: 'Bước',
-                value: periodStats.steps > 0 ? periodStats.steps.toLocaleString('vi-VN') : '--',
+                label: t('history.steps'),
+                value: periodStats.steps > 0 ? periodStats.steps.toLocaleString(currentIntlLocale()) : '--',
                 icon: <Footprints color="#10B981" size={18} />,
                 bg: 'bg-emerald-50',
               },
               {
                 key: 'kcal',
-                label: 'Calo tiêu hao',
-                value: periodStats.calories > 0 ? `${periodStats.calories.toLocaleString('vi-VN')} kcal` : '--',
+                label: t('history.caloriesBurned'),
+                value: periodStats.calories > 0 ? `${periodStats.calories.toLocaleString(currentIntlLocale())} kcal` : '--',
                 icon: <Zap color="#F59E0B" size={18} />,
                 bg: 'bg-amber-50',
               },

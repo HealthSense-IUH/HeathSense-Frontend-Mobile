@@ -7,6 +7,8 @@ import {
   Pressable,
 } from 'react-native';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
+import { getMonthLong, getWeekdayAbbr } from '@/services/workout/workoutI18n';
+import { useTranslation } from 'react-i18next';
 
 interface WorkoutCalendarModalProps {
   visible: boolean;
@@ -23,6 +25,7 @@ export function WorkoutCalendarModal({
   onSelectDate,
   workoutDates = new Set(),
 }: WorkoutCalendarModalProps) {
+  const { t } = useTranslation('workout');
   // Calendar viewing year & month
   const [viewingYear, setViewingYear] = useState(selectedDate.getFullYear());
   const [viewingMonth, setViewingMonth] = useState(selectedDate.getMonth()); // 0-indexed
@@ -167,7 +170,11 @@ export function WorkoutCalendarModal({
             </TouchableOpacity>
 
             <Text className="text-base font-bold text-slate-800 tracking-tight">
-              tháng {viewingMonth + 1} năm {viewingYear}
+              {t('calendar.monthYear', {
+                monthLong: getMonthLong(viewingMonth + 1),
+                month: viewingMonth + 1,
+                year: viewingYear,
+              })}
             </Text>
 
             <TouchableOpacity
@@ -179,12 +186,13 @@ export function WorkoutCalendarModal({
             </TouchableOpacity>
           </View>
 
-          {/* Weekday Labels Row: T.2 -> CN (Sunday in Red) */}
+          {/* Weekday Labels Row: T.2 -> CN (Sunday in Red); JS getDay(): 1..6 then 0 */}
           <View className="flex-row justify-between mb-3 px-1">
-            {['T.2', 'T.3', 'T.4', 'T.5', 'T.6', 'T.7', 'CN'].map((dayLabel) => {
-              const isSunday = dayLabel === 'CN';
+            {[1, 2, 3, 4, 5, 6, 0].map((dayIndex) => {
+              const dayLabel = getWeekdayAbbr(dayIndex);
+              const isSunday = dayIndex === 0;
               return (
-                <View key={dayLabel} className="w-10 items-center justify-center">
+                <View key={dayIndex} className="w-10 items-center justify-center">
                   <Text
                     className={`text-xs font-semibold ${
                       isSunday ? 'text-red-500 font-bold' : 'text-slate-400'

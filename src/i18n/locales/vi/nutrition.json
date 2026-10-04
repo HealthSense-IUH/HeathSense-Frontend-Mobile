@@ -1,0 +1,227 @@
+{
+  "common": {
+    "comingSoon": "Sắp ra mắt"
+  },
+  "dietRules": {
+    "summary": {
+      "ALCOHOL": "Cồn là yếu tố kích phát cơn rung nhĩ rõ nhất: món có cồn là đỏ.",
+      "CAFFEINE": "Caffeine liều cao làm tim đập nhanh: vượt ngưỡng là vàng.",
+      "SUGARS": "Tính trên đường tổng (chưa có số liệu đường bổ sung); không áp cho trái cây và sữa.",
+      "NA_K_RATIO": "Kali bằng hoặc hơn natri giúp ổn định nhịp tim; natri gấp nhiều lần kali mà món lại mặn là đỏ.",
+      "SODIUM": "Muối nhiều gây giữ nước, tăng áp lực lên tim.",
+      "SATURATED_FAT": "Chất béo bão hòa nhiều làm tăng nguy cơ tim mạch.",
+      "MAGNESIUM": "Giàu magie mà ít muối (hạt, đậu, ngũ cốc nguyên cám) là điểm tốt cho tim.",
+      "VITAMIN_K": "Đang dùng warfarin: không cần kiêng, nhưng nên ăn lượng vitamin K đều mỗi ngày."
+    },
+    "describe": {
+      "naKLimit": "đỏ khi Na/K trên {{value}}",
+      "naKLimitWithSodium": "đỏ khi Na/K trên {{value}} và natri trên {{sodium}} mg",
+      "naKGood": "tốt khi Na/K từ {{value}} trở xuống",
+      "magnesiumGood": "Tốt khi từ {{value}} {{unit}} trên 100 g",
+      "magnesiumGoodWithSodium": "Tốt khi từ {{value}} {{unit}} trên 100 g và natri không quá {{sodium}} mg",
+      "limit": "đỏ khi trên {{value}} {{unit}}",
+      "caution": "vàng khi trên {{value}} {{unit}}",
+      "per100g": "{{text}} (trên 100 g)"
+    }
+  },
+  "sources": {
+    "vnFct": {
+      "short": "Việt Nam",
+      "label": "Bảng thành phần thực phẩm Việt Nam 2007",
+      "citation": "Viện Dinh dưỡng - Bộ Y tế (2007). Bảng thành phần thực phẩm Việt Nam. Nhà xuất bản Y học, Hà Nội."
+    },
+    "usdaFndds": {
+      "short": "USDA",
+      "label": "USDA FNDDS 2021-2023",
+      "citation": "U.S. Department of Agriculture, Agricultural Research Service. FoodData Central: FNDDS 2021-2023."
+    }
+  },
+  "home": {
+    "title": "Ăn uống & Dinh dưỡng",
+    "description": "Gợi ý thực phẩm tốt cho tim mạch và người có rung nhĩ.",
+    "tabs": {
+      "foods": "Tra cứu thực phẩm",
+      "diet": "Đơn ăn uống",
+      "scan": "Ước tính calo"
+    },
+    "scan": {
+      "title": "Chụp ảnh món ăn, ước tính calo",
+      "description": "Chụp ảnh bữa ăn và trả lời vài câu hỏi về khẩu phần, HealthSense sẽ ước tính năng lượng và các chất dinh dưỡng chính.",
+      "highlights": {
+        "recognize": "Nhận diện món ăn từ ảnh",
+        "portion": "Hỏi thêm khẩu phần và cách chế biến để ước tính sát hơn",
+        "calculate": "Tính calo, đạm, tinh bột và chất béo từ cơ sở dữ liệu dinh dưỡng"
+      },
+      "note": "Kết quả chỉ là ước tính, không thay thế việc cân đo thực phẩm hay tư vấn dinh dưỡng."
+    },
+    "disclaimer": "<strong>Lưu ý y khoa:</strong> Các khuyến cáo dinh dưỡng trên HealthSense được tham khảo từ hướng dẫn lâm sàng của Hội Tim mạch Hoa Kỳ (ACC/AHA) và các tổng quan hệ thống y khoa. Không có thực phẩm nào tự chữa khỏi hoặc hoàn toàn ngăn ngừa rung nhĩ. Mọi thay đổi lớn về chế độ ăn hoặc sử dụng chất bổ sung cần có sự tư vấn của bác sĩ điều trị."
+  },
+  "dietAdvice": {
+    "level": {
+      "GOOD": "Tốt cho nhịp tim",
+      "OK": "Không có lưu ý",
+      "CAUTION": "Cần lưu ý",
+      "LIMIT": "Nên hạn chế",
+      "UNKNOWN": "Chưa đủ số liệu"
+    },
+    "noteTitle": "{{level}} theo đơn ăn uống của bác sĩ",
+    "noReasons": "Không có điểm nào cần lưu ý, nhưng cũng chưa có điểm nổi bật cho nhịp tim (kali cao hơn natri, hoặc giàu magie mà ít muối).",
+    "notPersonalized": "Bác sĩ chưa kê đơn ăn uống riêng cho bạn. Khi bác sĩ kê đơn trong buổi tư vấn, đánh giá sẽ thêm các điều bác sĩ dặn."
+  },
+  "dietPrescription": {
+    "rule": "{{text}}.",
+    "ruleCustom": "{{text}} (bác sĩ đặt riêng cho bạn).",
+    "legend": {
+      "GOOD": "Không có điểm xấu và có điểm tốt cho nhịp tim.",
+      "OK": "Không vướng quy tắc nào, cũng chưa có điểm tốt nổi bật.",
+      "CAUTION": "Ăn được, chú ý lượng.",
+      "LIMIT": "Nên hạn chế hoặc tránh.",
+      "UNKNOWN": "Nguồn dữ liệu thiếu số liệu để đánh giá."
+    },
+    "loadError": "Không tải được đơn ăn uống.",
+    "title": "Đơn ăn uống của bạn",
+    "subtitle": "Bác sĩ kê trong buổi tư vấn. Các món được chấm màu theo những quy tắc dưới đây.",
+    "subtitleUpdated": "Bác sĩ kê trong buổi tư vấn (cập nhật {{date}}). Các món được chấm màu theo những quy tắc dưới đây.",
+    "subtitleEmpty": "Bác sĩ chưa kê quy tắc ăn uống nào cho bạn nên các món chưa được chấm màu, chỉ hiện số liệu dinh dưỡng.",
+    "searchFoods": "Tra cứu món",
+    "doctorNote": "Bác sĩ dặn thêm",
+    "legendTitle": "Cách đọc màu của món",
+    "legendNote": "Có điểm đỏ thì món là đỏ, không có đỏ mà có vàng thì là vàng. Mở từng món để xem lý do. Đánh giá chỉ so số liệu trên 100 g với các ngưỡng, không thay thế lời khuyên trực tiếp của bác sĩ."
+  },
+  "foodCard": {
+    "highlights": "Thành phần dinh dưỡng nổi bật (trên 100g):",
+    "per100g": "Chuẩn 100g",
+    "viewDetail": "Xem chi tiết"
+  },
+  "search": {
+    "placeholder": "Tìm thực phẩm (ví dụ: cà phê, sữa ít béo, cá hồi, chuối, bia)...",
+    "clear": "Xóa từ khóa tìm kiếm",
+    "results": "Kết quả thực phẩm ({{count}})",
+    "searching": "Đang tìm...",
+    "noResults": "Không tìm thấy món ăn nào phù hợp với “{{query}}”.",
+    "suggestions": "Thử tìm theo từ khóa như: sữa, cá hồi, cà phê, chuối..."
+  },
+  "foods": {
+    "groupFoodCount": "{{value}} thực phẩm",
+    "groupFoodCount_one": "{{value}} thực phẩm",
+    "groupGuidanceDescription": "{{count}} món có khuyến nghị cho tim mạch.",
+    "groupGuidanceDescription_one": "{{count}} món có khuyến nghị cho tim mạch.",
+    "groupDefaultDescription": "Tra cứu số liệu dinh dưỡng của nhóm.",
+    "exploreWithGuidance": "Khám phá các loại · {{count}} có khuyến nghị",
+    "explore": "Khám phá các loại",
+    "groupsLoadError": "Không tải được danh sách nhóm thực phẩm.",
+    "sectionTitle": "Khám phá theo nhóm thực phẩm",
+    "sectionDescription": "Chọn một nhóm để xem khuyến nghị."
+  },
+  "guidance": {
+    "PRIORITIZE": "Nên ưu tiên",
+    "LIMIT": "Nên hạn chế",
+    "CAUTION": "Cần lưu ý",
+    "reference": "Tham khảo"
+  },
+  "nutrientShort": {
+    "energy": "Năng lượng",
+    "protein": "Đạm (Protein)",
+    "carbohydrate": "Carbs",
+    "fiber": "Chất xơ",
+    "fiberCrude": "Xơ thô",
+    "sugars": "Đường",
+    "fatTotal": "Tổng chất béo",
+    "fatSaturated": "Béo bão hòa",
+    "fatMonounsaturated": "Béo không bão hòa đơn",
+    "fatPolyunsaturated": "Béo không bão hòa đa",
+    "cholesterol": "Cholesterol",
+    "sodium": "Natri (Sodium)",
+    "potassium": "Kali (Potassium)",
+    "magnesium": "Magie",
+    "caffeine": "Caffeine",
+    "alcohol": "Cồn",
+    "vitaminK": "Vitamin K",
+    "epa": "Omega-3 EPA",
+    "dha": "Omega-3 DHA"
+  },
+  "referenceBrowser": {
+    "columns": {
+      "energyKcal": "Năng lượng",
+      "proteinG": "Đạm",
+      "carbohydrateG": "Tinh bột",
+      "fatTotalG": "Chất béo"
+    },
+    "allSources": "Tất cả",
+    "placeholder": "Tên tiếng Việt hoặc tiếng Anh, ví dụ: rau muống, giò lụa, salmon...",
+    "search": "Tìm",
+    "resultCount": "{{value}} kết quả",
+    "resultCount_one": "{{value}} kết quả",
+    "forQuery": "cho",
+    "loadError": "Không tải được dữ liệu dinh dưỡng.",
+    "empty": "Không tìm thấy thực phẩm phù hợp.",
+    "emptyHint": "Thử tên tiếng Việt (có hoặc không dấu) hoặc tiếng Anh, ví dụ: rau muong, gio lua, chicken, rice."
+  },
+  "category": {
+    "notFound": "Không tìm thấy nhóm thực phẩm.",
+    "backToGroups": "Tất cả nhóm thực phẩm",
+    "allGroups": "Nhóm thực phẩm",
+    "defaultDescription": "Khuyến nghị tim mạch và số liệu dinh dưỡng",
+    "variantsSubtitle": "Các biến thể của {{food}} trong nhóm {{group}}",
+    "recommendedTitle": "Có khuyến nghị cho tim mạch ({{count}})",
+    "recommendedDescription": "Chọn một loại để xem chi tiết.",
+    "itemCount": "{{count}} món",
+    "itemCount_one": "{{count}} món",
+    "includes": "Gồm có: {{items}}",
+    "viewOptions": "Xem các lựa chọn",
+    "optionsTitle": "Các lựa chọn của {{food}}",
+    "otherTypesShort": "Loại khác",
+    "allWithCount": "Tất cả ({{count}})",
+    "noVariants": "Không có món nào thuộc nhóm khuyến nghị này.",
+    "allFoodsTitle": "Tất cả thực phẩm trong nhóm ({{value}})",
+    "allFoodsDescription": "Số liệu trên 100 g, từ bảng thành phần thực phẩm Việt Nam và USDA.",
+    "otherGroups": "Khám phá nhóm thực phẩm khác"
+  },
+  "databaseFood": {
+    "title": "Thực phẩm",
+    "defaultPortion": "Khẩu phần thường dùng",
+    "notFoundTitle": "Không tìm thấy thực phẩm",
+    "notFoundDescription": "Thực phẩm này không có trong cơ sở dữ liệu dinh dưỡng.",
+    "sourceCode": "{{source}} · mã {{code}}",
+    "sourceCategory": "Phân loại gốc: {{category}}",
+    "wastePct": "Tỉ lệ thải bỏ khi sơ chế: <strong>{{value}}%</strong>. Số liệu bên dưới tính trên phần ăn được.",
+    "nutritionTitle": "Thành phần dinh dưỡng",
+    "calculatingFor": "Đang tính cho <strong>{{grams}} g</strong>.",
+    "calculatingForPortion": "Đang tính cho <strong>{{grams}} g</strong> ({{portion}}).",
+    "footer": {
+      "vnFct": "Số liệu tính trên 100 g phần ăn được. Chất nào sách không có số liệu thì không hiển thị. Chất xơ trong bảng này là xơ thô (celluloza), khác chất xơ tiêu hóa của USDA.",
+      "usda": "Khẩu phần và số liệu theo USDA FNDDS, phản ánh món ăn phổ biến tại Mỹ; khẩu phần thực tế ở Việt Nam có thể khác.",
+      "disclaimer": "Đây là số liệu tham khảo; màu đánh giá (nếu có đơn ăn uống) chỉ so số liệu với các quy tắc bác sĩ kê, không thay thế tư vấn của bác sĩ hoặc chuyên gia dinh dưỡng."
+    },
+    "citation": "Nguồn: {{citation}}"
+  },
+  "foodDetail": {
+    "title": "Chi tiết món",
+    "notFoundTitle": "Không tìm thấy món ăn",
+    "notFoundDescription": "Món ăn bạn đang tìm kiếm không tồn tại hoặc đã được cập nhật.",
+    "evidenceType": {
+      "GUIDELINE": "Hướng dẫn lâm sàng (Guideline)",
+      "SYSTEMATIC_REVIEW": "Tổng quan hệ thống (Systematic Review)",
+      "META_ANALYSIS": "Phân tích gộp (Meta-analysis)",
+      "RCT": "Thử nghiệm đối chứng ngẫu nhiên (RCT)",
+      "OTHER": "Khuyến cáo chuyên khoa (Clinical Review)"
+    },
+    "fnddsSource": "Nguồn tham chiếu FNDDS: {{source}}",
+    "type": "Loại: {{name}}",
+    "standardServing": "Định lượng chuẩn: 100 g",
+    "nutritionTitle": "Thành phần dinh dưỡng",
+    "nutritionSubtitle": "Tính trên mỗi 100g thực phẩm (chuẩn cơ sở dữ liệu USDA FNDDS 2021-2023)",
+    "collapseNutrients": "Thu gọn thành phần vi lượng",
+    "showMoreNutrients": "Xem thêm {{count}} thành phần dinh dưỡng chi tiết",
+    "showMoreNutrients_one": "Xem thêm {{count}} thành phần dinh dưỡng chi tiết",
+    "healthMeaning": "Ý nghĩa đối với sức khỏe của bạn",
+    "cardiovascular": "Sức khỏe tim mạch & Huyết áp",
+    "af": "Rung tâm nhĩ & Nhịp tim",
+    "medication": "Lưu ý khi sử dụng thuốc điều trị",
+    "evidenceTitle": "Cơ sở tham khảo & Bằng chứng y học",
+    "evidenceDescription": "Các khuyến nghị dinh dưỡng trên được đối chiếu từ tài liệu hướng dẫn lâm sàng và thử nghiệm y khoa chính thống.",
+    "year": "Năm {{year}}",
+    "viewSource": "Xem tài liệu gốc",
+    "footer": "Dữ liệu dinh dưỡng được trích xuất từ cơ sở dữ liệu USDA Food and Nutrient Database for Dietary Studies (FNDDS 2021-2023). Các thông tin về rung nhĩ và tim mạch chỉ mang tính giáo dục sức khỏe, không thay thế chẩn đoán hoặc phác đồ từ bác sĩ chuyên khoa tim mạch."
+  }
+}

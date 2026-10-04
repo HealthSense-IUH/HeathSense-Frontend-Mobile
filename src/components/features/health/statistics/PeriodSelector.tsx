@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 
 interface PeriodSelectorProps {
   year: number;
@@ -10,6 +11,7 @@ interface PeriodSelectorProps {
 }
 
 export function PeriodSelector({ monthText, onPrev, onNext }: PeriodSelectorProps) {
+  const { t } = useTranslation('health');
   return (
     <View className="flex justify-center pt-2 pb-1 mx-5">
       <View
@@ -25,7 +27,7 @@ export function PeriodSelector({ monthText, onPrev, onNext }: PeriodSelectorProp
         <Pressable
           onPress={onPrev}
           className="w-8 h-8 rounded-full bg-blue-50/90 items-center justify-center active:opacity-75"
-          aria-label="Kỳ trước"
+          aria-label={t('analysis.period.prevAria')}
         >
           <ChevronLeft color="#0D6EFD" size={16} strokeWidth={2.5} />
         </Pressable>
@@ -38,7 +40,7 @@ export function PeriodSelector({ monthText, onPrev, onNext }: PeriodSelectorProp
         <Pressable
           onPress={onNext}
           className="w-8 h-8 rounded-full bg-blue-50/90 items-center justify-center active:opacity-75"
-          aria-label="Kỳ tiếp theo"
+          aria-label={t('analysis.period.nextAria')}
         >
           <ChevronRight color="#0D6EFD" size={16} strokeWidth={2.5} />
         </Pressable>

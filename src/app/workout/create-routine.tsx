@@ -14,14 +14,17 @@ import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
 import { ExerciseIcon } from '@/components/features/workout/ExerciseIcon';
 import { useWorkoutCatalogStore } from '@/services/workout/workoutCatalogStore';
 import { RoutineExerciseItem, Exercise } from '@/services/workout/workoutTypes';
+import { getExerciseName } from '@/services/workout/workoutI18n';
 import { THEME } from '@/constants/theme';
+import { useTranslation } from 'react-i18next';
 
 export default function CreateRoutineScreen() {
   const router = useRouter();
+  const { t } = useTranslation('workout');
   const createRoutine = useWorkoutCatalogStore((state) => state.createRoutine);
   const exercises = useWorkoutCatalogStore((state) => state.exercises);
 
-  const [routineName, setRoutineName] = useState('Lịch trình của bạn 1');
+  const [routineName, setRoutineName] = useState(() => t('createRoutine.defaultName', { n: 1 }));
   const [hasWarmup, setHasWarmup] = useState(false);
   const [hasCooldown, setHasCooldown] = useState(false);
   const [routineItems, setRoutineItems] = useState<RoutineExerciseItem[]>([]);
@@ -51,7 +54,7 @@ export default function CreateRoutineScreen() {
 
   const handleSave = () => {
     if (!routineName.trim()) {
-      Alert.alert('Lỗi', 'Vui lòng nhập tên lịch trình');
+      Alert.alert(t('common:error.title'), t('createRoutine.nameRequired'));
       return;
     }
 
@@ -64,14 +67,14 @@ export default function CreateRoutineScreen() {
       items: routineItems,
     });
 
-    Alert.alert('Thành công', 'Đã lưu lịch trình tập luyện của bạn.', [
+    Alert.alert(t('createRoutine.savedTitle'), t('createRoutine.savedMessage'), [
       { text: 'OK', onPress: () => router.back() },
     ]);
   };
 
   return (
     <ScreenWrapper
-      title="Tạo lịch trình tập luyện"
+      title={t('catalog.createRoutine')}
       headerLeft={
         <TouchableOpacity
           onPress={() => router.back()}
@@ -85,7 +88,7 @@ export default function CreateRoutineScreen() {
         <ScrollView className="flex-1 px-5 pt-2" showsVerticalScrollIndicator={false}>
           {/* Subtitle Description */}
           <Text className="text-slate-500 text-sm font-medium leading-5 mb-5 px-1">
-            Kết hợp một loạt các bài tập thể dục cho một lịch trình tập luyện tùy chỉnh.
+            {t('createRoutine.subtitle')}
           </Text>
 
           {/* Routine Name Input Card (Image 1) */}
@@ -93,7 +96,7 @@ export default function CreateRoutineScreen() {
             <TextInput
               value={routineName}
               onChangeText={setRoutineName}
-              placeholder="Nhập tên lịch trình..."
+              placeholder={t('createRoutine.namePlaceholder')}
               placeholderTextColor="#94A3B8"
               className="text-lg font-bold text-slate-800"
             />
@@ -101,7 +104,7 @@ export default function CreateRoutineScreen() {
 
           {/* Section: Tập thể dục */}
           <Text className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3 px-1">
-            Tập thể dục
+            {t('createRoutine.exercisesSection')}
           </Text>
 
           <View className="bg-white rounded-3xl border border-slate-200/80 overflow-hidden shadow-sm mb-8">
@@ -109,10 +112,10 @@ export default function CreateRoutineScreen() {
             <View className="flex-row items-center justify-between p-4 border-b border-slate-100">
               <View>
                 <Text className="text-base font-semibold text-slate-800">
-                  Khởi động
+                  {t('createRoutine.warmup')}
                 </Text>
                 {hasWarmup && (
-                  <Text className="text-xs text-slate-400 mt-0.5">3 phút làm nóng khớp</Text>
+                  <Text className="text-xs text-slate-400 mt-0.5">{t('createRoutine.warmupHint')}</Text>
                 )}
               </View>
               <Switch
@@ -144,10 +147,12 @@ export default function CreateRoutineScreen() {
                     />
                     <View className="flex-1 min-w-0">
                       <Text className="text-sm font-semibold text-slate-800" numberOfLines={1}>
-                        {item.exerciseName}
+                        {getExerciseName({ id: item.exerciseId, name: item.exerciseName })}
                       </Text>
                       <Text className="text-xs text-slate-400 mt-0.5">
-                        {item.targetSets ? `${item.targetSets} hiệp • ${item.targetReps} reps` : '60 giây'}
+                        {item.targetSets
+                          ? t('createRoutine.setsReps', { sets: item.targetSets, reps: item.targetReps })
+                          : t('createRoutine.seconds', { value: 60 })}
                       </Text>
                     </View>
                   </View>
@@ -172,7 +177,7 @@ export default function CreateRoutineScreen() {
                 <Plus color="#10B981" size={18} strokeWidth={2.5} />
               </View>
               <Text className="text-base font-semibold text-emerald-600">
-                Thêm bài tập thể dục
+                {t('createRoutine.addExercise')}
               </Text>
             </TouchableOpacity>
 
@@ -180,10 +185,10 @@ export default function CreateRoutineScreen() {
             <View className="flex-row items-center justify-between p-4">
               <View>
                 <Text className="text-base font-semibold text-slate-800">
-                  Hạ nhiệt
+                  {t('createRoutine.cooldown')}
                 </Text>
                 {hasCooldown && (
-                  <Text className="text-xs text-slate-400 mt-0.5">3 phút giãn cơ & hồi phục</Text>
+                  <Text className="text-xs text-slate-400 mt-0.5">{t('createRoutine.cooldownHint')}</Text>
                 )}
               </View>
               <Switch
@@ -205,7 +210,7 @@ export default function CreateRoutineScreen() {
             activeOpacity={0.8}
             className="flex-1 py-4 rounded-2xl bg-white border border-slate-200 items-center justify-center shadow-sm active:opacity-75"
           >
-            <Text className="text-slate-600 font-semibold text-base">Thoát</Text>
+            <Text className="text-slate-600 font-semibold text-base">{t('common.exit')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -213,7 +218,7 @@ export default function CreateRoutineScreen() {
             activeOpacity={0.8}
             className="flex-1 py-4 rounded-2xl bg-slate-900 items-center justify-center shadow-md active:opacity-75"
           >
-            <Text className="text-white font-bold text-base">Lưu</Text>
+            <Text className="text-white font-bold text-base">{t('common:actions.save')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -224,10 +229,10 @@ export default function CreateRoutineScreen() {
           <View className="bg-white rounded-t-3xl p-5 max-h-[75%]">
             <View className="flex-row items-center justify-between mb-4">
               <Text className="text-lg font-bold text-slate-900">
-                Chọn bài tập vào lịch trình
+                {t('createRoutine.pickerTitle')}
               </Text>
               <TouchableOpacity onPress={() => setShowPickerModal(false)}>
-                <Text className="text-slate-500 font-medium">Đóng</Text>
+                <Text className="text-slate-500 font-medium">{t('common:actions.close')}</Text>
               </TouchableOpacity>
             </View>
 
@@ -240,7 +245,7 @@ export default function CreateRoutineScreen() {
                 >
                   <ExerciseIcon name={ex.iconName} size={18} className="mr-3" />
                   <Text className="text-base font-medium text-slate-800 flex-1">
-                    {ex.name}
+                    {getExerciseName(ex)}
                   </Text>
                 </TouchableOpacity>
               ))}

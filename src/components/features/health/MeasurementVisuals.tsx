@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { LayoutChangeEvent, Text, View } from 'react-native';
 import Svg, { Circle, Defs, Line, LinearGradient, Path, Stop, Text as SvgText } from 'react-native-svg';
 import { Activity, Droplets, Gauge, HeartPulse, ShieldAlert, ShieldCheck, Wind } from 'lucide-react-native';
+import { Trans, useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import type { HrvFeatures } from '@/types/health-records';
 
 const PRIMARY = '#0D6EFD';
@@ -14,11 +16,12 @@ function asNumberArray(value: unknown): number[] {
 
 /** Huy hiệu chất lượng tín hiệu (SQI) của phép đo. */
 function SqiBadge({ features }: { features: HrvFeatures }) {
+  const { t } = useTranslation('health');
   if (typeof features.sqi_ok !== 'boolean') return null;
   const ok = features.sqi_ok;
   const ratio =
     typeof features.sqi_valid_ratio === 'number'
-      ? ` • ${(features.sqi_valid_ratio * 100).toFixed(0)}% nhịp hợp lệ`
+      ? t('measurementVisuals.sqi.validRatio', { value: (features.sqi_valid_ratio * 100).toFixed(0) })
       : '';
 
   return (
@@ -32,7 +35,7 @@ function SqiBadge({ features }: { features: HrvFeatures }) {
     >
       {ok ? <ShieldCheck size={13} color="#047857" /> : <ShieldAlert size={13} color="#B91C1C" />}
       <Text className="text-[11px] font-semibold" style={{ color: ok ? '#047857' : '#B91C1C' }}>
-        {ok ? `Chất lượng đo: Tốt${ratio}` : 'Chất lượng đo: Kém — nên đo lại'}
+        {ok ? t('measurementVisuals.sqi.good', { ratio }) : t('measurementVisuals.sqi.poor')}
       </Text>
     </View>
   );
@@ -47,24 +50,24 @@ interface MetricTile {
   note?: string;
 }
 
-function buildExtraTiles(f: HrvFeatures): MetricTile[] {
+function buildExtraTiles(f: HrvFeatures, t: TFunction<'health'>): MetricTile[] {
   const tiles: MetricTile[] = [];
   if (typeof f.deviceSpO2 === 'number') {
-    tiles.push({ key: 'spo2', Icon: Droplets, label: 'SpO2', value: f.deviceSpO2.toFixed(0), unit: '%', note: 'Tham khảo (đo tại thiết bị)' });
+    tiles.push({ key: 'spo2', Icon: Droplets, label: 'SpO2', value: f.deviceSpO2.toFixed(0), unit: '%', note: t('measurementVisuals.tiles.spo2Note') });
   }
   if (typeof f.respiratoryRate === 'number') {
-    tiles.push({ key: 'resp', Icon: Wind, label: 'Nhịp thở', value: f.respiratoryRate.toFixed(1), unit: 'lần/phút', note: '12 - 20 lần/phút' });
+    tiles.push({ key: 'resp', Icon: Wind, label: t('measurementVisuals.tiles.respiratoryRate'), value: f.respiratoryRate.toFixed(1), unit: t('measurementVisuals.tiles.breathsPerMin'), note: t('measurementVisuals.tiles.respiratoryRateNote') });
   }
   if (typeof f.hrMin === 'number' && typeof f.hrMax === 'number') {
-    tiles.push({ key: 'hrrange', Icon: HeartPulse, label: 'Nhịp tim min - max', value: `${f.hrMin.toFixed(0)} - ${f.hrMax.toFixed(0)}`, unit: 'BPM', note: 'Trong phiên đo' });
+    tiles.push({ key: 'hrrange', Icon: HeartPulse, label: t('measurementVisuals.tiles.hrRange'), value: `${f.hrMin.toFixed(0)} - ${f.hrMax.toFixed(0)}`, unit: 'BPM', note: t('measurementVisuals.tiles.hrRangeNote') });
   }
   if (typeof f.perfusionIndex === 'number') {
-    tiles.push({ key: 'pi', Icon: Activity, label: 'Chỉ số tưới máu (PI)', value: f.perfusionIndex.toFixed(2), unit: '%', note: 'Thấp → đeo lỏng / tưới máu yếu' });
+    tiles.push({ key: 'pi', Icon: Activity, label: t('measurementVisuals.tiles.perfusionIndex'), value: f.perfusionIndex.toFixed(2), unit: '%', note: t('measurementVisuals.tiles.perfusionNote') });
   }
   // Điểm căng thẳng mất ý nghĩa khi nhịp quá bất thường (AFib) nên ẩn đi
   const irregular = typeof f.pNN50 === 'number' && f.pNN50 > 40;
   if (typeof f.stressScore === 'number' && !irregular) {
-    tiles.push({ key: 'stress', Icon: Gauge, label: 'Điểm căng thẳng', value: String(f.stressScore), unit: '/100', note: 'Tham khảo (Baevsky SI)' });
+    tiles.push({ key: 'stress', Icon: Gauge, label: t('measurementVisuals.tiles.stressScore'), value: String(f.stressScore), unit: '/100', note: t('measurementVisuals.tiles.stressNote') });
   }
   return tiles;
 }
@@ -145,17 +148,20 @@ function CardTitle({ children, Icon }: { children: string; Icon?: typeof Activit
   );
 }
 
+const Bold = <Text className="font-bold text-slate-700" />;
+
 /**
  * Khối trực quan của một phép đo (giống web MeasurementVisuals): sóng mạch PPG, huy hiệu SQI,
  * các chỉ số bổ sung và đồ thị Poincaré. Tự ẩn phần nào không có dữ liệu.
  */
 export function MeasurementVisuals({ features }: { features: HrvFeatures }) {
+  const { t } = useTranslation('health');
   const [width, setWidth] = useState(0);
   const onLayout = (e: LayoutChangeEvent) => setWidth(Math.floor(e.nativeEvent.layout.width));
 
   const wave = asNumberArray(features.chartData);
   const nn = asNumberArray(features.nnIntervals);
-  const extraTiles = buildExtraTiles(features);
+  const extraTiles = buildExtraTiles(features, t);
   const hasWave = wave.length >= 10;
   const hasPoincare = nn.length >= 10;
   const hasSqi = typeof features.sqi_ok === 'boolean';
@@ -167,14 +173,14 @@ export function MeasurementVisuals({ features }: { features: HrvFeatures }) {
       {hasWave && (
         <View className="rounded-2xl bg-slate-50 border border-slate-200 p-3.5">
           <View className="flex-row items-center justify-between flex-wrap mb-2" style={{ gap: 8 }}>
-            <CardTitle Icon={Activity}>Sóng mạch (PPG) trong phiên đo</CardTitle>
+            <CardTitle Icon={Activity}>{t('measurementVisuals.wave.title')}</CardTitle>
             <SqiBadge features={features} />
           </View>
           <View onLayout={onLayout}>
             <PpgWave wave={wave} width={width} />
           </View>
           <Text className="text-[11px] text-slate-500 mt-1 leading-4">
-            Mỗi đỉnh sóng là một nhịp tim. Sóng đều đặn → nhịp ổn định; sóng lộn xộn, biên độ thất thường → nhịp bất thường.
+            {t('measurementVisuals.wave.hint')}
           </Text>
         </View>
       )}
@@ -201,24 +207,24 @@ export function MeasurementVisuals({ features }: { features: HrvFeatures }) {
         <View style={{ gap: 12 }}>
           <View className="rounded-2xl bg-slate-50 border border-slate-200 p-3.5">
             <View className="mb-1.5">
-              <CardTitle>Đồ thị Poincaré</CardTitle>
+              <CardTitle>{t('measurementVisuals.poincare.title')}</CardTitle>
             </View>
             <View onLayout={hasWave ? undefined : onLayout}>
               <PoincarePlot nn={nn} width={width} />
             </View>
           </View>
           <View className="rounded-2xl bg-slate-50 border border-slate-200 p-3.5" style={{ gap: 6 }}>
-            <CardTitle>Cách đọc đồ thị</CardTitle>
+            <CardTitle>{t('measurementVisuals.poincare.howToRead')}</CardTitle>
             <Text className="text-xs text-slate-500 leading-5">
-              Mỗi chấm là <Text className="font-bold text-slate-700">một cặp nhịp tim liên tiếp</Text>: vị trí ngang là khoảng cách nhịp trước, vị trí dọc là khoảng cách nhịp sau.
+              <Trans t={t} i18nKey="measurementVisuals.poincare.dotExplain" components={{ b: Bold }} />
             </Text>
             <Text className="text-xs text-slate-500 leading-5">
-              • Đám chấm <Text className="font-bold text-slate-700">gọn, bám sát đường chéo</Text> → nhịp tim đều đặn.
+              • <Trans t={t} i18nKey="measurementVisuals.poincare.tight" components={{ b: Bold }} />
             </Text>
             <Text className="text-xs text-slate-500 leading-5">
-              • Đám chấm <Text className="font-bold text-slate-700">tản rộng như đám mây</Text> → nhịp biến thiên bất thường, đặc trưng thường gặp của rung nhĩ.
+              • <Trans t={t} i18nKey="measurementVisuals.poincare.scattered" components={{ b: Bold }} />
             </Text>
-            <Text className="text-[11px] text-slate-500">Dựa trên {nn.length} khoảng nhịp ghi nhận trong phiên đo.</Text>
+            <Text className="text-[11px] text-slate-500">{t('measurementVisuals.poincare.basedOn', { count: nn.length })}</Text>
           </View>
         </View>
       )}

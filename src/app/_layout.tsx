@@ -9,6 +9,7 @@ import { queryClient } from '@/utils/queryClient';
 import { THEME } from '@/constants/theme';
 import '@/services/notifee-management/notifeeForegroundService';
 import '@/global.css';
+import '@/i18n';
 
 export default function RootLayout() {
   const initializeAuth = useAuthStore((state) => state.initializeAuth);

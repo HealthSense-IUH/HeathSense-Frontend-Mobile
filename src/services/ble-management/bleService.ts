@@ -10,6 +10,7 @@ import BleManager, {
   BleManagerDidUpdateValueForCharacteristicEvent,
 } from "react-native-ble-manager";
 import { requestBluetoothPermissions } from "@/utils/blePermissions";
+import i18n from "@/i18n";
 import { ppgRecorder, PpgSample } from "@/services/ppg-management/ppgRecorder";
 import {
   BATTERY_SERVICE_UUID,
@@ -118,7 +119,7 @@ class HuyWatchBleService {
         return;
       }
     } catch (error) {
-      store.setStatus("error", "Không thể khởi tạo BLE manager.");
+      store.setStatus("error", i18n.t("settings:ble.errors.initFailed"));
       return;
     }
 
@@ -127,7 +128,7 @@ class HuyWatchBleService {
       store.setStatus("reconnecting");
       void this.displayForegroundNotification(
         knownDevice.id,
-        "Đang khôi phục kết nối HuyWatch",
+        i18n.t("settings:ble.notification.restoring"),
       );
       this.scheduleReconnect(DIRECT_RECONNECT_DELAY_MS);
     } else {
@@ -156,7 +157,7 @@ class HuyWatchBleService {
     try {
       const permission = await requestBluetoothPermissions();
       if (!permission.ok) {
-        throw new Error("Thiếu quyền Bluetooth.");
+        throw new Error(i18n.t("settings:ble.errors.permissionMissing"));
       }
 
       const alreadyConnected = await BleManager.isPeripheralConnected(id).catch(
@@ -167,7 +168,7 @@ class HuyWatchBleService {
         await withTimeout(
           BleManager.connect(id),
           DIRECT_CONNECT_TIMEOUT_MS,
-          "Kết nối BLE quá thời gian chờ.",
+          i18n.t("settings:ble.errors.connectTimeout"),
         );
       }
 
@@ -219,7 +220,7 @@ class HuyWatchBleService {
       await this.displayForegroundNotification(id);
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Không thể kết nối BLE.";
+        error instanceof Error ? error.message : i18n.t("settings:ble.errors.connectFailed");
       store.setConnectedDevice(null);
       store.setStatus("error", message);
 
@@ -259,7 +260,7 @@ class HuyWatchBleService {
   async sendCommand(command: string) {
     const store = useBleStore.getState();
     const deviceId = store.connectedDeviceId;
-    if (!deviceId) throw new Error("Chưa kết nối thiết bị");
+    if (!deviceId) throw new Error(i18n.t("settings:ble.errors.notConnected"));
 
     try {
       // Characteristic WRITE: beb5483e-36e1-4688-b7f5-ea07361b26a9
@@ -422,7 +423,7 @@ class HuyWatchBleService {
               });
             } else {
               // Ít hơn 4500 mẫu -> Hủy âm thầm không gây cảnh báo lỗi
-              ppgRecorder.cancelRecording("Số lượng mẫu không đủ 1 phút Pha 1. Hủy phiên ghi.");
+              ppgRecorder.cancelRecording(i18n.t("settings:ble.recording.notEnoughSamples"));
             }
           }
         } else if (line.startsWith("R2:")) {
@@ -484,9 +485,9 @@ class HuyWatchBleService {
         if (line.includes("MOTION") || line.includes("NOT_WEARING")) {
           // Phát hiện chuyển động hoặc tháo thiết bị trong khi đo Pha 1 -> HỦY ngay phiên ghi PPG
           if (store.isRecordingPpg) {
-            const reason = line.includes("MOTION") 
-              ? "Quá trình đo Rung nhĩ bị gián đoạn do cử động tay." 
-              : "Quá trình đo bị gián đoạn do tháo thiết bị.";
+            const reason = line.includes("MOTION")
+              ? i18n.t("settings:ble.recording.interruptedMotion")
+              : i18n.t("settings:ble.recording.interruptedRemoved");
             ppgRecorder.cancelRecording(reason);
           }
         }
@@ -526,7 +527,7 @@ class HuyWatchBleService {
       void this.displayForegroundNotification(
         event.peripheral,
         s.isRecordingPpg
-          ? `Đang ghi dữ liệu PPG: ${s.recordingSampleCount} mẫu`
+          ? i18n.t("settings:ble.notification.recording", { count: s.recordingSampleCount })
           : undefined,
         bpm,
         spo2,
@@ -593,7 +594,7 @@ class HuyWatchBleService {
     store.setStatus("reconnecting");
     void this.displayForegroundNotification(
       knownDevice.id,
-      "Mất kết nối, đang tự kết nối lại",
+      i18n.t("settings:ble.notification.lostReconnecting"),
     );
     this.scheduleReconnect(DIRECT_RECONNECT_DELAY_MS);
   }
@@ -661,7 +662,7 @@ class HuyWatchBleService {
         scanMode: 2,
       });
     } catch (error) {
-      store.setStatus("error", "Không thể scan để reconnect.");
+      store.setStatus("error", i18n.t("settings:ble.errors.reconnectScanFailed"));
       this.scanningForReconnect = false;
       this.scheduleReconnect(RECONNECT_SCAN_INTERVAL_MS);
       return;
@@ -720,7 +721,7 @@ class HuyWatchBleService {
   private async createForegroundChannel() {
     return notifee.createChannel({
       id: HUY_WATCH_CHANNEL_ID,
-      name: "HuyWatch Theo Dõi Sức Khỏe Ngầm",
+      name: i18n.t("settings:ble.channelName"),
       importance: AndroidImportance.HIGH,
     });
   }
@@ -775,13 +776,13 @@ class HuyWatchBleService {
     await notifee.displayNotification({
       id: HUY_WATCH_NOTIFICATION_ID,
       title: hasHealthData
-        ? `HuyWatch: ${bpm} BPM | SpO2 ${spo2}%`
-        : "HuyWatch đang chạy ngầm",
+        ? i18n.t("settings:ble.notification.titleVitals", { bpm, spo2 })
+        : i18n.t("settings:ble.notification.titleIdle"),
       body:
         message ??
         (hasHealthData
-          ? `Đang nhận dữ liệu từ thiết bị ${deviceId}`
-          : `Đang theo dõi dữ liệu từ thiết bị ${deviceId}`),
+          ? i18n.t("settings:ble.notification.receiving", { deviceId })
+          : i18n.t("settings:ble.notification.monitoring", { deviceId })),
       android: {
         channelId,
         asForegroundService: runAsForegroundService,

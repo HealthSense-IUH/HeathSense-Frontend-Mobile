@@ -7,6 +7,7 @@ import {
   View,
 } from 'react-native';
 import { AlertCircle, LogOut, ShieldCheck, User } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { UserSession } from '@/types/authentication';
 
 interface LogoutButtonProps {
@@ -20,7 +21,9 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
   onLogout,
   isLoading = false,
 }) => {
+  const { t } = useTranslation('auth');
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const role = user?.role || 'MEMBER';
 
   const handleConfirmLogout = async () => {
     setShowConfirmModal(false);
@@ -38,7 +41,7 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
             </View>
             <View className="flex-1">
               <Text className="text-lg font-bold text-foreground">
-                {user.fullName || 'Người dùng'}
+                {user.fullName || t('logout.defaultUser')}
               </Text>
               <Text className="text-xs text-muted-foreground mt-0.5">
                 {user.email}
@@ -46,7 +49,7 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
               <View className="flex-row items-center mt-2 bg-secondary/60 self-start px-2.5 py-1 rounded-full">
                 <ShieldCheck size={12} color="#00349C" className="mr-1" />
                 <Text className="text-[10px] font-bold text-secondary-foreground uppercase">
-                  {user.role || 'MEMBER'}
+                  {t(`profile:role.${role}`, { defaultValue: role })}
                 </Text>
               </View>
             </View>
@@ -66,7 +69,7 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
           <>
             <LogOut size={20} color="#DA1E2E" className="mr-2" />
             <Text className="text-sm font-bold text-destructive">
-              Đăng xuất khỏi ứng dụng
+              {t('logout.button')}
             </Text>
           </>
         )}
@@ -86,10 +89,10 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
             </View>
 
             <Text className="text-lg font-bold text-foreground text-center mb-2">
-              Xác nhận Đăng xuất
+              {t('logout.confirmTitle')}
             </Text>
             <Text className="text-xs text-muted-foreground text-center mb-6 leading-5">
-              Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng HealthSense? Bạn sẽ cần đăng nhập lại để tiếp tục sử dụng.
+              {t('logout.confirmMessage')}
             </Text>
 
             <View className="flex-row space-x-3">
@@ -98,7 +101,7 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
                 className="flex-1 bg-muted py-3 rounded-2xl items-center justify-center mr-2"
               >
                 <Text className="text-sm font-semibold text-foreground">
-                  Hủy
+                  {t('common:actions.cancel')}
                 </Text>
               </Pressable>
 
@@ -107,7 +110,7 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
                 className="flex-1 bg-destructive py-3 rounded-2xl items-center justify-center ml-2"
               >
                 <Text className="text-sm font-bold text-white">
-                  Đăng xuất
+                  {t('logout.confirm')}
                 </Text>
               </Pressable>
             </View>

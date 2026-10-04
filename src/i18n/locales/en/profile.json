@@ -1,0 +1,137 @@
+{
+  "page": {
+    "title": "Account profile",
+    "subtitle": "Contact details, identification and account security",
+    "description": "View and manage your personal contact details, identification information and account security.",
+    "loading": "Loading account information...",
+    "loadErrorTitle": "Could not load profile information",
+    "loadErrorFallback": "Could not load your account profile from the server.",
+    "retry": "Try reconnecting"
+  },
+  "doctor": {
+    "title": "Doctor on-duty profile & work schedule",
+    "activated": "Activated",
+    "notInitialized": "Not set up",
+    "summary": "Specialty: {{specialty}} • On-duty schedule: {{count}} time slots/week • Time zone: {{timezone}}",
+    "summary_one": "Specialty: {{specialty}} • On-duty schedule: {{count}} time slot/week • Time zone: {{timezone}}",
+    "notConfigured": "An administrator has not configured a specialty for this doctor account yet. You can still open and view your on-duty schedule.",
+    "updateSchedule": "Update schedule & time zone"
+  },
+  "status": {
+    "ACTIVE": "Active",
+    "PENDING_VERIFY": "Pending verification",
+    "INACTIVE": "Inactive",
+    "LOCKED": "Locked",
+    "BANNED": "Banned"
+  },
+  "role": {
+    "SUPER_ADMIN": "Super admin",
+    "ADMIN": "Administrator",
+    "DOCTOR": "Doctor",
+    "MEMBER": "Member"
+  },
+  "gender": {
+    "MALE": "Male",
+    "FEMALE": "Female",
+    "OTHER": "Other"
+  },
+  "card": {
+    "notProvided": "Not provided",
+    "defaultUser": "User",
+    "notUpdated": "Not updated",
+    "notSpecified": "Not specified",
+    "noAddress": "No address set",
+    "noEmail": "No email linked",
+    "changeAvatar": "Change profile picture",
+    "changePhoto": "Change photo",
+    "edit": "Edit profile & identification",
+    "editing": "Editing"
+  },
+  "fields": {
+    "displayName": "Display name",
+    "phone": "Phone number",
+    "dateOfBirth": "Date of birth",
+    "gender": "Gender",
+    "address": "Contact address",
+    "citizenId": "Citizen ID / ID card number",
+    "bankAccount": "Bank account",
+    "healthInsurance": "Health insurance card number"
+  },
+  "view": {
+    "personalTitle": "Personal & contact information",
+    "identityTitle": "Identification (Citizen ID / ID card)",
+    "hideSensitive": "Hide sensitive information",
+    "showSensitive": "Show sensitive information",
+    "citizenId": "Citizen ID number (CCCD)",
+    "securityTitle": "Security & system timestamps",
+    "joinedAt": "Joined on",
+    "lastUpdated": "Last updated"
+  },
+  "cccd": {
+    "front": "Citizen ID – Front",
+    "back": "Citizen ID – Back",
+    "viewDetail": "View details",
+    "notUploaded": "Not uploaded",
+    "webOnlyNote": "Uploading Citizen ID images and changing your profile picture is currently done on the web.",
+    "frontNotUploaded": "Front image not uploaded",
+    "backNotUploaded": "Back image not uploaded",
+    "rotation": "Rotation: {{deg}}°",
+    "uploading": "Uploading to S3...",
+    "frontEmpty": "No front image yet",
+    "backEmpty": "No back image yet",
+    "fileHint": "Choose a JPG, PNG, WEBP or HEIC image",
+    "upload": "Upload image",
+    "rotateLeft90": "Rotate left 90°",
+    "rotateRight90": "Rotate right 90°",
+    "remove": "Remove this image",
+    "rotateLeft": "Rotate left",
+    "rotateRight": "Rotate right",
+    "close": "Close"
+  },
+  "form": {
+    "title": "Update profile & personal identification",
+    "requiredNote": "Fields marked with <mark>*</mark> are required.",
+    "section1": "1. Basic personal information",
+    "displayNamePlaceholder": "Enter your display name",
+    "phonePlaceholder": "e.g. 0909 123 456",
+    "dateOfBirthLabel": "Date of birth (YYYY-MM-DD)",
+    "dateOfBirthPlaceholder": "e.g. 1990-05-20",
+    "addressPlaceholder": "Enter your address: house number, ward/commune, district, province/city",
+    "section2": "2. Identification & security",
+    "citizenIdPlaceholder": "e.g. 079204001234",
+    "bankAccountPlaceholder": "e.g. 1029384756 - Vietcombank",
+    "healthInsurancePlaceholder": "e.g. DN4790123456789",
+    "section3": "3. Upload Citizen ID images (both sides)",
+    "section3Hint": "Supports rotating and zooming in on images",
+    "cancel": "Cancel",
+    "save": "Save changes"
+  },
+  "validation": {
+    "missingTitle": "Missing information",
+    "invalidTitle": "Invalid",
+    "displayNameRequired": "Please enter a display name.",
+    "displayNameTooLong": "Display name must not exceed 120 characters.",
+    "phoneTooLong": "Phone number must not exceed 30 characters.",
+    "dateOfBirthFormat": "Date of birth must be in YYYY-MM-DD format.",
+    "citizenIdTooLong": "Citizen ID number must not exceed 20 characters."
+  },
+  "toast": {
+    "fileTooLarge": "File too large",
+    "avatarTooLarge": "Profile picture must not exceed 5MB.",
+    "avatarPresignError": "Could not get an upload link from the server.",
+    "avatarSuccessTitle": "Profile picture updated!",
+    "avatarSuccessDescription": "Your new profile picture has been saved.",
+    "uploadFailed": "Upload failed",
+    "avatarUploadError": "Could not update your profile picture.",
+    "cccdTooLarge": "Citizen ID file must not exceed 10MB.",
+    "cccdPresignError": "Could not get a Citizen ID image upload link from the server.",
+    "cccdFrontSuccess": "Citizen ID front uploaded successfully!",
+    "cccdBackSuccess": "Citizen ID back uploaded successfully!",
+    "cccdSuccessDescription": "Click 'Save changes' below to save the update to your profile.",
+    "cccdUploadError": "Could not upload the Citizen ID image.",
+    "saveSuccessMessage": "Profile and identification information updated successfully.",
+    "saveSuccessTitle": "Profile updated",
+    "saveSuccessDescription": "Your personal information and Citizen ID have been saved.",
+    "saveFailed": "Failed to update profile."
+  }
+}

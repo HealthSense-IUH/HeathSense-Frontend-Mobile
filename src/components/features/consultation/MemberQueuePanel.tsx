@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, Text, View } from 'react-native';
+import { Trans, useTranslation } from 'react-i18next';
 import {
   AlertCircle,
   ArrowRight,
@@ -14,6 +15,7 @@ import {
 } from 'lucide-react-native';
 import type { ConsultationRequestItem, CurrentQueueStateResponse } from '@/types/consultation';
 import { getCreditDisplay, getCreditReservationStatusConfig } from '@/constants/credits';
+import { currentIntlLocale } from '@/i18n';
 import { formatShortDate } from '@/utils/formatters';
 
 export interface MemberQueuePanelProps {
@@ -64,7 +66,7 @@ function useDeadlineCountdown(deadlineIso?: string | null, onExpire?: () => void
 }
 
 const formatTime = (iso?: string | null) =>
-  iso ? new Date(iso).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '--';
+  iso ? new Date(iso).toLocaleTimeString(currentIntlLocale(), { hour: '2-digit', minute: '2-digit' }) : '--';
 
 function Pill({ label, bg, text, border }: { label: string; bg: string; text: string; border: string }) {
   return (
@@ -116,6 +118,7 @@ export function MemberQueuePanel({
   onRegisterNew,
   onBuyCredits,
 }: MemberQueuePanelProps) {
+  const { t } = useTranslation('consultation');
   const creditPolicy = queueState?.creditPolicy || latestRequest?.creditPolicy;
   const reservationStatus = queueState?.creditReservationStatus || latestRequest?.creditReservationStatus;
   const reservationConfig = reservationStatus ? getCreditReservationStatusConfig(reservationStatus) : null;
@@ -133,24 +136,28 @@ export function MemberQueuePanel({
             <Stethoscope size={24} color="#059669" />
           </View>
           <View className="flex-1">
-            <Pill label="Phiên tư vấn đang diễn ra" bg="#10B981" text="#FFFFFF" border="#10B981" />
-            <Text className="text-base font-bold text-foreground mt-1.5">Bác sĩ đang đợi bạn trong phòng tư vấn</Text>
-            <Text className="text-xs text-muted-foreground mt-0.5">Phiên tư vấn #{queueState.sessionId} đã được kích hoạt thành công.</Text>
+            <Pill label={t('queuePanel.activeSession.badge')} bg="#10B981" text="#FFFFFF" border="#10B981" />
+            <Text className="text-base font-bold text-foreground mt-1.5">{t('queuePanel.activeSession.title')}</Text>
+            <Text className="text-xs text-muted-foreground mt-0.5">{t('queuePanel.activeSession.activated', { id: queueState.sessionId })}</Text>
           </View>
         </View>
         <View className="p-5" style={{ gap: 14 }}>
           <View className="bg-muted/30 border border-border rounded-xl p-4" style={{ gap: 8 }}>
-            <Row label="Mã phiên tư vấn:" value={`#${queueState.sessionId}`} />
-            {queueState.sessionStartedAt ? <Row label="Thời gian bắt đầu:" value={formatTime(queueState.sessionStartedAt)} /> : null}
-            {queueState.sessionEndsAt ? <Row label="Thời gian kết thúc block 15 phút:" value={formatTime(queueState.sessionEndsAt)} /> : null}
+            <Row label={t('queuePanel.activeSession.sessionCode')} value={`#${queueState.sessionId}`} />
+            {queueState.sessionStartedAt ? <Row label={t('queuePanel.activeSession.startTime')} value={formatTime(queueState.sessionStartedAt)} /> : null}
+            {queueState.sessionEndsAt ? <Row label={t('queuePanel.activeSession.blockEndTime')} value={formatTime(queueState.sessionEndsAt)} /> : null}
             {reservationStatus && reservationConfig ? (
               <View className="flex-row items-center justify-between pt-2 border-t border-border">
-                <Text className="text-xs text-muted-foreground">Trạng thái lượt:</Text>
+                <Text className="text-xs text-muted-foreground">{t('queuePanel.activeSession.reservationStatus')}</Text>
                 <Pill {...reservationConfig} />
               </View>
             ) : null}
           </View>
-          <PrimaryButton label="Vào phòng tư vấn ngay (Mở Chat)" onPress={() => onOpenSession(queueState.sessionId as string | number)} icon={<ArrowRight size={16} color="#FFFFFF" />} />
+          <PrimaryButton
+            label={t('queuePanel.activeSession.enterRoom')}
+            onPress={() => onOpenSession(queueState.sessionId as string | number)}
+            icon={<ArrowRight size={16} color="#FFFFFF" />}
+          />
         </View>
       </View>
     );
@@ -167,13 +174,13 @@ export function MemberQueuePanel({
               <UserCheck size={24} color="#0D6EFD" />
             </View>
             <View className="flex-1">
-              <Pill label="Bác sĩ đã sẵn sàng" bg="#0D6EFD" text="#FFFFFF" border="#0D6EFD" />
-              <Text className="text-base font-bold text-foreground mt-1.5">Bác sĩ đã nhận lượt tư vấn của bạn!</Text>
-              <Text className="text-xs text-muted-foreground mt-0.5">Vui lòng xác nhận để bắt đầu phiên tư vấn trực tiếp.</Text>
+              <Pill label={t('queuePanel.confirmation.badge')} bg="#0D6EFD" text="#FFFFFF" border="#0D6EFD" />
+              <Text className="text-base font-bold text-foreground mt-1.5">{t('queuePanel.confirmation.title')}</Text>
+              <Text className="text-xs text-muted-foreground mt-0.5">{t('queuePanel.confirmation.subtitle')}</Text>
             </View>
           </View>
           <View className="items-end">
-            <Text className="text-[11px] text-muted-foreground">Thời gian còn lại</Text>
+            <Text className="text-[11px] text-muted-foreground">{t('queuePanel.confirmation.timeLeft')}</Text>
             <View className="flex-row items-center" style={{ gap: 4 }}>
               <Clock size={14} color="#0D6EFD" />
               <Text className="text-lg font-bold text-primary">{confirmTimer}</Text>
@@ -183,11 +190,11 @@ export function MemberQueuePanel({
 
         <View className="p-5" style={{ gap: 12 }}>
           <View className="bg-muted/20 border border-border rounded-xl p-4" style={{ gap: 10 }}>
-            <Row label="Số thứ tự của bạn:" value={`#${String(queueState.queueNumber).padStart(3, '0')}`} valueColor="#0D6EFD" />
-            <Row label="Trạng thái:" value="Bác sĩ đã chấp nhận kết nối" valueColor="#059669" />
+            <Row label={t('queuePanel.confirmation.yourNumber')} value={`#${String(queueState.queueNumber).padStart(3, '0')}`} valueColor="#0D6EFD" />
+            <Row label={t('queuePanel.confirmation.status')} value={t('queuePanel.confirmation.doctorAccepted')} valueColor="#059669" />
             {creditDisplay ? (
               <View className="pt-2 border-t border-border">
-                <Text className="text-xs text-muted-foreground mb-1">Thông tin lượt:</Text>
+                <Text className="text-xs text-muted-foreground mb-1">{t('queuePanel.confirmation.creditInfo')}</Text>
                 <Pill label={creditDisplay} bg="#EFF6FF" text="#1D4ED8" border="#BFDBFE" />
               </View>
             ) : null}
@@ -198,44 +205,40 @@ export function MemberQueuePanel({
               <View className="flex-row items-start" style={{ gap: 10 }}>
                 <AlertCircle size={20} color="#D97706" />
                 <View className="flex-1">
-                  <Text className="font-semibold text-sm text-foreground">Không còn đủ lượt tại thời điểm bắt đầu phiên</Text>
-                  <Text className="text-xs text-muted-foreground mt-0.5">Màn hình xác nhận vẫn được giữ. Vui lòng nạp thêm lượt tư vấn để tiếp tục.</Text>
+                  <Text className="font-semibold text-sm text-foreground">{t('queuePanel.confirmation.insufficientTitle')}</Text>
+                  <Text className="text-xs text-muted-foreground mt-0.5">{t('queuePanel.confirmation.insufficientDescription')}</Text>
                 </View>
               </View>
               <Pressable onPress={onBuyCredits} className="h-9 rounded-xl bg-primary flex-row items-center justify-center self-start px-4 active:opacity-90" style={{ gap: 6 }}>
                 <Coins size={14} color="#FFFFFF" />
-                <Text className="text-white text-xs font-semibold">Mua thêm lượt tư vấn</Text>
+                <Text className="text-white text-xs font-semibold">{t('queuePanel.confirmation.buyCredits')}</Text>
               </Pressable>
             </View>
           ) : null}
 
           {isConfirmExpired ? (
-            <Notice color="danger" text="Đã hết thời gian xác nhận. Hệ thống đang làm mới trạng thái hàng đợi..." />
+            <Notice color="danger" text={t('queuePanel.confirmation.expired')} />
           ) : (
             <Notice
               color="primary"
-              text={
-                creditPolicy === 'PER_SESSION_CONFIRM_V2'
-                  ? 'Bạn có tối đa 15 phút để xác nhận. Sau khi bạn xác nhận, 1 lượt tư vấn sẽ được trừ và phiên tư vấn sẽ được bắt đầu ngay lập tức.'
-                  : 'Bạn có tối đa 15 phút để xác nhận. Sau khi bạn xác nhận, phiên tư vấn và khung chat trực tiếp sẽ được mở ngay lập tức.'
-              }
+              text={creditPolicy === 'PER_SESSION_CONFIRM_V2' ? t('queuePanel.confirmation.hintPerSession') : t('queuePanel.confirmation.hintDefault')}
             />
           )}
 
           <PrimaryButton
-            label={actionLoading ? 'Đang tạo phiên tư vấn...' : 'Tham gia tư vấn'}
+            label={actionLoading ? t('queuePanel.confirmation.creatingSession') : t('queuePanel.confirmation.join')}
             disabled={!canConfirm}
             onPress={() => queueState.offerId && onConfirm(queueState.offerId)}
             icon={actionLoading ? <ActivityIndicator size="small" color="#FFFFFF" /> : undefined}
           />
           <OutlineButton
-            label="Hủy lượt"
+            label={t('queuePanel.confirmation.cancel')}
             danger
             disabled={actionLoading}
             onPress={() =>
-              Alert.alert('Hủy lượt tư vấn', 'Bạn có chắc chắn muốn hủy lượt tư vấn này?', [
-                { text: 'Không', style: 'cancel' },
-                { text: 'Hủy lượt', style: 'destructive', onPress: () => onCancel(queueState.requestId) },
+              Alert.alert(t('queuePanel.confirmation.cancelTitle'), t('queuePanel.confirmation.cancelConfirm'), [
+                { text: t('common:actions.no'), style: 'cancel' },
+                { text: t('queuePanel.confirmation.cancel'), style: 'destructive', onPress: () => onCancel(queueState.requestId) },
               ])
             }
           />
@@ -256,38 +259,41 @@ export function MemberQueuePanel({
               <Users size={20} color="#0D6EFD" />
             </View>
             <View className="flex-1">
-              <Text className="text-base font-bold text-foreground">Hàng đợi Tư vấn Sức khỏe</Text>
+              <Text className="text-base font-bold text-foreground">{t('queuePanel.queue.title')}</Text>
               <Text className="text-xs text-muted-foreground">
-                {isOfferingDoctor ? 'Hệ thống đang kết nối bạn với bác sĩ...' : 'Bạn đang trong hàng đợi trực tuyến (FIFO)'}
+                {isOfferingDoctor ? t('queuePanel.queue.connecting') : t('queuePanel.queue.inQueue')}
               </Text>
             </View>
           </View>
           <Pressable onPress={onRefresh} disabled={loading} className="h-8 px-2.5 rounded-lg flex-row items-center active:opacity-70" style={{ gap: 4 }}>
             {loading ? <ActivityIndicator size="small" color="#64748B" /> : <RefreshCw size={14} color="#64748B" />}
-            <Text className="text-xs text-muted-foreground">Làm mới</Text>
+            <Text className="text-xs text-muted-foreground">{t('queuePanel.queue.refresh')}</Text>
           </Pressable>
         </View>
 
         <View className="p-5" style={{ gap: 16 }}>
           <View className="p-5 rounded-2xl bg-primary/5 border border-primary/20 items-center" style={{ gap: 10 }}>
-            <Text className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Số thứ tự của bạn</Text>
+            <Text className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{t('queuePanel.queue.yourNumber')}</Text>
             <Text className="text-4xl font-extrabold text-primary tracking-tight">#{String(queueState.queueNumber).padStart(3, '0')}</Text>
-            <Text className="text-xs text-muted-foreground">Ngày tiếp nhận: {formatShortDate(queueState.queueDate)}</Text>
+            <Text className="text-xs text-muted-foreground">{t('queuePanel.queue.queueDate', { date: formatShortDate(queueState.queueDate) })}</Text>
             <View className="flex-row flex-wrap justify-center" style={{ gap: 6 }}>
-              <Pill label={isOfferingDoctor ? 'Đang kết nối bác sĩ' : 'Đang chờ đến lượt'} bg="#FFFFFF" text="#0F172A" border="#E2E8F0" />
+              <Pill label={isOfferingDoctor ? t('queuePanel.queue.connectingDoctor') : t('queuePanel.queue.waitingTurn')} bg="#FFFFFF" text="#0F172A" border="#E2E8F0" />
               {creditDisplay ? <Pill label={creditDisplay} bg="#EFF6FF" text="#1D4ED8" border="#BFDBFE" /> : null}
             </View>
             <Text className="text-sm font-medium text-foreground">
-              Còn <Text className="text-primary font-bold text-base">{queueState.peopleAhead}</Text> người trước bạn
+              <Trans
+                t={t}
+                i18nKey="queuePanel.queue.peopleAhead"
+                count={queueState.peopleAhead}
+                components={{ strong: <Text className="text-primary font-bold text-base" /> }}
+              />
             </Text>
           </View>
 
           {isOfferingDoctor ? (
             <View className="flex-row items-center p-4 rounded-xl bg-amber-500/10 border border-amber-500/20" style={{ gap: 10 }}>
               <View className="h-3 w-3 rounded-full bg-amber-500" />
-              <Text className="text-xs font-medium text-amber-900 flex-1">
-                Hệ thống đang kết nối bạn với bác sĩ... Vui lòng giữ màn hình này và chờ phản hồi từ bác sĩ.
-              </Text>
+              <Text className="text-xs font-medium text-amber-900 flex-1">{t('queuePanel.queue.connectingNotice')}</Text>
             </View>
           ) : null}
 
@@ -295,29 +301,29 @@ export function MemberQueuePanel({
             <View className="flex-row items-start p-4 rounded-xl bg-muted/40 border border-border" style={{ gap: 10 }}>
               <Info size={16} color="#0D6EFD" />
               <View className="flex-1">
-                <Text className="text-xs font-semibold text-foreground">Hiện chưa có bác sĩ sẵn sàng.</Text>
-                <Text className="text-xs text-muted-foreground mt-0.5">Yêu cầu của bạn đã được xếp hàng và sẽ được xử lý khi có bác sĩ trực. Bạn không cần gửi lại yêu cầu.</Text>
+                <Text className="text-xs font-semibold text-foreground">{t('queuePanel.queue.noDoctorsTitle')}</Text>
+                <Text className="text-xs text-muted-foreground mt-0.5">{t('queuePanel.queue.noDoctorsDescription')}</Text>
               </View>
             </View>
           ) : null}
 
           <View className="border border-border rounded-xl p-4 bg-muted/10">
-            <Text className="text-xs font-semibold text-foreground mb-2">Thống kê đội ngũ bác sĩ:</Text>
+            <Text className="text-xs font-semibold text-foreground mb-2">{t('queuePanel.queue.doctorStats')}</Text>
             <View className="flex-row" style={{ gap: 10 }}>
-              <Stat label="Đang trực" value={queueState.doctorsOnDuty} color="#0F172A" />
-              <Stat label="Sẵn sàng" value={queueState.availableDoctors} color="#059669" />
-              <Stat label="Đang bận" value={queueState.busyDoctors} color="#D97706" />
+              <Stat label={t('queuePanel.queue.onDuty')} value={queueState.doctorsOnDuty} color="#0F172A" />
+              <Stat label={t('queuePanel.queue.available')} value={queueState.availableDoctors} color="#059669" />
+              <Stat label={t('queuePanel.queue.busy')} value={queueState.busyDoctors} color="#D97706" />
             </View>
           </View>
         </View>
 
         <View className="border-t border-border bg-muted/5 p-4 flex-row items-center justify-between" style={{ gap: 10 }}>
-          <Text className="text-xs text-muted-foreground flex-1">Bạn có thể hủy lượt bất cứ lúc nào trước khi phiên bắt đầu.</Text>
+          <Text className="text-xs text-muted-foreground flex-1">{t('queuePanel.queue.cancelHint')}</Text>
           <Pressable
             onPress={() =>
-              Alert.alert('Rời hàng đợi', 'Bạn có chắc chắn muốn rời khỏi hàng đợi tư vấn?', [
-                { text: 'Ở lại', style: 'cancel' },
-                { text: 'Hủy lượt chờ', style: 'destructive', onPress: () => onCancel(queueState.requestId) },
+              Alert.alert(t('queuePanel.queue.leaveTitle'), t('queuePanel.queue.leaveConfirm'), [
+                { text: t('queuePanel.queue.stay'), style: 'cancel' },
+                { text: t('queuePanel.queue.leave'), style: 'destructive', onPress: () => onCancel(queueState.requestId) },
               ])
             }
             disabled={actionLoading}
@@ -325,7 +331,7 @@ export function MemberQueuePanel({
             style={{ gap: 4, opacity: actionLoading ? 0.5 : 1 }}
           >
             <XCircle size={14} color="#64748B" />
-            <Text className="text-xs font-semibold text-muted-foreground">Hủy lượt chờ</Text>
+            <Text className="text-xs font-semibold text-muted-foreground">{t('queuePanel.queue.leave')}</Text>
           </Pressable>
         </View>
       </View>
@@ -340,15 +346,13 @@ export function MemberQueuePanel({
         <View className={`h-12 w-12 rounded-full items-center justify-center ${timedOut ? 'bg-amber-100' : 'bg-muted'}`}>
           {timedOut ? <Clock size={24} color="#D97706" /> : <XCircle size={24} color="#64748B" />}
         </View>
-        <Text className="text-base font-bold text-foreground text-center">{timedOut ? 'Bạn đã bỏ lỡ lượt tư vấn' : 'Yêu cầu tư vấn đã được hủy'}</Text>
+        <Text className="text-base font-bold text-foreground text-center">{timedOut ? t('queuePanel.timedOut.title') : t('queuePanel.cancelled.title')}</Text>
         <Text className="text-xs text-muted-foreground text-center leading-5">
-          {timedOut
-            ? 'Thời hạn xác nhận lượt tư vấn trước đó đã hết. Nếu bạn vẫn muốn được bác sĩ tư vấn, vui lòng đăng ký lại để nhận số thứ tự mới.'
-            : 'Lượt xếp hàng trước đó của bạn đã kết thúc. Bạn có thể tạo yêu cầu tư vấn mới bất cứ lúc nào.'}
+          {timedOut ? t('queuePanel.timedOut.description') : t('queuePanel.cancelled.description')}
         </Text>
         {reservationStatus && reservationConfig ? <Pill {...reservationConfig} /> : null}
         <Pressable onPress={onRegisterNew} className="h-11 px-5 rounded-xl bg-primary items-center justify-center active:opacity-90 mt-1">
-          <Text className="text-white font-bold text-sm">Đăng ký tư vấn mới</Text>
+          <Text className="text-white font-bold text-sm">{t('queuePanel.registerNew')}</Text>
         </Pressable>
       </View>
     );
@@ -360,12 +364,10 @@ export function MemberQueuePanel({
       <View className="h-14 w-14 rounded-2xl bg-primary/10 items-center justify-center">
         <Stethoscope size={28} color="#0D6EFD" />
       </View>
-      <Text className="text-base font-bold text-foreground text-center">Bạn chưa có yêu cầu tư vấn đang hoạt động</Text>
-      <Text className="text-xs text-muted-foreground text-center leading-5">
-        Đăng ký để được xếp vào hàng đợi tư vấn trực tiếp 1-1 với bác sĩ chuyên khoa.
-      </Text>
+      <Text className="text-base font-bold text-foreground text-center">{t('queuePanel.empty.title')}</Text>
+      <Text className="text-xs text-muted-foreground text-center leading-5">{t('queuePanel.empty.description')}</Text>
       <Pressable onPress={onRegisterNew} className="h-12 px-6 rounded-xl bg-primary items-center justify-center active:opacity-90 mt-1">
-        <Text className="text-white font-bold text-sm">Đăng ký tư vấn ngay</Text>
+        <Text className="text-white font-bold text-sm">{t('queuePanel.empty.register')}</Text>
       </Pressable>
     </View>
   );

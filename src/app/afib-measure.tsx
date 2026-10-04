@@ -21,6 +21,7 @@ import {
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path, Circle } from 'react-native-svg';
+import { Trans, useTranslation } from 'react-i18next';
 import { useBleStore } from '@/services/ble-management/bleStore';
 import { useBLE } from '@/context/BLEContext';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
@@ -33,6 +34,7 @@ import {
 } from '@/services/workout';
 
 export default function AFibMeasureScreen() {
+  const { t } = useTranslation('health');
   const router = useRouter();
   const { sendCommand, stopExportAndUploadPpgRecording } = useBLE();
   const store = useBleStore();
@@ -117,7 +119,7 @@ export default function AFibMeasureScreen() {
     try {
       await sendCommand("CMD:START_SCREENING");
     } catch (err) {
-      console.warn("Lỗi gửi lệnh đo:", err);
+      console.warn("[AFibMeasure] Failed to send screening command:", err);
     }
   };
 
@@ -126,15 +128,15 @@ export default function AFibMeasureScreen() {
     if (!current.canScreen) {
       if (current.reason === 'WORKOUT_IN_PROGRESS') {
         Alert.alert(
-          "Tạm dừng đo Rung nhĩ",
-          "Chức năng đo Rung nhĩ (AFib) tạm dừng trong lúc vận động để đảm bảo độ chính xác y khoa và tránh cảnh báo sai. Vui lòng hoàn thành buổi tập thể dục trước khi đo.",
-          [{ text: "Đã hiểu" }]
+          t('screening.workoutPaused.title'),
+          t('screening.workoutPaused.measureMessage'),
+          [{ text: t('screening.understood') }]
         );
       } else if (current.reason === 'COOLDOWN_ACTIVE') {
         Alert.alert(
-          "Thời gian phục hồi tim (10 phút)",
-          `Bạn vừa hoàn thành buổi tập thể dục. Để nhịp tim ổn định và tránh cảnh báo sai do nhịp xoang phục hồi sau gắng sức, vui lòng ngồi nghỉ tĩnh thêm ${current.formattedRemainingTime} trước khi bắt đầu đo tầm soát Rung nhĩ (AFib).`,
-          [{ text: "Đã hiểu" }]
+          t('screening.cooldown.title'),
+          t('screening.cooldown.message', { time: current.formattedRemainingTime }),
+          [{ text: t('screening.understood') }]
         );
       }
       return;
@@ -167,25 +169,25 @@ export default function AFibMeasureScreen() {
 
   const handleManualUpload = async () => {
     if (!isRecording) return;
-    setLocalUploadMsg("Đang xử lý dữ liệu...");
+    setLocalUploadMsg(t('measure.processingData'));
     try {
       await stopExportAndUploadPpgRecording();
     } catch (err: any) {
-      setLocalUploadMsg(err?.message || "Lỗi khi upload.");
+      setLocalUploadMsg(err?.message || t('measure.uploadError'));
     }
   };
 
   const handleShowProtocolInfo = () => {
     Alert.alert(
-      "Quy trình chuẩn y khoa AFib 60s",
-      "1. Ngồi yên tĩnh trên ghế tựa lưng thoải mái.\n2. Giữ cánh tay đặt ngang tầm tim.\n3. Không cử động hoặc nói chuyện trong suốt 60 giây đo.\n4. Cảm biến PPG sẽ tự động thu thập tín hiệu quang học và gửi về mô hình AI chẩn đoán.",
-      [{ text: "Đã hiểu", style: "default" }]
+      t('measure.protocolBadge'),
+      t('measure.protocolSteps'),
+      [{ text: t('screening.understood'), style: "default" }]
     );
   };
 
   return (
     <ScreenWrapper
-      title="Tầm soát Rung nhĩ"
+      title={t('measure.title')}
       statusBarStyle="dark"
       backgroundComponent={
         <View style={[StyleSheet.absoluteFill, { backgroundColor: '#F4F8FC', overflow: 'hidden' }]}>
@@ -211,7 +213,7 @@ export default function AFibMeasureScreen() {
             shadowRadius: 6,
             elevation: 2,
           }}
-          aria-label="Quay lại"
+          aria-label={t('common:actions.back')}
         >
           <ArrowLeft color={THEME.colors.primary} size={20} strokeWidth={2.4} />
         </Pressable>
@@ -220,7 +222,7 @@ export default function AFibMeasureScreen() {
         <Pressable
           onPress={handleShowProtocolInfo}
           className="w-11 h-11 rounded-full bg-slate-100/90 items-center justify-center shadow-inner active:opacity-80"
-          aria-label="Cài đặt đo lâm sàng"
+          aria-label={t('measure.settingsAria')}
         >
           <Settings color="#64748B" size={18} strokeWidth={2} />
         </Pressable>
@@ -232,12 +234,11 @@ export default function AFibMeasureScreen() {
           <View className="flex-row items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100/70 border border-blue-200/70 mb-2.5">
             <View className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-ping" />
             <Text className="text-blue-700 text-xs font-semibold">
-              Quy trình chuẩn y khoa AFib 60s
+              {t('measure.protocolBadge')}
             </Text>
           </View>
           <Text className="text-[13.5px] leading-relaxed text-slate-600 font-medium max-w-[310px] text-center">
-            Đảm bảo giữ yên cánh tay và dây đeo vừa vặn với cổ tay trong suốt{" "}
-            <Text className="font-bold text-[#0B1E3F]">60 giây đo</Text>.
+            <Trans t={t} i18nKey="measure.instruction" components={{ b: <Text className="font-bold text-[#0B1E3F]" /> }} />
           </Text>
         </View>
         {/* END: InstructionalGuidanceSection */}
@@ -264,7 +265,7 @@ export default function AFibMeasureScreen() {
             >
               <Text className="text-6xl font-extrabold text-[#0D6EFD]">{countdown}</Text>
               <Text className="text-xs font-bold text-blue-600 mt-1 uppercase tracking-wider">
-                Chuẩn bị
+                {t('measure.preparing')}
               </Text>
             </View>
           ) : isRecording ? (
@@ -304,7 +305,7 @@ export default function AFibMeasureScreen() {
                 <View className="flex-row items-center mt-1">
                   <View className="w-2 h-2 rounded-full bg-rose-500 mr-1.5 animate-ping" />
                   <Text className="text-[11px] font-bold text-rose-500 uppercase tracking-wider">
-                    Đang thu thập
+                    {t('measure.recording')}
                   </Text>
                 </View>
               </View>
@@ -328,8 +329,8 @@ export default function AFibMeasureScreen() {
               }}
             >
               <ActivityIndicator size="large" color="#0D6EFD" />
-              <Text className="text-sm font-bold text-slate-800 mt-3">AI đang phân tích...</Text>
-              <Text className="text-[11px] text-slate-400 mt-0.5">Xử lý tín hiệu PPG</Text>
+              <Text className="text-sm font-bold text-slate-800 mt-3">{t('measure.analyzing')}</Text>
+              <Text className="text-[11px] text-slate-400 mt-0.5">{t('measure.analyzingSub')}</Text>
             </View>
           ) : result ? (
             <View
@@ -358,7 +359,7 @@ export default function AFibMeasureScreen() {
                 {resultMeta.label}
               </Text>
               <Text className="text-xs text-slate-500 font-medium mt-0.5">
-                Khả năng bị rung nhĩ: {((result.confidence ?? 0) * 100).toFixed(1)}%
+                {t('afibHistory.card.afibProbability', { value: ((result.confidence ?? 0) * 100).toFixed(1) })}
               </Text>
               <Pressable
                 onPress={() => router.push(`/health-record/${result.id}` as any)}
@@ -366,7 +367,7 @@ export default function AFibMeasureScreen() {
                 className="mt-1.5 flex-row items-center active:opacity-70"
                 style={{ gap: 2 }}
               >
-                <Text className="text-xs font-semibold text-[#0D6EFD]">Xem chi tiết</Text>
+                <Text className="text-xs font-semibold text-[#0D6EFD]">{t('common:actions.viewDetails')}</Text>
                 <ChevronRight color="#0D6EFD" size={14} strokeWidth={2.2} />
               </Pressable>
             </View>
@@ -442,10 +443,10 @@ export default function AFibMeasureScreen() {
                 </View>
 
                 <Text className="text-[14px] font-bold text-[#1E3A8A] tracking-tight">
-                  Sẵn sàng đo
+                  {t('measure.ready')}
                 </Text>
                 <Text className="text-[11px] font-medium text-slate-400 mt-0.5">
-                  Cảm biến PPG sạch
+                  {t('measure.readySub')}
                 </Text>
               </View>
             </View>
@@ -487,7 +488,7 @@ export default function AFibMeasureScreen() {
                 <View className="w-7 h-7 rounded-xl bg-blue-100/90 items-center justify-center mr-2">
                   <Text className="text-blue-700 text-xs font-bold">1</Text>
                 </View>
-                <Text className="text-xs font-semibold text-slate-700">Ngồi yên tĩnh</Text>
+                <Text className="text-xs font-semibold text-slate-700">{t('measure.steps.sitStill')}</Text>
               </View>
               <View className="w-px h-6 bg-slate-200" />
               {/* Step 2 */}
@@ -495,7 +496,7 @@ export default function AFibMeasureScreen() {
                 <View className="w-7 h-7 rounded-xl bg-blue-100/90 items-center justify-center mr-2">
                   <Text className="text-blue-700 text-xs font-bold">2</Text>
                 </View>
-                <Text className="text-xs font-semibold text-slate-700">Tay không chuyển động</Text>
+                <Text className="text-xs font-semibold text-slate-700">{t('measure.steps.armStill')}</Text>
               </View>
               <View className="w-px h-6 bg-slate-200" />
               {/* Step 3 */}
@@ -503,7 +504,7 @@ export default function AFibMeasureScreen() {
                 <View className="w-7 h-7 rounded-xl bg-blue-100/90 items-center justify-center mr-2">
                   <Text className="text-blue-700 text-xs font-bold">3</Text>
                 </View>
-                <Text className="text-xs font-semibold text-slate-700">Không nói</Text>
+                <Text className="text-xs font-semibold text-slate-700">{t('measure.steps.noTalking')}</Text>
               </View>
             </View>
           )}
@@ -515,7 +516,7 @@ export default function AFibMeasureScreen() {
                 onPress={handleManualUpload}
                 className="w-full bg-rose-500 py-4 rounded-2xl flex-row items-center justify-center shadow-lg shadow-rose-500/30 active:opacity-80 mb-2"
               >
-                <Text className="text-base font-bold text-white">Dừng & Phân tích ngay</Text>
+                <Text className="text-base font-bold text-white">{t('measure.stopAndAnalyze')}</Text>
               </Pressable>
             ) : (
               /* Stitch Gradient 3-tone CTA Button */
@@ -549,12 +550,12 @@ export default function AFibMeasureScreen() {
                   </Svg>
                   <Text className="text-white font-bold text-base tracking-wide">
                     {availability.reason === 'COOLDOWN_ACTIVE'
-                      ? `Hồi phục tim (${availability.formattedRemainingTime})`
+                      ? t('measure.cta.cooldown', { time: availability.formattedRemainingTime })
                       : availability.reason === 'WORKOUT_IN_PROGRESS'
-                      ? "Tạm ngắt khi đang tập luyện"
+                      ? t('measure.cta.workout')
                       : isAnalyzing
-                      ? "Đang xử lý kết quả..."
-                      : "Bắt đầu đo 60 giây"}
+                      ? t('measure.cta.processing')
+                      : t('measure.cta.start')}
                   </Text>
                 </Pressable>
               </LinearGradient>
@@ -566,22 +567,26 @@ export default function AFibMeasureScreen() {
                 <AlertTriangle color="#D97706" size={15} />
                 <Text className="text-xs font-semibold text-amber-700 tracking-tight text-center">
                   {availability.reason === 'COOLDOWN_ACTIVE'
-                    ? `Đang trong 10 phút hồi phục tim (${availability.formattedRemainingTime}). Vui lòng nghỉ tĩnh để tránh cảnh báo sai.`
-                    : "Bạn đang trong phiên tập luyện. Đo AFib bị tạm ngắt để tránh nhiễu do vận động."}
+                    ? t('measure.banner.cooldown', { time: availability.formattedRemainingTime })
+                    : t('measure.banner.workout')}
                 </Text>
               </View>
             ) : !isConnected ? (
               <View className="flex-row items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-rose-50/90 border border-rose-200/80 shadow-xs mt-3">
                 <AlertTriangle color="#E11D48" size={15} />
                 <Text className="text-xs font-semibold text-rose-600 tracking-tight text-center">
-                  Vui lòng kết nối đồng hồ BLE trong mục{" "}
-                  <Text
-                    className="underline font-bold"
-                    onPress={() => router.push("/(public)/scan" as any)}
-                  >
-                    Cài đặt
-                  </Text>{" "}
-                  trước khi đo.
+                  <Trans
+                    t={t}
+                    i18nKey="measure.banner.notConnected"
+                    components={{
+                      link: (
+                        <Text
+                          className="underline font-bold"
+                          onPress={() => router.push("/(public)/scan" as any)}
+                        />
+                      ),
+                    }}
+                  />
                 </Text>
               </View>
             ) : null}

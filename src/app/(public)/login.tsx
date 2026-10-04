@@ -5,10 +5,12 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
 import { ArrowLeft, HeartPulse } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/services/authentication/authStore';
 import { useBleStore } from '@/services/ble-management/bleStore';
 import { LoginForm } from '@/components/features/auth/LoginForm';
 import { LoginRequest } from '@/types/authentication';
+import { LanguageFlagButton } from '@/components/ui/LanguageSwitch';
 
 const BRAND = '#2B6CB0';
 const CANVAS = '#EFF3F6';
@@ -40,6 +42,7 @@ function AmbientGlow() {
 }
 
 export default function LoginScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { login, isLoading, error, clearError } = useAuthStore();
   const canGoBack = router.canGoBack();
@@ -76,7 +79,7 @@ export default function LoginScreen() {
               {canGoBack ? (
                 <Pressable
                   onPress={() => router.back()}
-                  accessibilityLabel="Quay lại"
+                  accessibilityLabel={t('actions.back')}
                   className="w-10 h-10 rounded-full bg-white items-center justify-center active:opacity-80"
                   style={{ boxShadow: '0 1px 3px rgba(15, 23, 42, 0.08)' }}
                 >
@@ -98,7 +101,7 @@ export default function LoginScreen() {
                 </Text>
               </View>
 
-              <View className="w-10 h-10" />
+              <LanguageFlagButton />
             </View>
 
             {/* Thẻ đăng nhập ở giữa phần còn lại của màn hình */}

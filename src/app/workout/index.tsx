@@ -13,9 +13,12 @@ import { FavoriteWorkoutSection } from '@/components/features/workout/FavoriteWo
 import { WeeklyWorkoutCard } from '@/components/features/workout/WeeklyWorkoutCard';
 import { useWorkoutCatalogStore } from '@/services/workout/workoutCatalogStore';
 import { THEME } from '@/constants/theme';
+import { useTranslation } from 'react-i18next';
+import { currentIntlLocale } from '@/i18n';
 
 export default function WorkoutHubScreen() {
   const router = useRouter();
+  const { t } = useTranslation('workout');
   const getTodayStats = useWorkoutCatalogStore((state) => state.getTodayStats);
   const getWeeklyStats = useWorkoutCatalogStore((state) => state.getWeeklyStats);
 
@@ -30,7 +33,7 @@ export default function WorkoutHubScreen() {
 
   return (
     <ScreenWrapper
-      title="Trung Tâm Luyện Tập"
+      title={t('hub.title')}
       statusBarStyle="dark"
       className="bg-slate-50"
       headerLeft={
@@ -67,7 +70,7 @@ export default function WorkoutHubScreen() {
           className="p-5 rounded-3xl mb-5 relative border border-emerald-500/20 shadow-md"
         >
           <Text className="text-white text-base font-semibold leading-relaxed pr-6">
-            Theo dõi mức độ thể lực để được cung cấp nội dung cũng như mục tiêu dựa trên trọng tâm luyện tập của bạn.
+            {t('hub.banner')}
           </Text>
         </LinearGradient>
 
@@ -82,16 +85,16 @@ export default function WorkoutHubScreen() {
             elevation: 2,
           }}
         >
-          <Text className="text-sm font-bold text-slate-800 mb-3">Bước</Text>
+          <Text className="text-sm font-bold text-slate-800 mb-3">{t('hub.steps')}</Text>
 
           <View className="flex-row items-end justify-between">
             {/* Step Count Number */}
             <View>
               <Text className="text-4xl font-extrabold text-slate-900 tracking-tight">
-                {todayStats.totalSteps.toLocaleString('vi-VN')}
+                {todayStats.totalSteps.toLocaleString(currentIntlLocale())}
               </Text>
               <Text className="text-xs text-slate-500 mt-1 font-medium">
-                {todayStats.targetSteps.toLocaleString('vi-VN')} bước
+                {t('hub.stepsTarget', { value: todayStats.targetSteps.toLocaleString(currentIntlLocale()) })}
               </Text>
             </View>
 
@@ -143,9 +146,9 @@ export default function WorkoutHubScreen() {
           }}
         >
           <View className="flex-row items-center gap-2 mb-3">
-            <Text className="text-sm font-bold text-slate-800">H.luyện chạy</Text>
+            <Text className="text-sm font-bold text-slate-800">{t('hub.runningCoach')}</Text>
             <View className="bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
-              <Text className="text-[10px] font-bold text-slate-600">Beta</Text>
+              <Text className="text-[10px] font-bold text-slate-600">{t('hub.beta')}</Text>
             </View>
           </View>
 
@@ -158,10 +161,10 @@ export default function WorkoutHubScreen() {
             {/* Content */}
             <View className="flex-1">
               <Text className="text-base font-bold text-slate-900 tracking-tight">
-                Xác định cấp độ chạy bộ
+                {t('hub.runningLevelTitle')}
               </Text>
               <Text className="text-xs text-slate-500 mt-1 leading-relaxed" numberOfLines={2}>
-                Nhận kế hoạch tập chi tiết để đạt mục tiêu chạy bộ của bạn.
+                {t('hub.runningLevelDescription')}
               </Text>
             </View>
           </View>

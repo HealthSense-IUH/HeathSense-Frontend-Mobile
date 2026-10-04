@@ -3,6 +3,7 @@ import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, Text, View } 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Clock, Download, FileText, RefreshCw } from 'lucide-react-native';
 import { useHealthRecord } from '@/hooks/useHealthHistory';
 import { getRecordDownloadUrlApi } from '@/services/health-records';
@@ -12,17 +13,18 @@ import { PredictionBadge } from '@/components/features/health/PredictionBadge';
 import { MeasurementVisuals } from '@/components/features/health/MeasurementVisuals';
 import type { HrvFeatures } from '@/types/health-records';
 
-/** 4 chỉ số sinh lý chính hiện ở trên bảng HRV (giống web). */
-const CORE_TILES: { key: keyof HrvFeatures; label: string; decimals: number; unit: string; range: string }[] = [
-  { key: 'HR_mean', label: 'Nhịp tim TB', decimals: 0, unit: 'BPM', range: '60 - 100 BPM' },
+/** 4 chỉ số sinh lý chính hiện ở trên bảng HRV (giống web). labelKey = khóa i18n trong namespace health; label = chữ cố định. */
+const CORE_TILES: { key: keyof HrvFeatures; label?: string; labelKey?: string; decimals: number; unit: string; range: string }[] = [
+  { key: 'HR_mean', labelKey: 'recordDetail.avgHeartRate', decimals: 0, unit: 'BPM', range: '60 - 100 BPM' },
   { key: 'SDNN', label: 'SDNN', decimals: 1, unit: 'ms', range: '30 - 100 ms' },
   { key: 'RMSSD', label: 'RMSSD', decimals: 1, unit: 'ms', range: '20 - 50 ms' },
-  { key: 'LF_HF_Ratio', label: 'Tỷ lệ LF/HF', decimals: 2, unit: '', range: '0.5 - 2.0' },
+  { key: 'LF_HF_Ratio', labelKey: 'recordDetail.lfHfRatio', decimals: 2, unit: '', range: '0.5 - 2.0' },
 ];
 
 const shadow = { boxShadow: '0 4px 16px rgba(15, 23, 42, 0.05)' };
 
 export default function HealthRecordDetailScreen() {
+  const { t } = useTranslation('health');
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -35,12 +37,12 @@ export default function HealthRecordDetailScreen() {
     try {
       const url = await getRecordDownloadUrlApi(record.id);
       if (!url) {
-        Alert.alert('Lỗi', 'Không tìm thấy đường dẫn tải file.');
+        Alert.alert(t('common:error.title'), t('recordDetail.downloadUrlNotFound'));
         return;
       }
       await Linking.openURL(url);
     } catch {
-      Alert.alert('Lỗi', 'Không thể lấy đường dẫn tải tệp.');
+      Alert.alert(t('common:error.title'), t('recordDetail.downloadUrlFailed'));
     } finally {
       setDownloading(false);
     }
@@ -51,7 +53,7 @@ export default function HealthRecordDetailScreen() {
       return (
         <View className="py-20 items-center justify-center">
           <ActivityIndicator size="large" color="#0D6EFD" />
-          <Text className="mt-4 text-slate-500 font-medium text-sm">Đang tải kết quả đo...</Text>
+          <Text className="mt-4 text-slate-500 font-medium text-sm">{t('recordDetail.loading')}</Text>
         </View>
       );
     }
@@ -60,11 +62,11 @@ export default function HealthRecordDetailScreen() {
         <View className="py-20 items-center px-6">
           <View className="bg-rose-50 border border-rose-200 rounded-2xl p-4 w-full">
             <Text className="text-rose-700 font-semibold text-sm text-center">
-              {error ? 'Lỗi tải dữ liệu. Vui lòng thử lại.' : 'Không tìm thấy bản ghi đo.'}
+              {error ? t('common:state.loadError') : t('recordDetail.notFound')}
             </Text>
           </View>
           <Pressable onPress={() => refetch()} className="mt-4 px-4 py-2.5 rounded-xl bg-white border border-slate-200 active:opacity-80">
-            <Text className="text-sm font-semibold text-slate-700">Thử lại</Text>
+            <Text className="text-sm font-semibold text-slate-700">{t('common:actions.retry')}</Text>
           </Pressable>
         </View>
       );
@@ -79,18 +81,18 @@ export default function HealthRecordDetailScreen() {
       <View style={{ gap: 14 }}>
         {/* Tiêu đề + thời gian đo */}
         <View>
-          <Text className="text-lg font-bold text-slate-900 tracking-tight">Chi tiết Kết quả Tầm soát Nhịp tim</Text>
+          <Text className="text-lg font-bold text-slate-900 tracking-tight">{t('recordDetail.title')}</Text>
           <View className="flex-row items-center mt-1.5" style={{ gap: 6 }}>
             <Clock size={13} color="#64748B" />
-            <Text className="text-xs text-slate-500">Thời gian đo: {formatRecordDate(record.createdAt)}</Text>
+            <Text className="text-xs text-slate-500">{t('recordDetail.measuredAt', { date: formatRecordDate(record.createdAt) })}</Text>
           </View>
-          <Text className="text-xs text-slate-500 mt-0.5" numberOfLines={1}>File: {record.fileName}</Text>
+          <Text className="text-xs text-slate-500 mt-0.5" numberOfLines={1}>{t('recordDetail.file', { name: record.fileName })}</Text>
         </View>
 
         {/* Kết luận AI */}
         <View className="rounded-2xl bg-white border border-slate-200 p-4" style={shadow}>
           <View className="flex-row items-center flex-wrap" style={{ gap: 8 }}>
-            <Text className="text-xs text-slate-500 font-medium">Kết luận AI:</Text>
+            <Text className="text-xs text-slate-500 font-medium">{t('recordDetail.aiConclusion')}</Text>
             <PredictionBadge meta={meta} />
           </View>
           <Text className="text-xs text-slate-500 leading-5 mt-2">{meta.advice}</Text>
@@ -101,7 +103,7 @@ export default function HealthRecordDetailScreen() {
           ) : null}
           {hasConfidence ? (
             <View className="mt-3 pt-3 border-t border-slate-100 flex-row items-center justify-between">
-              <Text className="text-xs text-slate-500">Khả năng bị rung nhĩ</Text>
+              <Text className="text-xs text-slate-500">{t('recordDetail.afibProbability')}</Text>
               <Text className="text-lg font-bold text-slate-900">{((record.confidence as number) * 100).toFixed(1)}%</Text>
             </View>
           ) : null}
@@ -116,7 +118,7 @@ export default function HealthRecordDetailScreen() {
             const value = features[tile.key];
             return (
               <View key={String(tile.key)} className="rounded-2xl bg-slate-50 border border-slate-200 p-3.5" style={{ width: '48%', flexGrow: 1 }}>
-                <Text className="text-xs text-slate-500 font-medium">{tile.label}</Text>
+                <Text className="text-xs text-slate-500 font-medium">{tile.labelKey ? t(tile.labelKey) : tile.label}</Text>
                 <Text className="text-xl font-bold text-slate-900 mt-1">
                   {typeof value === 'number' ? formatHrvNumber(value, tile.decimals) : '--'}
                   {tile.unit ? <Text className="text-xs font-normal text-slate-500"> {tile.unit}</Text> : null}
@@ -129,11 +131,11 @@ export default function HealthRecordDetailScreen() {
 
         {/* Bảng HRV */}
         <View style={{ gap: 8 }}>
-          <Text className="text-xs font-semibold text-slate-800 uppercase tracking-wider">Các chỉ số Biến thiên Nhịp tim (HRV)</Text>
+          <Text className="text-xs font-semibold text-slate-800 uppercase tracking-wider">{t('recordDetail.hrvTitle')}</Text>
           <View className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
             <View className="flex-row bg-slate-50 border-b border-slate-200 px-4 py-2.5">
-              <Text className="flex-1 text-xs font-semibold text-slate-500">Chỉ số</Text>
-              <Text className="text-xs font-semibold text-slate-500">Giá trị đo / Dải tham chiếu</Text>
+              <Text className="flex-1 text-xs font-semibold text-slate-500">{t('recordDetail.table.metric')}</Text>
+              <Text className="text-xs font-semibold text-slate-500">{t('recordDetail.table.value')} / {t('recordDetail.table.referenceRange')}</Text>
             </View>
             {HRV_TABLE_ROWS.map((row, idx) => {
               const value = features[row.key];
@@ -164,7 +166,7 @@ export default function HealthRecordDetailScreen() {
         <View className="flex-row items-center justify-between pt-3 border-t border-slate-200">
           <View className="flex-row items-center" style={{ gap: 6 }}>
             <FileText size={13} color="#64748B" />
-            <Text className="text-xs text-slate-500">Kích thước: {sizeKb ?? '--'} KB</Text>
+            <Text className="text-xs text-slate-500">{t('recordDetail.fileSize', { size: sizeKb ?? '--' })}</Text>
           </View>
           <Pressable
             onPress={handleDownload}
@@ -173,7 +175,7 @@ export default function HealthRecordDetailScreen() {
             style={{ gap: 6, opacity: downloading ? 0.6 : 1 }}
           >
             {downloading ? <ActivityIndicator size="small" color="#0D6EFD" /> : <Download size={14} color="#334155" />}
-            <Text className="text-xs font-semibold text-slate-700">{downloading ? 'Đang tải...' : 'Tải CSV gốc'}</Text>
+            <Text className="text-xs font-semibold text-slate-700">{downloading ? t('recordDetail.downloading') : t('recordDetail.downloadCsv')}</Text>
           </Pressable>
         </View>
       </View>
@@ -190,17 +192,17 @@ export default function HealthRecordDetailScreen() {
               onPress={() => (router.canGoBack() ? router.back() : router.replace('/history' as any))}
               className="w-10 h-10 rounded-full bg-white border border-slate-100 items-center justify-center active:opacity-80"
               style={shadow}
-              aria-label="Quay lại"
+              aria-label={t('common:actions.back')}
             >
               <ArrowLeft color="#0B1329" size={20} strokeWidth={2.4} />
             </Pressable>
-            <Text className="text-[22px] font-extrabold text-[#0B1329] tracking-tight">Chi tiết kết quả</Text>
+            <Text className="text-[22px] font-extrabold text-[#0B1329] tracking-tight">{t('recordDetail.screenTitle')}</Text>
           </View>
           <Pressable
             onPress={() => refetch()}
             className="w-10 h-10 rounded-full bg-white border border-slate-100 items-center justify-center active:opacity-80"
             style={shadow}
-            aria-label="Làm mới"
+            aria-label={t('common:actions.refresh')}
           >
             {isFetching ? <ActivityIndicator size="small" color="#0D6EFD" /> : <RefreshCw color="#64748B" size={17} strokeWidth={2} />}
           </Pressable>

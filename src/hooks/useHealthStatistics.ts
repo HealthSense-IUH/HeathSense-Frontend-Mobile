@@ -3,21 +3,16 @@ import { getHealthStatisticsApi } from '@/services/health-records';
 import { HealthStatisticsResponse } from '@/types/health-records';
 import { QUERY_KEYS } from '@/constants/queryKeys';
 
-type FilterType = 'Ngày' | 'Tuần' | 'Tháng' | 'Năm';
+/** Kỳ thống kê — mã gửi thẳng lên API; nhãn hiển thị lấy qua t('health:analysis.filter.<code>'). */
+export type StatisticsPeriod = 'DAY' | 'WEEK' | 'MONTH' | 'YEAR';
+export const STATISTICS_PERIODS: StatisticsPeriod[] = ['DAY', 'WEEK', 'MONTH', 'YEAR'];
 
-export const useHealthStatistics = (filter: FilterType, referenceDate: Date) => {
-  
-  let period = 'YEAR';
-  switch (filter) {
-    case 'Ngày': period = 'DAY'; break;
-    case 'Tuần': period = 'WEEK'; break;
-    case 'Tháng': period = 'MONTH'; break;
-    case 'Năm': period = 'YEAR'; break;
-  }
+export const useHealthStatistics = (filter: StatisticsPeriod, referenceDate: Date) => {
+  const period: StatisticsPeriod = filter;
 
   const formattedDate = referenceDate.toISOString();
   const dateKey = formattedDate.split('T')[0];
-  
+
   let timezone = 'UTC';
   try {
     if (typeof Intl !== 'undefined' && Intl.DateTimeFormat) {

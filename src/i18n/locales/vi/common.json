@@ -1,0 +1,73 @@
+{
+  "appName": "HealthSense",
+  "language": {
+    "label": "Ngôn ngữ",
+    "vi": "Tiếng Việt",
+    "en": "English",
+    "switchTo": "Đổi sang {{language}}"
+  },
+  "actions": {
+    "close": "Đóng",
+    "retry": "Thử lại",
+    "refresh": "Làm mới",
+    "back": "Quay lại",
+    "prev": "Trước",
+    "next": "Sau",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "confirm": "Xác nhận",
+    "done": "Hoàn tất",
+    "viewAll": "Xem tất cả",
+    "viewDetails": "Xem chi tiết",
+    "details": "Chi tiết",
+    "search": "Tìm kiếm",
+    "clearFilters": "Xóa bộ lọc",
+    "later": "Để sau",
+    "no": "Không",
+    "yes": "Có"
+  },
+  "state": {
+    "loading": "Đang tải...",
+    "loadError": "Lỗi tải dữ liệu. Vui lòng thử lại.",
+    "notAvailable": "--",
+    "noData": "Chưa có dữ liệu",
+    "notUpdated": "Chưa cập nhật",
+    "unknown": "Không xác định"
+  },
+  "pagination": {
+    "pageOf": "Trang {{page}} / {{total}}",
+    "pageOfWithCount": "Trang {{page}} / {{total}} · {{count}} {{unit}}",
+    "records": "bản ghi",
+    "orders": "đơn",
+    "entries": "biến động",
+    "sessions": "phiên"
+  },
+  "units": {
+    "bpm": "BPM",
+    "ms": "ms",
+    "percent": "%",
+    "kcal": "kcal",
+    "steps": "bước",
+    "times": "lần",
+    "credits": "lượt",
+    "days": "ngày",
+    "minutes": "phút",
+    "grams": "g"
+  },
+  "date": {
+    "today": "Hôm nay",
+    "yesterday": "Hôm qua"
+  },
+  "tabs": {
+    "home": "Trang chủ",
+    "history": "Lịch sử đo",
+    "consultation": "Tư vấn",
+    "settings": "Cài đặt",
+    "measure": "Đo tầm soát rung nhĩ"
+  },
+  "error": {
+    "title": "Lỗi",
+    "generic": "Đã xảy ra lỗi. Vui lòng thử lại sau.",
+    "server": "Hệ thống đang gặp sự cố xử lý dữ liệu từ máy chủ. Vui lòng thử lại sau."
+  }
+}

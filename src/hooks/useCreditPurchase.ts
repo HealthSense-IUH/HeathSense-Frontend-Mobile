@@ -3,6 +3,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { creditsApi } from '@/services/credits.service';
 import { generateCreditIdempotencyKey } from '@/constants/credits';
 import { readCreditsError } from './useCreditsData';
+import i18n from '@/i18n';
 import type { CreditOrderDetail, CreditPackage } from '@/types/credits';
 
 /** Giữ Idempotency-Key của lần mua chưa xong để thử lại cùng mã (không tạo trùng đơn). */
@@ -77,8 +78,8 @@ export function useCreditPurchase() {
   }, []);
 
   const executePurchase = useCallback(async (): Promise<PurchaseOutcome> => {
-    if (!selectedPackage || !idempotencyKey) return { kind: 'error', message: 'Thiếu thông tin gói hoặc phiên đăng nhập.' };
-    if (inFlightRef.current) return { kind: 'error', message: 'Giao dịch đang được xử lý.' };
+    if (!selectedPackage || !idempotencyKey) return { kind: 'error', message: i18n.t('credits:purchase.errors.missingInfo') };
+    if (inFlightRef.current) return { kind: 'error', message: i18n.t('credits:purchase.errors.inFlight') };
     inFlightRef.current = true;
     setIsSubmitting(true);
     setLastError(null);
@@ -96,7 +97,7 @@ export function useCreditPurchase() {
       if (order.status === 'REQUIRES_REVIEW') {
         pendingIntents.delete(selectedPackage.id);
         setHasPendingRetry(false);
-        setLastError('Giao dịch đã được ghi nhận và đang được hệ thống kiểm tra.');
+        setLastError(i18n.t('credits:purchase.errors.requiresReview'));
         return { kind: 'review', detail: result };
       }
 
@@ -104,12 +105,12 @@ export function useCreditPurchase() {
         if (payment.status === 'CREATING' || !payment.checkoutUrl) {
           setHasPendingRetry(true);
           setPendingOrder(result);
-          setLastError('Giao dịch đang được khởi tạo. Vui lòng kiểm tra lại sau.');
+          setLastError(i18n.t('credits:purchase.errors.creatingNotice'));
           return { kind: 'pending', detail: result };
         }
         if (!payment.checkoutUrl.startsWith('https://')) {
-          setLastError('Liên kết thanh toán từ cổng thanh toán không an toàn (yêu cầu HTTPS).');
-          return { kind: 'error', message: 'Liên kết thanh toán không an toàn.' };
+          setLastError(i18n.t('credits:purchase.errors.insecureCheckoutUrl'));
+          return { kind: 'error', message: i18n.t('credits:purchase.errors.insecureLink') };
         }
         pendingIntents.delete(selectedPackage.id);
         setHasPendingRetry(false);
@@ -126,22 +127,22 @@ export function useCreditPurchase() {
       setPendingOrder(result);
       return { kind: 'pending', detail: result };
     } catch (err) {
-      const parsed = readCreditsError(err, 'Giao dịch mua không thành công. Vui lòng thử lại.');
+      const parsed = readCreditsError(err, i18n.t('credits:purchase.errors.generic'));
       let message = parsed.message;
       if (parsed.status === 503 || parsed.code === 4108) {
         setIsFeatureDisabled(true);
-        message = 'Chức năng mua lượt tư vấn tạm thời chưa khả dụng.';
+        message = i18n.t('credits:purchase.errors.featureDisabled');
       } else if (parsed.code === 4103) {
-        message = 'Xung đột khóa giao dịch (Idempotency). Vui lòng thử lại với cùng gói hoặc kiểm tra lại lịch sử đơn.';
+        message = i18n.t('credits:purchase.errors.idempotencyConflict');
       } else if (parsed.code === 4105) {
-        message = 'Gói lượt tư vấn đã ngừng mở bán. Vui lòng tải lại danh sách gói.';
+        message = i18n.t('credits:purchase.errors.packageUnavailable');
       } else if (parsed.code === 4020) {
-        message = 'Cổng thanh toán PayOS chưa được cấu hình trên hệ thống.';
+        message = i18n.t('credits:purchase.errors.payosNotConfigured');
       } else if (parsed.code === 4021 || parsed.status === 502) {
-        message = 'Cổng thanh toán PayOS không phản hồi hoặc từ chối thao tác. Vui lòng thử lại sau.';
+        message = i18n.t('credits:purchase.errors.payosUnavailable');
         setHasPendingRetry(true);
       } else if (parsed.status == null || parsed.status >= 500) {
-        message = 'Không thể kết nối tới máy chủ. Trạng thái giao dịch chưa được xác nhận; vui lòng bấm Thử lại để kiểm tra với cùng mã yêu cầu.';
+        message = i18n.t('credits:purchase.errors.network');
         setHasPendingRetry(true);
       }
       setLastError(message);

@@ -1,11 +1,13 @@
 import React from 'react';
 import { Pressable, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { ArrowRight, Sparkles } from 'lucide-react-native';
 import { DIET_ADVICE_STYLE, GUIDANCE_FALLBACK, GUIDANCE_STYLE, NUTRIENT_SHORT_LABEL, formatNutrientAmount } from '@/constants/nutrition';
 import type { DietAdvice, Food, GuidanceType, NutrientCode, NutrientValue } from '@/types/nutrition';
 
 /** Huy hiệu khuyến nghị tim mạch của một món (Nên ưu tiên / Cần lưu ý / Nên hạn chế). */
 export function GuidanceBadge({ type, size = 'sm' }: { type?: GuidanceType | null; size?: 'sm' | 'md' }) {
+  useTranslation('nutrition'); // nhãn là getter i18n: đăng ký để re-render khi đổi ngôn ngữ
   const style = (type && GUIDANCE_STYLE[type]) || GUIDANCE_FALLBACK;
   return (
     <View className={`flex-row items-center rounded-full border ${size === 'sm' ? 'px-2 py-0.5' : 'px-2.5 py-1'}`} style={{ gap: 4, backgroundColor: style.bg, borderColor: style.border }}>
@@ -17,6 +19,7 @@ export function GuidanceBadge({ type, size = 'sm' }: { type?: GuidanceType | nul
 
 /** Nhãn màu theo đơn ăn uống bác sĩ kê (xanh / trung tính / vàng / đỏ / xám). */
 export function DietAdviceBadge({ advice }: { advice?: DietAdvice | null }) {
+  useTranslation('nutrition');
   if (!advice) return null;
   const style = DIET_ADVICE_STYLE[advice.level] || DIET_ADVICE_STYLE.UNKNOWN;
   return (
@@ -29,27 +32,24 @@ export function DietAdviceBadge({ advice }: { advice?: DietAdvice | null }) {
 
 /** Hộp đánh giá chi tiết trên màn một món: màu, từng lý do và ghi chú khi chưa có đơn riêng. */
 export function DietAdviceNote({ advice }: { advice?: DietAdvice | null }) {
+  const { t } = useTranslation('nutrition');
   if (!advice) return null;
   const style = DIET_ADVICE_STYLE[advice.level] || DIET_ADVICE_STYLE.UNKNOWN;
   return (
     <View className="rounded-2xl border p-4" style={{ gap: 6, backgroundColor: style.bg, borderColor: style.border }}>
       <View className="flex-row items-center" style={{ gap: 6 }}>
         <style.Icon size={16} color={style.text} />
-        <Text className="text-sm font-semibold text-slate-900 flex-1">{style.label} theo đơn ăn uống của bác sĩ</Text>
+        <Text className="text-sm font-semibold text-slate-900 flex-1">{t('dietAdvice.noteTitle', { level: style.label })}</Text>
       </View>
       {advice.reasons.length > 0 ? (
         advice.reasons.map((r) => (
           <Text key={r.code} className="text-xs text-slate-700 leading-5">• {r.message}</Text>
         ))
       ) : (
-        <Text className="text-xs text-slate-700 leading-5">
-          Không có điểm nào cần lưu ý, nhưng cũng chưa có điểm nổi bật cho nhịp tim (kali cao hơn natri, hoặc giàu magie mà ít muối).
-        </Text>
+        <Text className="text-xs text-slate-700 leading-5">{t('dietAdvice.noReasons')}</Text>
       )}
       {!advice.personalized ? (
-        <Text className="text-[11px] text-slate-500 leading-4">
-          Bác sĩ chưa kê đơn ăn uống riêng cho bạn. Khi bác sĩ kê đơn trong buổi tư vấn, đánh giá sẽ thêm các điều bác sĩ dặn.
-        </Text>
+        <Text className="text-[11px] text-slate-500 leading-4">{t('dietAdvice.notPersonalized')}</Text>
       ) : null}
     </View>
   );
@@ -57,6 +57,7 @@ export function DietAdviceNote({ advice }: { advice?: DietAdvice | null }) {
 
 /** Lưới các chất nổi bật của món (theo highlightNutrientCodes, không có thì lấy chất chính). */
 export function NutrientHighlights({ nutrients, highlightCodes }: { nutrients: NutrientValue[]; highlightCodes?: NutrientCode[] }) {
+  useTranslation('nutrition');
   const shown =
     highlightCodes && highlightCodes.length > 0
       ? highlightCodes.map((code) => nutrients.find((n) => n.nutrientCode === code)).filter((n): n is NutrientValue => Boolean(n))
@@ -78,6 +79,7 @@ export function NutrientHighlights({ nutrients, highlightCodes }: { nutrients: N
 
 /** Thẻ một món có khuyến nghị (giống web FoodCard). */
 export function FoodCard({ food, onPress }: { food: Food; onPress: () => void }) {
+  const { t } = useTranslation('nutrition');
   const subtitle = food.foodName !== food.foodNameSpecific ? food.foodName : null;
   return (
     <Pressable onPress={onPress} className="rounded-2xl border border-slate-200/80 bg-white p-4 active:opacity-80" style={{ gap: 8 }}>
@@ -96,14 +98,14 @@ export function FoodCard({ food, onPress }: { food: Food; onPress: () => void })
       <View>
         <View className="flex-row items-center mb-1.5" style={{ gap: 4 }}>
           <Sparkles size={11} color="#0D6EFD" />
-          <Text className="text-[11px] text-slate-500 font-medium">Thành phần dinh dưỡng nổi bật (trên 100g):</Text>
+          <Text className="text-[11px] text-slate-500 font-medium">{t('foodCard.highlights')}</Text>
         </View>
         <NutrientHighlights nutrients={food.nutrients} highlightCodes={food.highlightNutrientCodes} />
       </View>
       <View className="pt-2 border-t border-slate-100 flex-row items-center justify-between">
-        <Text className="text-[11px] text-slate-500">Chuẩn 100g</Text>
+        <Text className="text-[11px] text-slate-500">{t('foodCard.per100g')}</Text>
         <View className="flex-row items-center" style={{ gap: 4 }}>
-          <Text className="text-xs font-medium text-primary">Xem chi tiết</Text>
+          <Text className="text-xs font-medium text-primary">{t('foodCard.viewDetail')}</Text>
           <ArrowRight size={13} color="#0D6EFD" />
         </View>
       </View>

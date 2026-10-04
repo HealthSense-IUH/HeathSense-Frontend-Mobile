@@ -22,10 +22,13 @@ import { ExerciseIcon } from '@/components/features/workout/ExerciseIcon';
 import { CreateExerciseModal } from '@/components/features/workout/CreateExerciseModal';
 import { useWorkoutCatalogStore } from '@/services/workout/workoutCatalogStore';
 import { Exercise } from '@/services/workout/workoutTypes';
+import { getExerciseName } from '@/services/workout/workoutI18n';
 import { THEME } from '@/constants/theme';
+import { useTranslation } from 'react-i18next';
 
 export default function WorkoutCatalogScreen() {
   const router = useRouter();
+  const { t } = useTranslation('workout');
 
   const exercises = useWorkoutCatalogStore((state) => state.exercises);
   const favoriteIds = useWorkoutCatalogStore((state) => state.favoriteIds);
@@ -61,7 +64,7 @@ export default function WorkoutCatalogScreen() {
 
   return (
     <ScreenWrapper
-      title="Bài tập thể dục của bạn"
+      title={t('catalog.title')}
       statusBarStyle="dark"
       className="bg-slate-50"
       headerLeft={
@@ -94,7 +97,7 @@ export default function WorkoutCatalogScreen() {
         {favoriteExercises.length > 0 && (
           <View className="mb-6">
             <Text className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2.5 px-1">
-              Yêu thích
+              {t('catalog.favorites')}
             </Text>
 
             <View className="bg-white rounded-3xl border border-slate-200/80 overflow-hidden shadow-sm">
@@ -121,7 +124,7 @@ export default function WorkoutCatalogScreen() {
                         className="text-base font-semibold text-slate-900 flex-1"
                         numberOfLines={1}
                       >
-                        {exercise.name}
+                        {getExerciseName(exercise)}
                       </Text>
                     </View>
 
@@ -149,7 +152,7 @@ export default function WorkoutCatalogScreen() {
         {/* SECTION 2: BÀI TẬP KHÁC (Light Theme matching Image 2) */}
         <View className="mb-8">
           <Text className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2.5 px-1">
-            Bài tập khác
+            {t('catalog.others')}
           </Text>
 
           <View className="bg-white rounded-3xl border border-slate-200/80 overflow-hidden shadow-sm">
@@ -176,7 +179,7 @@ export default function WorkoutCatalogScreen() {
                       className="text-base font-medium text-slate-800 flex-1"
                       numberOfLines={1}
                     >
-                      {exercise.name}
+                      {getExerciseName(exercise)}
                     </Text>
                   </View>
 
@@ -233,7 +236,7 @@ export default function WorkoutCatalogScreen() {
             onPress={(e) => e.stopPropagation()}
           >
             <Text className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-4 px-1">
-              Thêm bài tập thể dục
+              {t('catalog.addMenuTitle')}
             </Text>
 
             <TouchableOpacity
@@ -246,7 +249,7 @@ export default function WorkoutCatalogScreen() {
             >
               <ListOrdered color="#10B981" size={22} />
               <Text className="text-slate-800 font-semibold text-base">
-                Chọn từ danh sách bài tập
+                {t('catalog.chooseFromList')}
               </Text>
             </TouchableOpacity>
 
@@ -260,7 +263,7 @@ export default function WorkoutCatalogScreen() {
             >
               <PlusCircle color="#0EA5E9" size={22} />
               <Text className="text-slate-800 font-semibold text-base">
-                Tạo bài tập thể dục mới
+                {t('catalog.createExercise')}
               </Text>
             </TouchableOpacity>
 
@@ -274,7 +277,7 @@ export default function WorkoutCatalogScreen() {
             >
               <Timer color="#F59E0B" size={22} />
               <Text className="text-slate-800 font-semibold text-base">
-                Tạo lịch trình tập luyện
+                {t('catalog.createRoutine')}
               </Text>
             </TouchableOpacity>
 

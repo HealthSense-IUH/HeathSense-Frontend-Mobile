@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { consultationApi } from '@/services/consultation.service';
 import { creditsApi } from '@/services/credits.service';
 import { CONSULTATION_CONFIRM_ERROR_MESSAGES } from '@/constants/credits';
+import i18n from '@/i18n';
 import type {
   ConsultationQueueStatisticsResponse,
   ConsultationRequestItem,
@@ -35,7 +36,7 @@ export function readError(error: unknown, fallback: string) {
   if (typeof data === 'string' && data.trim()) return data;
   const serverMsg = typeof data === 'object' && data ? data.message : undefined;
   if (serverMsg === 'Uncategorized error') {
-    return 'Hệ thống đang gặp sự cố xử lý dữ liệu từ máy chủ. Vui lòng thử lại sau.';
+    return i18n.t('common:error.server');
   }
   return serverMsg || err?.message || fallback;
 }
@@ -171,7 +172,7 @@ export function useConsultationsLogic() {
       }
 
       if (reqRes.status === 'rejected' && sessRes.status === 'rejected') {
-        setAlert({ type: 'error', text: readError(reqRes.reason, 'Không thể tải dữ liệu tư vấn.') });
+        setAlert({ type: 'error', text: readError(reqRes.reason, i18n.t('consultation:logic.alerts.loadDataFailed')) });
       }
     } finally {
       if (!silent) setLoading(false);
@@ -197,20 +198,20 @@ export function useConsultationsLogic() {
     setAlert(null);
     setInsufficientCredits(false);
     if (!requestForm.reasonForCare.trim()) {
-      setAlert({ type: 'error', text: 'Vui lòng nhập lý do đăng ký chăm sóc.' });
+      setAlert({ type: 'error', text: i18n.t('consultation:logic.alerts.reasonForCareRequired') });
       return 'error';
     }
     if (!requestForm.currentConcern.trim()) {
-      setAlert({ type: 'error', text: 'Vui lòng nhập triệu chứng & vấn đề lo ngại hiện tại.' });
+      setAlert({ type: 'error', text: i18n.t('consultation:logic.alerts.currentConcernRequired') });
       return 'error';
     }
     if (healthRecords.length === 0) {
-      setAlert({ type: 'error', text: 'Bạn cần thực hiện đo điện tim trước khi gửi yêu cầu tư vấn.' });
+      setAlert({ type: 'error', text: i18n.t('consultation:logic.alerts.ecgRequired') });
       return 'error';
     }
     if (wallet && wallet.available <= 0) {
       setInsufficientCredits(true);
-      setAlert({ type: 'error', text: 'Bạn không có đủ lượt tư vấn khả dụng để vào hàng đợi.' });
+      setAlert({ type: 'error', text: i18n.t('consultation:logic.alerts.noCreditsForQueue') });
       return 'error';
     }
     if (hasActiveQueue(currentQueueState)) return 'conflict';
@@ -225,7 +226,7 @@ export function useConsultationsLogic() {
       const created = unwrap<ConsultationRequestItem>(res);
       setRequestForm(EMPTY_FORM);
       const queueNumber = created?.queueNumber ? ` #${String(created.queueNumber).padStart(3, '0')}` : '';
-      setAlert({ type: 'success', text: `Đã vào hàng đợi tư vấn thành công. Số thứ tự của bạn:${queueNumber}.` });
+      setAlert({ type: 'success', text: i18n.t('consultation:logic.alerts.queueJoined', { queueNumber }) });
       await fetchCurrentQueueState();
       await loadData(true);
       return 'ok';
@@ -243,9 +244,9 @@ export function useConsultationsLogic() {
       const isInsufficient = status === 409 && (code === 4100 || msg.includes('lượt') || msg.includes('credit'));
       if (isInsufficient) {
         setInsufficientCredits(true);
-        setAlert({ type: 'error', text: 'Bạn chưa đủ lượt để xếp hàng tư vấn. Vui lòng nạp thêm lượt.' });
+        setAlert({ type: 'error', text: i18n.t('consultation:logic.alerts.insufficientCreditsForQueue') });
       } else {
-        setAlert({ type: 'error', text: readError(err, 'Không thể gửi yêu cầu tư vấn.') });
+        setAlert({ type: 'error', text: readError(err, i18n.t('consultation:logic.alerts.createRequestFailed')) });
       }
       return 'error';
     } finally {
@@ -261,7 +262,7 @@ export function useConsultationsLogic() {
     setAlert(null);
     try {
       const session = unwrap<ConsultationSessionItem>(await consultationApi.confirmQueueRequest(currentQueueState.requestId, { offerId }));
-      setAlert({ type: 'success', text: 'Đã xác nhận thành công. Phiên tư vấn đã được kích hoạt!' });
+      setAlert({ type: 'success', text: i18n.t('consultation:logic.alerts.queueConfirmed') });
       await fetchCurrentQueueState();
       await loadData(true);
       return session ?? null;
@@ -277,7 +278,7 @@ export function useConsultationsLogic() {
         setAlert({ type: 'error', text: CONSULTATION_CONFIRM_ERROR_MESSAGES[code] });
         if (code === 4004) await loadData(true);
       } else {
-        setAlert({ type: 'error', text: readError(err, 'Không thể xác nhận lượt tư vấn.') });
+        setAlert({ type: 'error', text: readError(err, i18n.t('consultation:logic.alerts.confirmQueueFailed')) });
       }
       await fetchCurrentQueueState();
       return null;
@@ -293,12 +294,12 @@ export function useConsultationsLogic() {
     setAlert(null);
     try {
       await consultationApi.cancelRequest(requestId);
-      setAlert({ type: 'success', text: 'Đã rời khỏi hàng đợi tư vấn.' });
+      setAlert({ type: 'success', text: i18n.t('consultation:logic.alerts.leftQueue') });
       setCurrentQueueState(null);
       await loadData(true);
       return true;
     } catch (err) {
-      setAlert({ type: 'error', text: readError(err, 'Không thể hủy lượt chờ tư vấn.') });
+      setAlert({ type: 'error', text: readError(err, i18n.t('consultation:logic.alerts.cancelQueueFailed')) });
       await fetchCurrentQueueState();
       return false;
     } finally {
@@ -310,10 +311,10 @@ export function useConsultationsLogic() {
     setActionLoading(true);
     try {
       await consultationApi.shareHealthRecord(sessionId, recordId);
-      setAlert({ type: 'success', text: `Hồ sơ #${recordId} đã được cấp quyền cho bác sĩ phụ trách xem xét.` });
+      setAlert({ type: 'success', text: i18n.t('consultation:shareHealthRecordDialog.toast.successDescription', { id: recordId }) });
       return true;
     } catch (err) {
-      setAlert({ type: 'error', text: readError(err, 'Không thể chia sẻ hồ sơ lúc này.') });
+      setAlert({ type: 'error', text: readError(err, i18n.t('consultation:shareHealthRecordDialog.toast.shareErrorDescription')) });
       return false;
     } finally {
       setActionLoading(false);
@@ -325,11 +326,11 @@ export function useConsultationsLogic() {
     setActionLoading(true);
     try {
       await consultationApi.requestRenewal(sessionId, {});
-      setAlert({ type: 'success', text: 'Yêu cầu gia hạn của bạn đã được gửi đến Điều phối viên chăm sóc.' });
+      setAlert({ type: 'success', text: i18n.t('consultation:renewalDialog.toast.requestSuccessDescription') });
       await loadData(true);
       return true;
     } catch (err) {
-      setAlert({ type: 'error', text: readError(err, 'Không thể gửi yêu cầu gia hạn vào lúc này.') });
+      setAlert({ type: 'error', text: readError(err, i18n.t('consultation:renewalDialog.toast.requestErrorDescription')) });
       return false;
     } finally {
       setActionLoading(false);
@@ -340,11 +341,11 @@ export function useConsultationsLogic() {
     setActionLoading(true);
     try {
       await consultationApi.acceptRenewalAgreement(renewalId, { agreementId: Number(agreementId), accepted: true });
-      setAlert({ type: 'success', text: 'Bạn đã chấp nhận thỏa thuận gia hạn. Vui lòng tiến hành thanh toán để áp dụng thời hạn mới.' });
+      setAlert({ type: 'success', text: i18n.t('consultation:renewalAgreementDialog.toast.acceptSuccessDescription') });
       await loadData(true);
       return true;
     } catch (err) {
-      setAlert({ type: 'error', text: readError(err, 'Không thể xác nhận thỏa thuận gia hạn lúc này.') });
+      setAlert({ type: 'error', text: readError(err, i18n.t('consultation:renewalAgreementDialog.toast.acceptErrorDescription')) });
       return false;
     } finally {
       setActionLoading(false);
@@ -361,10 +362,10 @@ export function useConsultationsLogic() {
         await loadData(true);
         return true;
       }
-      setAlert({ type: 'error', text: 'Không thể tạo liên kết thanh toán PayOS.' });
+      setAlert({ type: 'error', text: i18n.t('consultation:renewalDialog.toast.paymentLinkErrorDescription') });
       return false;
     } catch (err) {
-      setAlert({ type: 'error', text: readError(err, 'Không thể tạo giao dịch thanh toán gia hạn.') });
+      setAlert({ type: 'error', text: readError(err, i18n.t('consultation:renewalDialog.toast.paymentInitErrorDescription')) });
       return false;
     } finally {
       setActionLoading(false);
@@ -375,11 +376,11 @@ export function useConsultationsLogic() {
     setActionLoading(true);
     try {
       await consultationApi.cancelRenewal(renewalId);
-      setAlert({ type: 'success', text: 'Yêu cầu gia hạn đã được hủy. Thời hạn phiên chăm sóc hiện tại giữ nguyên.' });
+      setAlert({ type: 'success', text: i18n.t('consultation:renewalDialog.toast.cancelSuccessDescription') });
       await loadData(true);
       return true;
     } catch (err) {
-      setAlert({ type: 'error', text: readError(err, 'Không thể hủy yêu cầu gia hạn lúc này.') });
+      setAlert({ type: 'error', text: readError(err, i18n.t('consultation:renewalDialog.toast.cancelErrorDescription')) });
       return false;
     } finally {
       setActionLoading(false);

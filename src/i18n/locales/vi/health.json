@@ -1,0 +1,383 @@
+{
+  "predictionLabel": {
+    "normal": {
+      "label": "Bình thường",
+      "advice": "Tín hiệu nhịp tim ổn định và nằm trong dải sinh lý bình thường. Hãy duy trì theo dõi sức khỏe định kỳ."
+    },
+    "uncertain": {
+      "label": "Chưa rõ",
+      "advice": "Dữ liệu có một số đoạn nhiễu nhẹ. Kết quả mang tính tham khảo, nên đo lại khi ngồi yên tĩnh."
+    },
+    "afibSuspected": {
+      "label": "Nghi ngờ AFib",
+      "advice": "Có dấu hiệu loạn nhịp hoặc biến thiên khoảng cách R-R bất thường nhẹ. Khuyến khích đo lại khi nghỉ ngơi."
+    },
+    "afib": {
+      "label": "Cảnh báo AFib",
+      "advice": "AI phát hiện biến thiên nhịp tim có tính chất rung nhĩ. Khuyến nghị liên hệ bác sĩ chuyên khoa tim mạch để được chẩn đoán."
+    },
+    "processing": {
+      "label": "Đang phân tích",
+      "short": "Đang xử lý",
+      "advice": "Dữ liệu đang được phân tích qua mô hình AI. Vui lòng đợi trong giây lát..."
+    },
+    "failed": {
+      "label": "Lỗi phân tích",
+      "advice": "Tín hiệu đo quá ngắn hoặc chứa nhiều nhiễu động. Khuyến nghị thực hiện đo lại trong trạng thái nghỉ ngơi."
+    },
+    "unknown": {
+      "label": "Chưa có kết luận",
+      "advice": "Bản ghi đang chờ đồng bộ hóa dữ liệu."
+    }
+  },
+  "greeting": {
+    "fallbackName": "Bạn",
+    "morning": {
+      "text": "Chào buổi sáng",
+      "subtext": "Chúc bạn một ngày mới dồi dào năng lượng và luôn có một trái tim khỏe mạnh."
+    },
+    "afternoon": {
+      "text": "Chào buổi chiều",
+      "subtext": "Hãy duy trì năng lượng tích cực và lắng nghe nhịp tim sinh hiệu của bạn nhé."
+    },
+    "evening": {
+      "text": "Chào buổi tối",
+      "subtext": "Thư giãn tinh thần, chăm sóc giấc ngủ và kiểm tra sự ổn định của nhịp tim."
+    }
+  },
+  "dashboard": {
+    "title": "Tổng quan sức khỏe",
+    "description": "Chỉ số tim mạch mới nhất và các lần tầm soát rung nhĩ"
+  },
+  "memberDashboard": {
+    "latestMeasurement": "Lần đo gần nhất",
+    "afibProbability": "Khả năng bị rung nhĩ",
+    "noAssessment": "Chưa có đánh giá",
+    "hrvRmssd": "Biến thiên nhịp (RMSSD)",
+    "sdnn": "SDNN: {{value}}",
+    "totalScreenings": "Tổng lượt tầm soát",
+    "screeningsBreakdown": "{{normal}} bình thường • {{warning}} cảnh báo",
+    "recent": {
+      "title": "Lịch sử Đo Gần Đây",
+      "description": "5 lần đo mới nhất của bạn trên hệ thống",
+      "empty": "Chưa có bản ghi đo nào. Hãy đo bằng thiết bị HealthSense để bắt đầu!"
+    }
+  },
+  "home": {
+    "ble": {
+      "connected": "Đã kết nối",
+      "waiting": "Chờ kết nối",
+      "sectionLabel": "Kết nối BLE",
+      "defaultDeviceName": "Thiết bị đeo",
+      "deviceConnected": "{{name}}: Đã kết nối",
+      "reconnecting": "Đang kết nối lại...",
+      "notPaired": "Chưa ghép đôi thiết bị",
+      "receiving": "Đang nhận dữ liệu nhịp tim & SpO2",
+      "tapToScan": "Chạm vào đây để quét & kết nối ...",
+      "change": "Đổi",
+      "connect": "Kết nối"
+    },
+    "afibSection": "Tầm soát Rung nhĩ (AFib)",
+    "todayMetrics": {
+      "title": "Chỉ số hôm nay",
+      "currentHeartRate": "Nhịp tim hiện tại",
+      "spo2": "Nồng độ Oxy (SpO2)",
+      "steps": "Số bước chân",
+      "calories": "Calo tiêu thụ"
+    },
+    "nutrition": {
+      "title": "Ăn uống & Dinh dưỡng",
+      "description": "Gợi ý thực phẩm tốt cho tim mạch và đơn ăn uống"
+    },
+    "workout": {
+      "title": "Trung tâm luyện tập",
+      "description": "Bắt đầu buổi tập, theo dõi nhịp tim & calo"
+    }
+  },
+  "screening": {
+    "understood": "Đã hiểu",
+    "workoutPaused": {
+      "title": "Tạm dừng đo Rung nhĩ",
+      "cardMessage": "Bạn đang trong phiên tập luyện thể dục. Để đảm bảo độ chính xác y khoa và tránh cảnh báo giả do rung lắc cơ bắp, chức năng đo AFib tạm dừng trong lúc tập. Vui lòng hoàn thành buổi tập trước khi đo.",
+      "measureMessage": "Chức năng đo Rung nhĩ (AFib) tạm dừng trong lúc vận động để đảm bảo độ chính xác y khoa và tránh cảnh báo sai. Vui lòng hoàn thành buổi tập thể dục trước khi đo."
+    },
+    "cooldown": {
+      "title": "Thời gian phục hồi tim (10 phút)",
+      "message": "Bạn vừa hoàn thành buổi tập thể dục. Để nhịp tim ổn định và tránh cảnh báo sai do nhịp xoang phục hồi sau gắng sức, vui lòng ngồi nghỉ tĩnh thêm {{time}} trước khi bắt đầu đo tầm soát Rung nhĩ (AFib)."
+    },
+    "card": {
+      "badge": {
+        "cooldown": "Hồi phục tim: {{time}}",
+        "workout": "Đang tập luyện thể thao",
+        "default": "Chẩn đoán lâm sàng 60s"
+      },
+      "title": "Đo Rung nhĩ Chủ động",
+      "latest": "Lần đo gần nhất: {{label}}",
+      "cooldownHint": "Vừa kết thúc bài tập. Để nhịp tim ổn định và tránh cảnh báo sai, vui lòng nghỉ tĩnh thêm {{time}} trước khi đo.",
+      "description": "Chủ động ghi nhận tín hiệu quang học PPG 100Hz và phân tích AI để phát hiện sớm các dấu hiệu rung nhĩ và bất thường nhịp tim.",
+      "cta": {
+        "cooldown": "Hồi phục: {{time}}",
+        "workout": "Tạm ngắt khi tập",
+        "measureAgain": "Thực hiện đo lại",
+        "start": "Bắt đầu đo ngay"
+      },
+      "hint": {
+        "cooldown": "Nghỉ tĩnh 10p",
+        "workout": "Vận động active",
+        "default": "Quy trình 60s"
+      }
+    }
+  },
+  "measure": {
+    "title": "Tầm soát Rung nhĩ",
+    "settingsAria": "Cài đặt đo lâm sàng",
+    "protocolBadge": "Quy trình chuẩn y khoa AFib 60s",
+    "protocolSteps": "1. Ngồi yên tĩnh trên ghế tựa lưng thoải mái.\n2. Giữ cánh tay đặt ngang tầm tim.\n3. Không cử động hoặc nói chuyện trong suốt 60 giây đo.\n4. Cảm biến PPG sẽ tự động thu thập tín hiệu quang học và gửi về mô hình AI chẩn đoán.",
+    "instruction": "Đảm bảo giữ yên cánh tay và dây đeo vừa vặn với cổ tay trong suốt <b>60 giây đo</b>.",
+    "preparing": "Chuẩn bị",
+    "recording": "Đang thu thập",
+    "analyzing": "AI đang phân tích...",
+    "analyzingSub": "Xử lý tín hiệu PPG",
+    "ready": "Sẵn sàng đo",
+    "readySub": "Cảm biến PPG sạch",
+    "steps": {
+      "sitStill": "Ngồi yên tĩnh",
+      "armStill": "Tay không chuyển động",
+      "noTalking": "Không nói"
+    },
+    "stopAndAnalyze": "Dừng & Phân tích ngay",
+    "cta": {
+      "cooldown": "Hồi phục tim ({{time}})",
+      "workout": "Tạm ngắt khi đang tập luyện",
+      "processing": "Đang xử lý kết quả...",
+      "start": "Bắt đầu đo 60 giây"
+    },
+    "banner": {
+      "cooldown": "Đang trong 10 phút hồi phục tim ({{time}}). Vui lòng nghỉ tĩnh để tránh cảnh báo sai.",
+      "workout": "Bạn đang trong phiên tập luyện. Đo AFib bị tạm ngắt để tránh nhiễu do vận động.",
+      "notConnected": "Vui lòng kết nối đồng hồ BLE trong mục <link>Cài đặt</link> trước khi đo."
+    },
+    "processingData": "Đang xử lý dữ liệu...",
+    "uploadError": "Lỗi khi upload."
+  },
+  "afibHistory": {
+    "title": "Lịch sử đo",
+    "description": "Các lần đo chủ động và cảnh báo tầm soát từ AI",
+    "viewByDay": "Xem theo ngày",
+    "loading": "Đang tải lịch sử đo...",
+    "searchPlaceholder": "Tìm kiếm theo ngày / tên file...",
+    "filter": {
+      "all": "Tất cả trạng thái",
+      "normal": "Bình thường (An toàn)",
+      "warning": "Cảnh báo (Rung nhĩ)",
+      "processing": "Đang phân tích"
+    },
+    "legend": "Chú thích AI:",
+    "empty": {
+      "title": "Chưa có bản ghi đo nào",
+      "description": "Không tìm thấy bản ghi đo phù hợp với bộ lọc. Hãy đo bằng thiết bị HealthSense để bắt đầu tầm soát.",
+      "measureNow": "Đo ngay"
+    },
+    "card": {
+      "heartRate": "Nhịp tim: {{value}}",
+      "afibProbability": "Khả năng bị rung nhĩ: {{value}}%",
+      "file": "File: {{name}}"
+    }
+  },
+  "historyDates": {
+    "title": "Lịch đo theo ngày",
+    "empty": "Chưa có dữ liệu đo nào",
+    "year": "Năm {{year}}",
+    "dayTitle": "Ngày {{day}} Tháng {{month}}",
+    "subtitleToday": "Hôm nay • Bản ghi gần nhất",
+    "subtitleSaved": "Bản ghi đã lưu",
+    "hint": "Chọn một ngày để xem các lần đo trong ngày đó."
+  },
+  "heatmap": {
+    "months": {
+      "0": "Tháng 1",
+      "1": "Tháng 2",
+      "2": "Tháng 3",
+      "3": "Tháng 4",
+      "4": "Tháng 5",
+      "5": "Tháng 6",
+      "6": "Tháng 7",
+      "7": "Tháng 8",
+      "8": "Tháng 9",
+      "9": "Tháng 10",
+      "10": "Tháng 11",
+      "11": "Tháng 12"
+    },
+    "selected": {
+      "screenTitle": "Chi tiết theo ngày",
+      "title": "Các lần đo ngày {{date}}",
+      "count_one": "{{count}} lần đo",
+      "count_other": "{{count}} lần đo",
+      "loading": "Đang tải dữ liệu đo của ngày {{date}}...",
+      "empty": "Không tìm thấy bản ghi đo nào trong ngày này.",
+      "file": "File: {{name}}",
+      "heartRateLabel": "Nhịp tim:",
+      "afibProbabilityLabel": "Khả năng AFib:"
+    }
+  },
+  "recordDetail": {
+    "screenTitle": "Chi tiết kết quả",
+    "loading": "Đang tải kết quả đo...",
+    "notFound": "Không tìm thấy bản ghi đo.",
+    "title": "Chi tiết Kết quả Tầm soát Nhịp tim",
+    "measuredAt": "Thời gian đo: {{date}}",
+    "file": "File: {{name}}",
+    "aiConclusion": "Kết luận AI:",
+    "afibProbability": "Khả năng bị rung nhĩ",
+    "avgHeartRate": "Nhịp tim TB",
+    "lfHfRatio": "Tỷ lệ LF/HF",
+    "hrvTitle": "Các chỉ số Biến thiên Nhịp tim (HRV)",
+    "table": {
+      "metric": "Chỉ số",
+      "value": "Giá trị đo",
+      "referenceRange": "Dải tham chiếu"
+    },
+    "meaning": {
+      "meanNn": "Khoảng thời gian trung bình giữa 2 nhịp liên tiếp",
+      "sdnn": "Độ biến thiên tổng thể của hệ thần kinh tự chủ",
+      "rmssd": "Mức độ hoạt động thần kinh phó giao cảm (Vagal tone)",
+      "pnn50": "Tỷ lệ các cặp nhịp tim liên tiếp chênh lệch > 50ms",
+      "cv": "Hệ số biến thiên tương đối của nhịp tim",
+      "lf": "Năng lượng dải tần thấp (giao cảm và huyết áp)",
+      "hf": "Năng lượng dải tần cao (hô hấp và phó giao cảm)",
+      "lfHf": "Tỷ lệ cân bằng thần kinh giao cảm / phó giao cảm"
+    },
+    "fileSize": "Kích thước: {{size}} KB",
+    "downloadUrlNotFound": "Không tìm thấy đường dẫn tải file.",
+    "downloadUrlFailed": "Không thể lấy đường dẫn tải tệp.",
+    "downloading": "Đang tải...",
+    "downloadCsv": "Tải CSV gốc"
+  },
+  "measurementVisuals": {
+    "sqi": {
+      "validRatio": " • {{value}}% nhịp hợp lệ",
+      "good": "Chất lượng đo: Tốt{{ratio}}",
+      "poor": "Chất lượng đo: Kém — nên đo lại"
+    },
+    "tiles": {
+      "spo2Note": "Tham khảo (đo tại thiết bị)",
+      "respiratoryRate": "Nhịp thở",
+      "breathsPerMin": "lần/phút",
+      "respiratoryRateNote": "12 - 20 lần/phút",
+      "hrRange": "Nhịp tim min - max",
+      "hrRangeNote": "Trong phiên đo",
+      "perfusionIndex": "Chỉ số tưới máu (PI)",
+      "perfusionNote": "Thấp → đeo lỏng / tưới máu yếu",
+      "stressScore": "Điểm căng thẳng",
+      "stressNote": "Tham khảo (Baevsky SI)"
+    },
+    "wave": {
+      "title": "Sóng mạch (PPG) trong phiên đo",
+      "hint": "Mỗi đỉnh sóng là một nhịp tim. Sóng đều đặn → nhịp ổn định; sóng lộn xộn, biên độ thất thường → nhịp bất thường."
+    },
+    "poincare": {
+      "title": "Đồ thị Poincaré",
+      "howToRead": "Cách đọc đồ thị",
+      "dotExplain": "Mỗi chấm là <b>một cặp nhịp tim liên tiếp</b>: vị trí ngang là khoảng cách nhịp trước, vị trí dọc là khoảng cách nhịp sau.",
+      "tight": "Đám chấm <b>gọn, bám sát đường chéo</b> → nhịp tim đều đặn.",
+      "scattered": "Đám chấm <b>tản rộng như đám mây</b> → nhịp biến thiên bất thường, đặc trưng thường gặp của rung nhĩ.",
+      "basedOn": "Dựa trên {{count}} khoảng nhịp ghi nhận trong phiên đo."
+    }
+  },
+  "reports": {
+    "title": "Báo cáo sức khỏe",
+    "description": "Tổng hợp từ {{count}} phép đo gần nhất của bạn",
+    "loadError": "Không thể tải dữ liệu báo cáo. Vui lòng thử lại.",
+    "avgHeartRate": "Nhịp tim trung bình",
+    "heartRateReference": "Dải tham chiếu: 60 - 100 BPM",
+    "avgSpo2": "SpO2 trung bình",
+    "spo2Reference": "Mức tham khảo (đo tại thiết bị)",
+    "spo2NoData": "Chưa có dữ liệu SpO2 từ thiết bị",
+    "avgHrv": "HRV trung bình (RMSSD)",
+    "hrvHint": "Độ biến thiên nhịp tim — cao hơn thường tốt hơn",
+    "screening": {
+      "normal": "Bình thường",
+      "uncertain": "Chưa chắc chắn",
+      "afibSuspected": "Nghi ngờ rung nhĩ",
+      "afib": "Rung nhĩ",
+      "per30Days": "phép đo / 30 ngày"
+    },
+    "trend": {
+      "title": "Xu hướng Nhịp tim theo ngày",
+      "description": "Trung bình / thấp nhất / cao nhất mỗi ngày, tính từ các phép đo thực tế",
+      "empty": "Chưa có phép đo nào — hãy đo bằng thiết bị HealthSense để xem xu hướng.",
+      "max": "Cao nhất",
+      "avg": "Trung bình",
+      "min": "Thấp nhất"
+    },
+    "periodAnalysis": {
+      "title": "Phân tích tầm soát theo kỳ",
+      "description": "Biểu đồ số lần đo theo ngày / tuần / tháng / năm"
+    }
+  },
+  "analysis": {
+    "title": "Chi tiết phân tích",
+    "filter": {
+      "DAY": "Ngày",
+      "WEEK": "Tuần",
+      "MONTH": "Tháng",
+      "YEAR": "Năm"
+    },
+    "period": {
+      "day": "Ngày {{date}}",
+      "month": "Tháng {{month}}/{{year}}",
+      "year": "Năm {{year}}",
+      "prevAria": "Kỳ trước",
+      "nextAria": "Kỳ tiếp theo"
+    },
+    "badge": {
+      "thisWeek": "Tuần này",
+      "thisMonth": "Tháng này",
+      "thisYear": "Năm nay"
+    },
+    "settingsAlert": {
+      "title": "Cài đặt phân tích",
+      "message": "Hệ thống AI tự động đồng bộ và phân loại bất thường nhịp tim qua PPG 60s theo chuẩn y khoa.",
+      "measureNow": "Đo lâm sàng ngay"
+    },
+    "preparingChart": "Đang chuẩn bị biểu đồ...",
+    "emptyRange": "Chưa có bản ghi đo nào trong khoảng thời gian này",
+    "summary": "kết quả, bao gồm <b>{{riskCount}}</b> có nguy cơ rung tâm nhĩ",
+    "clinicalNote": "Thuật toán phân tích nhịp tim tự động qua cảm biến PPG. Khi phát hiện các dấu hiệu bất thường lặp lại, hãy liên hệ bác sĩ chuyên khoa tim mạch để được tư vấn đo ECG lâm sàng 12 đạo trình.",
+    "measureNowCta": "Tiến hành đo lâm sàng ngay",
+    "legend": {
+      "normal": "Không có bất thường",
+      "uncertain": "Không rõ ràng",
+      "afibSuspected": "Nghi ngờ rung tâm nhĩ",
+      "afibRisk": "Nguy cơ rung tâm nhĩ"
+    },
+    "donut": {
+      "totalChecks": "Tổng số lần kiểm tra",
+      "centerRisk": "Nguy cơ",
+      "centerSuspected": "Nghi ngờ",
+      "centerStable": "Ổn định"
+    }
+  },
+  "sleep": {
+    "title": "Phân tích Giấc ngủ",
+    "duration": "Thời gian ngủ",
+    "quality": "Chất lượng",
+    "good": "Tốt",
+    "deep": "Ngủ sâu",
+    "light": "Ngủ nông",
+    "awake": "Thức"
+  },
+  "ppg": {
+    "cancelled": "Đã hủy phiên ghi PPG.",
+    "noActiveSession": "Chưa có phiên ghi dữ liệu PPG đang chạy.",
+    "notEnoughData": "Dữ liệu không đủ 1 phút ({{samples}}/{{required}} mẫu). Hủy xuất file.",
+    "exportFailed": "Không thể xuất file CSV.",
+    "shareTitle": "Xuất dữ liệu PPG CSV",
+    "analysisError": "Lỗi phân tích AI",
+    "emptyFile": "File CSV dữ liệu PPG rỗng, không thể gửi.",
+    "invalidPresignedUrl": "Presigned URL trả về không hợp lệ.",
+    "uploadFailed": "Upload file lên S3 thất bại với mã HTTP: {{status}}. Chi tiết: {{detail}}",
+    "analysisTimeout": "Quá thời gian chờ AI phân tích (Timeout).",
+    "analysisFailed": "Backend báo lỗi phân tích AI thất bại."
+  }
+}

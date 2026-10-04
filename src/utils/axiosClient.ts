@@ -1,6 +1,7 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { ApiResponse, MobileLoginResponse } from '@/types/authentication';
+import { currentLanguage } from '@/i18n';
 
 // Default API Base URL (Android emulator uses 10.0.2.2:8080 to connect to localhost:8080)
 export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.1.8:8080';
@@ -72,6 +73,10 @@ axiosClient.interceptors.request.use(
       if (accessToken) {
         config.headers.Authorization = `Bearer ${accessToken}`;
       }
+      // Server trả thông báo theo ngôn ngữ đang chọn trên app (giống web: header lang + Accept-Language)
+      const lang = currentLanguage();
+      config.headers.lang = lang;
+      config.headers['Accept-Language'] = lang;
     } catch (e) {
       console.warn('[axiosClient] Error reading access token:', e);
     }

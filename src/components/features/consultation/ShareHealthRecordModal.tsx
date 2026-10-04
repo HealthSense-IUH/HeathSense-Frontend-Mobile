@@ -7,7 +7,9 @@ import {
   Pressable,
   ActivityIndicator,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Share2, Activity, Check, X, AlertCircle } from 'lucide-react-native';
+import { formatDateTime } from '@/utils/formatters';
 import type { HealthRecordItem } from '@/types/consultation';
 
 interface ShareHealthRecordModalProps {
@@ -25,6 +27,7 @@ export function ShareHealthRecordModal({
   onClose,
   onShare,
 }: ShareHealthRecordModalProps) {
+  const { t } = useTranslation('consultation');
   const [selectedRecordId, setSelectedRecordId] = useState<string | number | null>(null);
   const [sharing, setSharing] = useState(false);
 
@@ -58,28 +61,27 @@ export function ShareHealthRecordModal({
                 <Share2 size={22} className="text-primary" />
               </View>
               <View>
-                <Text className="font-bold text-foreground text-lg">Chia sẻ Hồ sơ đo đạc</Text>
-                <Text className="text-xs text-muted-foreground">Phiên tư vấn #{sessionId}</Text>
+                <Text className="font-bold text-foreground text-lg">{t('shareHealthRecordDialog.title')}</Text>
+                <Text className="text-xs text-muted-foreground">{t('workspace.sessionTitle', { id: sessionId })}</Text>
               </View>
             </View>
             <Pressable
               onPress={onClose}
               className="h-8 w-8 rounded-full bg-muted items-center justify-center active:opacity-70"
+              accessibilityLabel={t('common:actions.close')}
             >
               <X size={18} className="text-foreground" />
             </Pressable>
           </View>
 
-          <Text className="text-xs text-muted-foreground my-3">
-            Chọn một bản ghi đo tín hiệu sinh trắc học để ủy quyền cho bác sĩ xem xét trong phiên khám này:
-          </Text>
+          <Text className="text-xs text-muted-foreground my-3">{t('shareHealthRecordDialog.selectPrompt')}</Text>
 
           {/* Records List */}
           <ScrollView showsVerticalScrollIndicator={false} className="py-2 mb-4">
             {!healthRecords || healthRecords.length === 0 ? (
               <View className="py-12 items-center">
                 <AlertCircle size={32} className="text-muted-foreground mb-2" />
-                <Text className="text-sm text-muted-foreground">Bạn chưa có bản ghi đo đạc nào.</Text>
+                <Text className="text-sm text-muted-foreground">{t('shareHealthRecordDialog.emptyTitle')}</Text>
               </View>
             ) : (
               <View className="space-y-2.5">
@@ -109,13 +111,11 @@ export function ShareHealthRecordModal({
 
                       <View className="flex-1">
                         <Text className="text-sm font-bold text-foreground">
-                          Hồ sơ #{record.id}
+                          {t('shareHealthRecordDialog.recordLabel', { id: record.id })}
                           {record.predictionLabel ? ` • [${record.predictionLabel}]` : ''}
                         </Text>
                         <Text className="text-xs text-muted-foreground mt-0.5">
-                          {record.createdAt
-                            ? new Date(record.createdAt).toLocaleString('vi-VN')
-                            : 'Đo lường nhịp tim / ECG'}
+                          {record.createdAt ? formatDateTime(record.createdAt) : t('shareHealthRecordDialog.recordFallbackDescription')}
                         </Text>
                       </View>
                     </Pressable>
@@ -132,7 +132,7 @@ export function ShareHealthRecordModal({
               disabled={sharing}
               className="flex-1 py-3.5 rounded-xl bg-muted items-center justify-center active:opacity-70"
             >
-              <Text className="font-semibold text-foreground text-sm">Hủy</Text>
+              <Text className="font-semibold text-foreground text-sm">{t('common:actions.cancel')}</Text>
             </Pressable>
 
             <Pressable
@@ -145,7 +145,7 @@ export function ShareHealthRecordModal({
               {sharing ? (
                 <ActivityIndicator size="small" color="#ffffff" />
               ) : (
-                <Text className="font-bold text-white text-sm">Chia sẻ ngay</Text>
+                <Text className="font-bold text-white text-sm">{t('shareHealthRecordDialog.share')}</Text>
               )}
             </Pressable>
           </View>

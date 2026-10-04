@@ -3,6 +3,7 @@ import { Text, Pressable, View, Alert } from 'react-native';
 import { HeartPulse, CheckCircle2, AlertCircle, Play, ArrowRight, Timer } from 'lucide-react-native';
 import Svg, { Path } from 'react-native-svg';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { useBleStore } from '@/services/ble-management/bleStore';
 import { LinearGradient } from 'expo-linear-gradient';
 import { getAFibScreeningAvailability, useWorkoutEngineStore } from '@/services/workout';
@@ -11,6 +12,7 @@ import { getPredictionMeta } from '@/constants/healthRecords';
 import { formatDateTime } from '@/utils/formatters';
 
 export function AFibScreeningCard() {
+  const { t } = useTranslation('health');
   const router = useRouter();
   const aiAnalysisResult = useBleStore(state => state.aiAnalysisResult);
   // Bản ghi mới nhất trên server; lúc chưa tải xong thì dùng kết quả vừa đo trong phiên
@@ -42,15 +44,15 @@ export function AFibScreeningCard() {
     if (!current.canScreen) {
       if (current.reason === 'WORKOUT_IN_PROGRESS') {
         Alert.alert(
-          "Tạm dừng đo Rung nhĩ",
-          "Bạn đang trong phiên tập luyện thể dục. Để đảm bảo độ chính xác y khoa và tránh cảnh báo giả do rung lắc cơ bắp, chức năng đo AFib tạm dừng trong lúc tập. Vui lòng hoàn thành buổi tập trước khi đo.",
-          [{ text: "Đã hiểu" }]
+          t('screening.workoutPaused.title'),
+          t('screening.workoutPaused.cardMessage'),
+          [{ text: t('screening.understood') }]
         );
       } else if (current.reason === 'COOLDOWN_ACTIVE') {
         Alert.alert(
-          "Thời gian phục hồi tim (10 phút)",
-          `Bạn vừa hoàn thành buổi tập thể dục. Để nhịp tim ổn định và tránh cảnh báo sai do nhịp xoang phục hồi sau gắng sức, vui lòng ngồi nghỉ tĩnh thêm ${current.formattedRemainingTime} trước khi bắt đầu đo tầm soát Rung nhĩ (AFib).`,
-          [{ text: "Đã hiểu" }]
+          t('screening.cooldown.title'),
+          t('screening.cooldown.message', { time: current.formattedRemainingTime }),
+          [{ text: t('screening.understood') }]
         );
       }
       return;
@@ -117,14 +119,14 @@ export function AFibScreeningCard() {
             >
               <Text className="text-[10px] font-bold text-white uppercase tracking-wider">
                 {availability.reason === 'COOLDOWN_ACTIVE'
-                  ? `Hồi phục tim: ${availability.formattedRemainingTime}`
+                  ? t('screening.card.badge.cooldown', { time: availability.formattedRemainingTime })
                   : availability.reason === 'WORKOUT_IN_PROGRESS'
-                  ? 'Đang tập luyện thể thao'
-                  : 'Chẩn đoán lâm sàng 60s'}
+                  ? t('screening.card.badge.workout')
+                  : t('screening.card.badge.default')}
               </Text>
             </View>
             <Text className="text-xl font-extrabold text-white tracking-tight leading-snug">
-              Đo Rung nhĩ Chủ động
+              {t('screening.card.title')}
             </Text>
           </View>
 
@@ -158,19 +160,21 @@ export function AFibScreeningCard() {
                 <CheckCircle2 color="#FFFFFF" size={17} className="mr-2" />
               )}
               <Text className="text-sm font-bold text-white flex-1">
-                Lần đo gần nhất: {latestMeta.label}
+                {t('screening.card.latest', { label: latestMeta.label })}
               </Text>
             </View>
             <Text className="text-xs text-white/85 pl-6">
-              {latestRecord.confidence != null ? `Khả năng bị rung nhĩ: ${(latestRecord.confidence * 100).toFixed(1)}% • ` : ''}
+              {latestRecord.confidence != null
+                ? `${t('afibHistory.card.afibProbability', { value: (latestRecord.confidence * 100).toFixed(1) })} • `
+                : ''}
               {formatDateTime(latestRecord.createdAt)}
             </Text>
           </View>
         ) : (
           <Text className="text-white/90 text-xs sm:text-[13px] leading-relaxed font-normal mb-4 pr-1">
             {availability.reason === 'COOLDOWN_ACTIVE'
-              ? `Vừa kết thúc bài tập. Để nhịp tim ổn định và tránh cảnh báo sai, vui lòng nghỉ tĩnh thêm ${availability.formattedRemainingTime} trước khi đo.`
-              : 'Chủ động ghi nhận tín hiệu quang học PPG 100Hz và phân tích AI để phát hiện sớm các dấu hiệu rung nhĩ và bất thường nhịp tim.'}
+              ? t('screening.card.cooldownHint', { time: availability.formattedRemainingTime })
+              : t('screening.card.description')}
           </Text>
         )}
 
@@ -186,20 +190,20 @@ export function AFibScreeningCard() {
             )}
             <Text className="text-[#D92C44] font-bold text-xs tracking-wide">
               {availability.reason === 'COOLDOWN_ACTIVE'
-                ? `Hồi phục: ${availability.formattedRemainingTime}`
+                ? t('screening.card.cta.cooldown', { time: availability.formattedRemainingTime })
                 : availability.reason === 'WORKOUT_IN_PROGRESS'
-                ? 'Tạm ngắt khi tập'
-                : (latestRecord ? 'Thực hiện đo lại' : 'Bắt đầu đo ngay')}
+                ? t('screening.card.cta.workout')
+                : (latestRecord ? t('screening.card.cta.measureAgain') : t('screening.card.cta.start'))}
             </Text>
           </View>
 
           <View className="flex-row items-center pr-1 opacity-90">
             <Text className="text-white/90 text-[11px] font-semibold mr-1">
               {availability.reason === 'COOLDOWN_ACTIVE'
-                ? 'Nghỉ tĩnh 10p'
+                ? t('screening.card.hint.cooldown')
                 : availability.reason === 'WORKOUT_IN_PROGRESS'
-                ? 'Vận động active'
-                : 'Quy trình 60s'}
+                ? t('screening.card.hint.workout')
+                : t('screening.card.hint.default')}
             </Text>
             <ArrowRight color="#FFFFFF" size={14} strokeWidth={2.4} />
           </View>

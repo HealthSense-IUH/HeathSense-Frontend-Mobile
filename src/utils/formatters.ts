@@ -1,12 +1,14 @@
+import { currentIntlLocale } from '@/i18n';
+
 /**
  * Hàm định dạng dùng chung — bám theo web (src/lib/formatters.ts) để số liệu, ngày giờ
- * hiển thị giống nhau giữa hai nền tảng.
+ * hiển thị giống nhau giữa hai nền tảng; locale lấy theo ngôn ngữ đang chọn (vi/en).
  */
 
 /** Số thập phân kiểu Việt Nam; trả "--" khi không phải số. */
 export function formatHrvNumber(val: unknown, decimals = 2): string {
   if (typeof val !== 'number' || Number.isNaN(val)) return '--';
-  return Number(val.toFixed(decimals)).toLocaleString('vi-VN');
+  return Number(val.toFixed(decimals)).toLocaleString(currentIntlLocale());
 }
 
 /** dd/MM/yyyy HH:mm:ss — dùng cho thời gian đo (giống web). */
@@ -14,7 +16,7 @@ export function formatRecordDate(iso?: string | number | null): string {
   if (!iso) return 'N/A';
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return String(iso);
-  return d.toLocaleString('vi-VN', {
+  return d.toLocaleString(currentIntlLocale(), {
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
@@ -29,7 +31,7 @@ export function formatDateTime(iso?: string | number | null, fallback = '-'): st
   if (!iso) return fallback;
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return String(iso);
-  return d.toLocaleString('vi-VN', {
+  return d.toLocaleString(currentIntlLocale(), {
     hour: '2-digit',
     minute: '2-digit',
     day: '2-digit',
@@ -43,13 +45,13 @@ export function formatShortDate(iso?: string | number | null, fallback = '-'): s
   if (!iso) return fallback;
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return String(iso);
-  return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  return d.toLocaleDateString(currentIntlLocale(), { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
 /** Tiền VND: 150.000 ₫ */
 export function formatVND(amount?: number | null, fallback = '—'): string {
   if (amount === undefined || amount === null || Number.isNaN(amount)) return fallback;
-  return `${Math.round(amount).toLocaleString('vi-VN')} ₫`;
+  return `${Math.round(amount).toLocaleString(currentIntlLocale())} ₫`;
 }
 
 /** YYYY-MM-DD theo giờ máy (không dùng toISOString vì lệch múi giờ). */

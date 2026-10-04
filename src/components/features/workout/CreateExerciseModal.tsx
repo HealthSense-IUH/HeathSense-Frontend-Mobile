@@ -9,13 +9,10 @@ import {
   Pressable,
 } from 'react-native';
 import { Check, ChevronDown, X } from 'lucide-react-native';
-import {
-  ExerciseCategory,
-  TrackingMetricType,
-  EXERCISE_CATEGORY_LABELS,
-  TRACKING_TYPE_LABELS,
-} from '@/services/workout/workoutTypes';
+import { ExerciseCategory, TrackingMetricType } from '@/services/workout/workoutTypes';
+import { getCategoryLabel, getTrackingTypeLabel } from '@/services/workout/workoutI18n';
 import { useWorkoutCatalogStore } from '@/services/workout/workoutCatalogStore';
+import { useTranslation } from 'react-i18next';
 
 interface CreateExerciseModalProps {
   visible: boolean;
@@ -28,6 +25,7 @@ export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
   onClose,
   onCreated,
 }) => {
+  const { t } = useTranslation('workout');
   const addCustomExercise = useWorkoutCatalogStore((state) => state.addCustomExercise);
 
   const [name, setName] = useState('');
@@ -40,7 +38,7 @@ export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
 
   const handleSave = () => {
     if (!name.trim()) {
-      setErrorMsg('Vui lòng nhập tên bài tập thể dục');
+      setErrorMsg(t('createExercise.nameRequired'));
       return;
     }
 
@@ -50,7 +48,7 @@ export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
       trackingType,
       met: trackingType === 'DISTANCE_GPS' ? 6.5 : trackingType === 'SETS_REST' ? 4.5 : 4.0,
       iconName: category === 'BALL' ? 'Trophy' : category === 'WATER' ? 'Waves' : 'Activity',
-      description: 'Bài tập thể dục tùy chỉnh do người dùng tạo.',
+      description: t('createExercise.customDescription'),
     });
 
     setName('');
@@ -99,7 +97,7 @@ export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
           {/* Header */}
           <View className="flex-row items-center justify-between mb-5">
             <Text className="text-xl font-bold text-white tracking-tight">
-              Tạo bài tập thể dục mới
+              {t('catalog.createExercise')}
             </Text>
             <TouchableOpacity
               onPress={onClose}
@@ -114,7 +112,7 @@ export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
             {/* Input Name */}
             <View className="mb-5">
               <Text className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-                Tên bài tập
+                {t('createExercise.nameLabel')}
               </Text>
               <TextInput
                 value={name}
@@ -122,7 +120,7 @@ export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
                   setName(text);
                   if (errorMsg) setErrorMsg('');
                 }}
-                placeholder="Tên bài tập thể dục"
+                placeholder={t('createExercise.namePlaceholder')}
                 placeholderTextColor="#64748B"
                 className="bg-slate-800/90 text-white font-medium px-4 py-3.5 rounded-2xl border border-slate-700 text-base"
               />
@@ -136,7 +134,7 @@ export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
             {/* Tracking Type Dropdown */}
             <View className="mb-5">
               <Text className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-                Dữ liệu cần ghi
+                {t('createExercise.trackingLabel')}
               </Text>
               <TouchableOpacity
                 onPress={() => {
@@ -147,7 +145,7 @@ export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
                 className="bg-slate-800/90 flex-row items-center justify-between px-4 py-3.5 rounded-2xl border border-slate-700"
               >
                 <Text className="text-emerald-400 font-medium text-base" numberOfLines={1}>
-                  {TRACKING_TYPE_LABELS[trackingType]}
+                  {getTrackingTypeLabel(trackingType)}
                 </Text>
                 <ChevronDown color="#94A3B8" size={18} />
               </TouchableOpacity>
@@ -168,7 +166,7 @@ export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
                           trackingType === item ? 'text-emerald-400 font-semibold' : 'text-slate-300'
                         }`}
                       >
-                        {TRACKING_TYPE_LABELS[item]}
+                        {getTrackingTypeLabel(item)}
                       </Text>
                       {trackingType === item && <Check color="#10B981" size={18} />}
                     </TouchableOpacity>
@@ -180,7 +178,7 @@ export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
             {/* Category Dropdown */}
             <View className="mb-6">
               <Text className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-                Thể loại
+                {t('createExercise.categoryLabel')}
               </Text>
               <TouchableOpacity
                 onPress={() => {
@@ -191,7 +189,7 @@ export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
                 className="bg-slate-800/90 flex-row items-center justify-between px-4 py-3.5 rounded-2xl border border-slate-700"
               >
                 <Text className="text-emerald-400 font-medium text-base">
-                  {EXERCISE_CATEGORY_LABELS[category]}
+                  {getCategoryLabel(category)}
                 </Text>
                 <ChevronDown color="#94A3B8" size={18} />
               </TouchableOpacity>
@@ -212,7 +210,7 @@ export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
                           category === cat ? 'text-emerald-400 font-semibold' : 'text-slate-300'
                         }`}
                       >
-                        {EXERCISE_CATEGORY_LABELS[cat]}
+                        {getCategoryLabel(cat)}
                       </Text>
                       {category === cat && <Check color="#10B981" size={18} />}
                     </TouchableOpacity>
@@ -229,7 +227,7 @@ export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
               activeOpacity={0.8}
               className="flex-1 py-3.5 rounded-2xl bg-slate-800 items-center justify-center border border-slate-700 active:opacity-75"
             >
-              <Text className="text-slate-300 font-semibold text-base">Thoát</Text>
+              <Text className="text-slate-300 font-semibold text-base">{t('common.exit')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -237,7 +235,7 @@ export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
               activeOpacity={0.8}
               className="flex-1 py-3.5 rounded-2xl bg-emerald-600 items-center justify-center shadow-md active:opacity-75"
             >
-              <Text className="text-white font-bold text-base">Lưu</Text>
+              <Text className="text-white font-bold text-base">{t('common:actions.save')}</Text>
             </TouchableOpacity>
           </View>
         </Pressable>

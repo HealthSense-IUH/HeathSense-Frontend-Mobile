@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+import { Trans, useTranslation } from 'react-i18next';
 import { AlertCircle, ChevronLeft, ChevronRight, Coins, History, Package, RefreshCw, ShoppingBag, ShoppingCart } from 'lucide-react-native';
 import { useCreditsData, PAYMENT_DATE_PRESETS } from '@/hooks/useCreditsData';
 import { useCreditPurchase } from '@/hooks/useCreditPurchase';
@@ -10,6 +11,7 @@ import {
   getCreditOrderStatusConfig,
   getCreditSourceTypeLabel,
 } from '@/constants/credits';
+import { currentIntlLocale } from '@/i18n';
 import { formatDateTime, formatVND } from '@/utils/formatters';
 import { PurchaseCreditsModal } from './PurchaseCreditsModal';
 import { OrderDetailModal } from './OrderDetailModal';
@@ -39,30 +41,56 @@ function SectionTitle({ title, description }: { title: string; description: stri
 }
 
 function ErrorBox({ message, onRetry }: { message: string; onRetry: () => void }) {
+  const { t } = useTranslation('common');
   return (
     <View className="rounded-2xl border border-rose-200 bg-rose-50/60 p-5 items-center" style={{ gap: 8 }}>
       <AlertCircle size={32} color="#DC2626" />
       <Text className="text-xs text-rose-700 text-center">{message}</Text>
       <Pressable onPress={onRetry} className="flex-row items-center h-9 px-3 rounded-xl border border-border bg-white active:opacity-80" style={{ gap: 6 }}>
         <RefreshCw size={14} color="#334155" />
-        <Text className="text-xs font-semibold text-foreground">Thử lại</Text>
+        <Text className="text-xs font-semibold text-foreground">{t('actions.retry')}</Text>
       </Pressable>
     </View>
   );
 }
 
-function Pagination({ page, totalPages, total, unit, onChange }: { page: number; totalPages: number; total: number; unit: string; onChange: (p: number) => void }) {
+function Pagination({
+  page,
+  totalPages,
+  total,
+  i18nKey,
+  onChange,
+}: {
+  page: number;
+  totalPages: number;
+  total: number;
+  i18nKey: 'ordersTable.pagination' | 'ledgerTable.pagination';
+  onChange: (p: number) => void;
+}) {
+  const { t } = useTranslation('credits');
   if (total === 0) return null;
   return (
     <View className="flex-row items-center justify-between mt-2">
       <Text className="text-xs text-muted-foreground">
-        Trang <Text className="font-bold text-foreground">{page}</Text> / {totalPages} (Tổng {total} {unit})
+        <Trans t={t} i18nKey={i18nKey} values={{ page, totalPages, total }} components={{ strong: <Text className="font-bold text-foreground" /> }} />
       </Text>
       <View className="flex-row" style={{ gap: 8 }}>
-        <Pressable onPress={() => onChange(page - 1)} disabled={page <= 1} className="h-9 w-9 rounded-xl border border-border bg-white items-center justify-center" style={{ opacity: page <= 1 ? 0.4 : 1 }}>
+        <Pressable
+          onPress={() => onChange(page - 1)}
+          disabled={page <= 1}
+          className="h-9 w-9 rounded-xl border border-border bg-white items-center justify-center"
+          style={{ opacity: page <= 1 ? 0.4 : 1 }}
+          accessibilityLabel={t('common:actions.prev')}
+        >
           <ChevronLeft size={16} color="#334155" />
         </Pressable>
-        <Pressable onPress={() => onChange(page + 1)} disabled={page >= totalPages} className="h-9 w-9 rounded-xl border border-border bg-white items-center justify-center" style={{ opacity: page >= totalPages ? 0.4 : 1 }}>
+        <Pressable
+          onPress={() => onChange(page + 1)}
+          disabled={page >= totalPages}
+          className="h-9 w-9 rounded-xl border border-border bg-white items-center justify-center"
+          style={{ opacity: page >= totalPages ? 0.4 : 1 }}
+          accessibilityLabel={t('common:actions.next')}
+        >
           <ChevronRight size={16} color="#334155" />
         </Pressable>
       </View>
@@ -72,6 +100,7 @@ function Pagination({ page, totalPages, total, unit, onChange }: { page: number;
 
 /** Ví lượt tư vấn của hội viên (giống web MemberCreditsPanel): ví, gói lượt, lịch sử đơn mua, biến động lượt. */
 export function MemberCreditsPanel({ onWalletChanged }: MemberCreditsPanelProps) {
+  const { t } = useTranslation('credits');
   const data = useCreditsData();
   const purchase = useCreditPurchase();
   const [subTab, setSubTab] = useState<SubTab>('packages');
@@ -107,7 +136,7 @@ export function MemberCreditsPanel({ onWalletChanged }: MemberCreditsPanelProps)
       );
     }
     if (data.walletError && !data.wallet) {
-      return <ErrorBox message={`Không thể tải thông tin ví lượt. ${data.walletError}`} onRetry={() => void data.loadWallet()} />;
+      return <ErrorBox message={`${t('wallet.loadError')}. ${data.walletError}`} onRetry={() => void data.loadWallet()} />;
     }
     return (
       <View className="rounded-2xl border border-emerald-200/80 bg-emerald-50/60 p-5 overflow-hidden">
@@ -118,16 +147,16 @@ export function MemberCreditsPanel({ onWalletChanged }: MemberCreditsPanelProps)
           <View className="p-1.5 rounded-md bg-emerald-100">
             <Coins size={16} color="#047857" />
           </View>
-          <Text className="text-sm font-semibold text-emerald-900">Lượt tư vấn khả dụng</Text>
+          <Text className="text-sm font-semibold text-emerald-900">{t('wallet.availableTitle')}</Text>
         </View>
         <View className="flex-row items-end mt-2" style={{ gap: 6 }}>
-          <Text className="text-4xl font-extrabold text-emerald-700 tracking-tight">{available.toLocaleString('vi-VN')}</Text>
-          <Text className="text-base font-semibold text-emerald-600 mb-1.5">lượt</Text>
+          <Text className="text-4xl font-extrabold text-emerald-700 tracking-tight">{available.toLocaleString(currentIntlLocale())}</Text>
+          <Text className="text-base font-semibold text-emerald-600 mb-1.5">{t('wallet.unit', { count: available })}</Text>
         </View>
-        <Text className="text-xs text-muted-foreground mt-1">Sẵn sàng để bắt đầu phiên tư vấn sức khỏe trực tuyến</Text>
+        <Text className="text-xs text-muted-foreground mt-1">{t('wallet.readyHint')}</Text>
         {reserved > 0 ? (
           <View className="self-start mt-2 rounded-full bg-amber-100 px-2 py-0.5">
-            <Text className="text-[11px] font-medium text-amber-800">(Đang tạm giữ {reserved} lượt cho ca hiện tại)</Text>
+            <Text className="text-[11px] font-medium text-amber-800">{t('wallet.reservedHint', { count: reserved })}</Text>
           </View>
         ) : null}
       </View>
@@ -146,22 +175,22 @@ export function MemberCreditsPanel({ onWalletChanged }: MemberCreditsPanelProps)
       return (
         <View className="rounded-2xl border border-amber-200 bg-amber-50/60 p-5 items-center" style={{ gap: 8 }}>
           <AlertCircle size={36} color="#D97706" />
-          <Text className="text-sm font-semibold text-amber-800 text-center">Chức năng mua lượt tạm chưa khả dụng</Text>
-          <Text className="text-xs text-amber-700 text-center leading-5">Hệ thống mua lượt tư vấn hiện đang tạm tắt trong môi trường này. Quý hội viên vui lòng quay lại sau.</Text>
+          <Text className="text-sm font-semibold text-amber-800 text-center">{t('packagesGrid.disabledTitle')}</Text>
+          <Text className="text-xs text-amber-700 text-center leading-5">{t('packagesGrid.disabledDescription')}</Text>
           <Pressable onPress={() => void data.loadPackages()} className="flex-row items-center h-9 px-3 rounded-xl border border-border bg-white active:opacity-80" style={{ gap: 6 }}>
             <RefreshCw size={14} color="#334155" />
-            <Text className="text-xs font-semibold text-foreground">Kiểm tra lại</Text>
+            <Text className="text-xs font-semibold text-foreground">{t('packagesGrid.checkAgain')}</Text>
           </Pressable>
         </View>
       );
     }
-    if (data.packagesError) return <ErrorBox message={`Không thể tải danh sách gói lượt. ${data.packagesError}`} onRetry={() => void data.loadPackages()} />;
+    if (data.packagesError) return <ErrorBox message={`${t('packagesGrid.loadError')}. ${data.packagesError}`} onRetry={() => void data.loadPackages()} />;
     if (data.packages.length === 0) {
       return (
         <View className="rounded-2xl border border-dashed border-border p-8 items-center" style={{ gap: 8 }}>
           <Package size={40} color="#94A3B8" />
-          <Text className="text-sm font-semibold text-foreground">Chưa có gói lượt tư vấn</Text>
-          <Text className="text-xs text-muted-foreground text-center">Hiện tại chưa có gói lượt tư vấn nào đang mở bán. Vui lòng quay lại sau hoặc liên hệ hỗ trợ viên.</Text>
+          <Text className="text-sm font-semibold text-foreground">{t('packagesGrid.emptyTitle')}</Text>
+          <Text className="text-xs text-muted-foreground text-center">{t('packagesGrid.emptyDescription')}</Text>
         </View>
       );
     }
@@ -170,28 +199,28 @@ export function MemberCreditsPanel({ onWalletChanged }: MemberCreditsPanelProps)
         {data.packages.map((pkg) => (
           <View key={pkg.id} className="rounded-2xl border border-border bg-card p-5" style={{ gap: 12 }}>
             <View className="flex-row items-start justify-between">
-              <Pill label={pkg.code || 'GÓI TƯ VẤN'} bg="#EFF6FF" text="#1D4ED8" border="#BFDBFE" />
+              <Pill label={pkg.code || t('packagesGrid.defaultCode')} bg="#EFF6FF" text="#1D4ED8" border="#BFDBFE" />
               <Text className="text-[11px] text-muted-foreground">#{pkg.id}</Text>
             </View>
             <View>
               <Text className="text-lg font-bold text-foreground" numberOfLines={1}>{pkg.name}</Text>
               <Text className="text-xs text-muted-foreground mt-0.5" numberOfLines={2}>
-                {pkg.description || 'Gói lượt tư vấn chuyên sâu cùng bác sĩ chuyên khoa'}
+                {pkg.description || t('packagesGrid.defaultDescription')}
               </Text>
             </View>
             <View className="pt-2 border-t border-border/60" style={{ gap: 6 }}>
               <View className="flex-row items-center justify-between">
-                <Text className="text-xs text-muted-foreground">Số lượt nhận:</Text>
+                <Text className="text-xs text-muted-foreground">{t('packagesGrid.creditsReceived')}</Text>
                 <Text className="text-base font-extrabold text-emerald-700">{formatCreditQuantity(pkg.creditQuantity)}</Text>
               </View>
               <View className="flex-row items-center justify-between">
-                <Text className="text-xs text-muted-foreground">Đơn giá:</Text>
+                <Text className="text-xs text-muted-foreground">{t('packagesGrid.price')}</Text>
                 <Text className="text-xl font-black text-foreground">{formatVND(pkg.priceVnd)}</Text>
               </View>
             </View>
             <Pressable onPress={() => handleSelectPackage(pkg)} className="h-11 rounded-xl bg-primary flex-row items-center justify-center active:opacity-90" style={{ gap: 8 }}>
               <ShoppingCart size={16} color="#FFFFFF" />
-              <Text className="text-white font-bold text-sm">Mua lượt</Text>
+              <Text className="text-white font-bold text-sm">{t('packagesGrid.buy')}</Text>
             </Pressable>
           </View>
         ))}
@@ -203,15 +232,24 @@ export function MemberCreditsPanel({ onWalletChanged }: MemberCreditsPanelProps)
     const overview = data.overview;
     const statusKeys = Object.keys(CREDIT_ORDER_STATUS_CONFIG) as CreditOrderStatus[];
     const orders = data.orders?.content ?? [];
+    const successfulOrders = overview?.successfulOrderCount ?? 0;
     return (
       <View style={{ gap: 14 }}>
         {/* KPI */}
         <View className="flex-row flex-wrap" style={{ gap: 10 }}>
           {[
-            { label: 'Tổng tiền đã thanh toán', value: formatVND(overview?.totalPaidVnd ?? 0), hint: 'Chỉ tính giao dịch đã hoàn tất' },
-            { label: 'Tổng lượt đã mua', value: formatCreditQuantity(overview?.totalPurchasedCredits ?? 0), hint: 'Từ các gói đã mua thành công' },
-            { label: 'Lần mua thành công', value: `${overview?.successfulOrderCount ?? 0} đơn`, hint: 'Giao dịch nạp được xác nhận' },
-            { label: 'Lượt khả dụng hiện tại', value: formatCreditQuantity(available), hint: `Số dư: ${data.wallet?.balance ?? 0} • Đang giữ: ${reserved}` },
+            { label: t('memberKpi.totalPaid'), value: formatVND(overview?.totalPaidVnd ?? 0), hint: t('memberKpi.totalPaidHint') },
+            { label: t('memberKpi.totalPurchasedCredits'), value: formatCreditQuantity(overview?.totalPurchasedCredits ?? 0), hint: t('memberKpi.totalPurchasedHint') },
+            {
+              label: t('memberKpi.successfulOrders'),
+              value: `${successfulOrders} ${t('memberKpi.orderUnit', { count: successfulOrders })}`,
+              hint: t('memberKpi.successfulOrdersHint'),
+            },
+            {
+              label: t('memberKpi.availableCreditsNow'),
+              value: formatCreditQuantity(available),
+              hint: `${t('memberKpi.balance', { value: data.wallet?.balance ?? 0 })} • ${t('memberKpi.reserved', { value: reserved })}`,
+            },
           ].map((kpi) => (
             <View key={kpi.label} className="rounded-2xl border border-border bg-card p-3.5" style={{ width: '48%', flexGrow: 1 }}>
               <Text className="text-[11px] text-muted-foreground">{kpi.label}</Text>
@@ -222,7 +260,7 @@ export function MemberCreditsPanel({ onWalletChanged }: MemberCreditsPanelProps)
         </View>
         {overview?.firstPaidAt || overview?.lastPaidAt ? (
           <Text className="text-[11px] text-muted-foreground">
-            Lần thanh toán đầu: {formatDateTime(overview.firstPaidAt)} • Gần nhất: {formatDateTime(overview.lastPaidAt)}
+            {t('memberKpi.firstPaidAt')} {formatDateTime(overview.firstPaidAt)} • {t('memberKpi.lastPaidAt')} {formatDateTime(overview.lastPaidAt)}
           </Text>
         ) : null}
 
@@ -239,7 +277,7 @@ export function MemberCreditsPanel({ onWalletChanged }: MemberCreditsPanelProps)
         </ScrollView>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
           <Pressable onPress={() => data.changeOrderStatus(undefined)} className={`px-3 py-1.5 rounded-full border ${!data.orderStatus ? 'bg-slate-800 border-slate-800' : 'bg-white border-border'}`}>
-            <Text className={`text-xs font-semibold ${!data.orderStatus ? 'text-white' : 'text-muted-foreground'}`}>Tất cả trạng thái</Text>
+            <Text className={`text-xs font-semibold ${!data.orderStatus ? 'text-white' : 'text-muted-foreground'}`}>{t('filters.allStatuses')}</Text>
           </Pressable>
           {statusKeys.map((key) => {
             const cfg = CREDIT_ORDER_STATUS_CONFIG[key];
@@ -259,11 +297,11 @@ export function MemberCreditsPanel({ onWalletChanged }: MemberCreditsPanelProps)
         ) : orders.length === 0 ? (
           <View className="rounded-2xl border border-dashed border-border p-8 items-center" style={{ gap: 6 }}>
             <ShoppingBag size={36} color="#94A3B8" />
-            <Text className="text-sm font-semibold text-foreground">{data.datePreset !== 'all' || data.orderStatus ? 'Không tìm thấy đơn mua phù hợp' : 'Chưa có đơn mua lượt nào'}</Text>
+            <Text className="text-sm font-semibold text-foreground">
+              {data.datePreset !== 'all' || data.orderStatus ? t('ordersTable.filteredEmptyTitle') : t('ordersTable.emptyTitle')}
+            </Text>
             <Text className="text-xs text-muted-foreground text-center">
-              {data.datePreset !== 'all' || data.orderStatus
-                ? 'Không có đơn mua nào thỏa mãn bộ lọc ngày hoặc trạng thái đang chọn.'
-                : 'Khi bạn mua các gói lượt tư vấn, thông tin các đơn hàng sẽ được lưu vết đầy đủ tại đây.'}
+              {data.datePreset !== 'all' || data.orderStatus ? t('ordersTable.filteredEmptyDescription') : t('ordersTable.emptyDescription')}
             </Text>
           </View>
         ) : (
@@ -273,7 +311,7 @@ export function MemberCreditsPanel({ onWalletChanged }: MemberCreditsPanelProps)
               return (
                 <Pressable key={order.id} onPress={() => setDetailOrderId(String(order.id))} className="rounded-2xl border border-border bg-card p-4 active:opacity-80" style={{ gap: 6 }}>
                   <View className="flex-row items-center justify-between">
-                    <Text className="text-xs font-bold text-foreground">Đơn #{order.id}</Text>
+                    <Text className="text-xs font-bold text-foreground">{t('ordersTable.orderNumber', { id: order.id })}</Text>
                     <Pill {...cfg} />
                   </View>
                   <Text className="text-sm font-semibold text-foreground">{order.packageName}</Text>
@@ -281,13 +319,13 @@ export function MemberCreditsPanel({ onWalletChanged }: MemberCreditsPanelProps)
                     <Text className="text-xs text-muted-foreground">{formatCreditQuantity(order.creditQuantity)} • {formatVND(order.amountVnd)}</Text>
                     <Text className="text-[11px] text-muted-foreground">{formatDateTime(order.createdAt)}</Text>
                   </View>
-                  {order.status === 'PENDING_PAYMENT' ? <Text className="text-xs font-semibold text-primary">Tiếp tục thanh toán →</Text> : null}
+                  {order.status === 'PENDING_PAYMENT' ? <Text className="text-xs font-semibold text-primary">{t('ordersTable.resumePayment')} →</Text> : null}
                 </Pressable>
               );
             })}
           </View>
         )}
-        <Pagination page={data.ordersPage} totalPages={data.orders?.totalPages ?? 1} total={data.orders?.totalElements ?? 0} unit="đơn" onChange={data.changeOrdersPage} />
+        <Pagination page={data.ordersPage} totalPages={data.orders?.totalPages ?? 1} total={data.orders?.totalElements ?? 0} i18nKey="ordersTable.pagination" onChange={data.changeOrdersPage} />
       </View>
     );
   };
@@ -300,12 +338,13 @@ export function MemberCreditsPanel({ onWalletChanged }: MemberCreditsPanelProps)
       return (
         <View className="rounded-2xl border border-dashed border-border p-8 items-center" style={{ gap: 6 }}>
           <History size={36} color="#94A3B8" />
-          <Text className="text-sm font-semibold text-foreground">Chưa có biến động lượt tư vấn nào</Text>
-          <Text className="text-xs text-muted-foreground text-center">Mọi thao tác mua lượt, giữ lượt hoặc bồi hoàn sẽ được ghi chép minh bạch tại đây.</Text>
+          <Text className="text-sm font-semibold text-foreground">{t('ledgerTable.emptyTitle')}</Text>
+          <Text className="text-xs text-muted-foreground text-center">{t('ledgerTable.emptyDescription')}</Text>
         </View>
       );
     }
     const signed = (n: number) => `${n > 0 ? '+' : ''}${n}`;
+    const deltaLabel = (n: number) => t('ledgerTable.deltaCredits', { value: signed(n), count: Math.abs(n) });
     return (
       <View style={{ gap: 10 }}>
         {entries.map((entry) => {
@@ -321,39 +360,41 @@ export function MemberCreditsPanel({ onWalletChanged }: MemberCreditsPanelProps)
               <Text className="text-xs text-muted-foreground">{op.description}</Text>
               <View className="flex-row" style={{ gap: 10 }}>
                 <View className="flex-1 rounded-xl bg-muted/40 p-2.5">
-                  <Text className="text-[10px] text-muted-foreground">Lượt khả dụng</Text>
-                  <Text className="text-sm font-bold" style={{ color: availableDelta >= 0 ? '#047857' : '#B91C1C' }}>{signed(availableDelta)} lượt</Text>
+                  <Text className="text-[10px] text-muted-foreground">{t('ledgerTable.columns.available')}</Text>
+                  <Text className="text-sm font-bold" style={{ color: availableDelta >= 0 ? '#047857' : '#B91C1C' }}>{deltaLabel(availableDelta)}</Text>
                 </View>
                 <View className="flex-1 rounded-xl bg-muted/40 p-2.5">
-                  <Text className="text-[10px] text-muted-foreground">Tổng lượt</Text>
-                  <Text className="text-sm font-bold text-foreground">{signed(entry.deltaBalance)} lượt</Text>
+                  <Text className="text-[10px] text-muted-foreground">{t('ledgerTable.columns.total')}</Text>
+                  <Text className="text-sm font-bold text-foreground">{deltaLabel(entry.deltaBalance)}</Text>
                 </View>
                 <View className="flex-1 rounded-xl bg-muted/40 p-2.5">
-                  <Text className="text-[10px] text-muted-foreground">Số dư sau</Text>
+                  <Text className="text-[10px] text-muted-foreground">{t('ledgerTable.columns.balanceAfter')}</Text>
                   <Text className="text-sm font-bold text-foreground">{entry.balanceAfter}</Text>
-                  <Text className="text-[10px] text-muted-foreground">{entry.balanceAfter - entry.reservedAfter} khả dụng</Text>
+                  <Text className="text-[10px] text-muted-foreground">{t('ledgerTable.availableAfter', { value: entry.balanceAfter - entry.reservedAfter })}</Text>
                 </View>
               </View>
               <View className="flex-row items-center justify-between">
-                <Text className="text-[11px] text-muted-foreground">Nguồn gốc: {getCreditSourceTypeLabel(entry.sourceType)} #{entry.sourceId}</Text>
+                <Text className="text-[11px] text-muted-foreground">
+                  {t('ledgerTable.columns.source')}: {getCreditSourceTypeLabel(entry.sourceType)} #{entry.sourceId}
+                </Text>
                 {isOrder ? (
                   <Pressable onPress={() => setDetailOrderId(String(entry.sourceId))} hitSlop={6}>
-                    <Text className="text-[11px] font-semibold text-primary">Xem đơn</Text>
+                    <Text className="text-[11px] font-semibold text-primary">{t('ledgerTable.viewOrder')}</Text>
                   </Pressable>
                 ) : null}
               </View>
             </View>
           );
         })}
-        <Pagination page={data.ledgerPage} totalPages={data.ledger?.totalPages ?? 1} total={data.ledger?.totalElements ?? 0} unit="biến động" onChange={(p) => void data.loadLedger(p)} />
+        <Pagination page={data.ledgerPage} totalPages={data.ledger?.totalPages ?? 1} total={data.ledger?.totalElements ?? 0} i18nKey="ledgerTable.pagination" onChange={(p) => void data.loadLedger(p)} />
       </View>
     );
   };
 
   const tabs: { key: SubTab; label: string; Icon: typeof Package }[] = [
-    { key: 'packages', label: 'Gói lượt', Icon: Package },
-    { key: 'orders', label: 'Đơn mua', Icon: ShoppingBag },
-    { key: 'ledger', label: 'Biến động', Icon: History },
+    { key: 'packages', label: t('page.tabsShort.packages'), Icon: Package },
+    { key: 'orders', label: t('page.tabsShort.orders'), Icon: ShoppingBag },
+    { key: 'ledger', label: t('page.tabsShort.ledger'), Icon: History },
   ];
 
   return (
@@ -362,11 +403,16 @@ export function MemberCreditsPanel({ onWalletChanged }: MemberCreditsPanelProps)
         <View className="flex-1">
           <View className="flex-row items-center" style={{ gap: 6 }}>
             <Coins size={18} color="#0D6EFD" />
-            <Text className="text-base font-semibold text-foreground">Ví lượt tư vấn</Text>
+            <Text className="text-base font-semibold text-foreground">{t('page.title')}</Text>
           </View>
-          <Text className="text-xs text-muted-foreground mt-0.5">Quản lý số dư lượt tư vấn, mua thêm lượt và theo dõi lịch sử giao dịch minh bạch.</Text>
+          <Text className="text-xs text-muted-foreground mt-0.5">{t('page.description')}</Text>
         </View>
-        <Pressable onPress={() => void data.refreshAll()} disabled={anyLoading} className="h-9 w-9 rounded-xl border border-border bg-white items-center justify-center active:opacity-80">
+        <Pressable
+          onPress={() => void data.refreshAll()}
+          disabled={anyLoading}
+          className="h-9 w-9 rounded-xl border border-border bg-white items-center justify-center active:opacity-80"
+          accessibilityLabel={t('page.refresh')}
+        >
           {anyLoading ? <ActivityIndicator size="small" color="#0D6EFD" /> : <RefreshCw size={16} color="#334155" />}
         </Pressable>
       </View>
@@ -374,12 +420,12 @@ export function MemberCreditsPanel({ onWalletChanged }: MemberCreditsPanelProps)
       {renderWallet()}
 
       <View className="flex-row bg-muted/60 p-1 rounded-xl">
-        {tabs.map((t) => {
-          const active = subTab === t.key;
+        {tabs.map((tab) => {
+          const active = subTab === tab.key;
           return (
-            <Pressable key={t.key} onPress={() => setSubTab(t.key)} className={`flex-1 py-2 rounded-lg flex-row items-center justify-center ${active ? 'bg-background shadow-xs' : ''}`} style={{ gap: 6 }}>
-              <t.Icon size={14} color={active ? '#0D6EFD' : '#64748B'} />
-              <Text className={`text-xs font-bold ${active ? 'text-foreground' : 'text-muted-foreground'}`}>{t.label}</Text>
+            <Pressable key={tab.key} onPress={() => setSubTab(tab.key)} className={`flex-1 py-2 rounded-lg flex-row items-center justify-center ${active ? 'bg-background shadow-xs' : ''}`} style={{ gap: 6 }}>
+              <tab.Icon size={14} color={active ? '#0D6EFD' : '#64748B'} />
+              <Text className={`text-xs font-bold ${active ? 'text-foreground' : 'text-muted-foreground'}`}>{tab.label}</Text>
             </Pressable>
           );
         })}
@@ -387,17 +433,17 @@ export function MemberCreditsPanel({ onWalletChanged }: MemberCreditsPanelProps)
 
       {subTab === 'packages' ? (
         <View style={{ gap: 12 }}>
-          <SectionTitle title="Danh sách gói lượt đang mở bán" description="Chọn gói lượt phù hợp để nạp thêm vào ví tư vấn của bạn." />
+          <SectionTitle title={t('page.packagesTitle')} description={t('page.packagesDescription')} />
           {renderPackages()}
         </View>
       ) : subTab === 'orders' ? (
         <View style={{ gap: 12 }}>
-          <SectionTitle title="Tổng kết & Lịch sử đơn mua" description="Theo dõi tổng quan số tiền đã nạp và chi tiết các đơn mua lượt tư vấn." />
+          <SectionTitle title={t('page.ordersTitle')} description={t('page.ordersSummaryDescription')} />
           {renderOrders()}
         </View>
       ) : (
         <View style={{ gap: 12 }}>
-          <SectionTitle title="Lịch sử biến động lượt" description="Nhật ký chi tiết các giao dịch mua, giữ lượt và sử dụng lượt tư vấn." />
+          <SectionTitle title={t('page.ledgerTitle')} description={t('page.ledgerDescription')} />
           {renderLedger()}
         </View>
       )}

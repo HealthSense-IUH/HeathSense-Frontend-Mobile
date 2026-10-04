@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import { AlertCircle, ArrowRight, AtSign, CircleX, Eye, EyeOff, Lock } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { LoginRequest } from '@/types/authentication';
 
 /** Màu theo thiết kế Stitch "Đăng nhập xác thực" (Clinical Clarity & Modern Pulse) */
@@ -79,6 +80,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   error,
   onNavigateToRegister,
 }) => {
+  const { t } = useTranslation('auth');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -90,11 +92,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   const handleSubmit = async () => {
     setLocalError(null);
     if (!email.trim()) {
-      setLocalError('Vui lòng nhập Email.');
+      setLocalError(t('validation.emailRequired'));
       return;
     }
     if (!password) {
-      setLocalError('Vui lòng nhập mật khẩu.');
+      setLocalError(t('validation.passwordRequired'));
       return;
     }
 
@@ -116,7 +118,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       }}
     >
       <Text className="text-xl font-bold tracking-tight mb-6" style={{ color: ON_SURFACE }}>
-        Đăng nhập tài khoản
+        {t('login.title')}
       </Text>
 
       {displayError ? (
@@ -129,9 +131,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       <View className="w-full" style={{ gap: 16 }}>
         <AuthField
           ref={emailInputRef}
-          label="Tài khoản / Email"
+          label={t('login.emailLabel')}
           icon={<AtSign size={20} color={ON_SURFACE_VARIANT} />}
-          placeholder="nhap.email@domain.com"
+          placeholder={t('login.emailPlaceholder')}
           keyboardType="email-address"
           autoCapitalize="none"
           autoCorrect={false}
@@ -149,7 +151,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                   emailInputRef.current?.focus();
                 }}
                 hitSlop={8}
-                accessibilityLabel="Xóa nội dung"
+                accessibilityLabel={t('login.clearInput')}
                 className="p-1"
               >
                 <CircleX size={18} color={OUTLINE} />
@@ -160,7 +162,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
         <AuthField
           ref={passwordInputRef}
-          label="Mật khẩu bảo vệ"
+          label={t('login.passwordLabel')}
           icon={<Lock size={20} color={ON_SURFACE_VARIANT} />}
           placeholder="••••••••••••"
           secureTextEntry={!showPassword}
@@ -174,7 +176,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             <Pressable
               onPress={() => setShowPassword(!showPassword)}
               hitSlop={8}
-              accessibilityLabel={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+              accessibilityLabel={showPassword ? t('password.hide') : t('password.show')}
               className="p-1"
             >
               {showPassword ? (
@@ -202,7 +204,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         >
           {isLoading ? <ActivityIndicator size="small" color="#FFFFFF" /> : null}
           <Text className="text-white text-sm font-semibold tracking-wide">
-            {isLoading ? 'Đang xử lý...' : 'Đăng nhập'}
+            {isLoading ? t('login.submitting') : t('login.submit')}
           </Text>
           {!isLoading ? <ArrowRight size={20} color="#FFFFFF" /> : null}
         </Pressable>
@@ -211,11 +213,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       {onNavigateToRegister && (
         <View className="flex-row items-center justify-center pt-5 mt-2">
           <Text className="text-xs" style={{ color: ON_SURFACE_VARIANT }}>
-            Chưa có tài khoản?
+            {t('login.noAccount')}
           </Text>
           <Pressable onPress={onNavigateToRegister} hitSlop={8}>
             <Text className="text-xs font-semibold ml-1" style={{ color: BRAND }}>
-              Đăng ký
+              {t('login.registerNow')}
             </Text>
           </Pressable>
         </View>

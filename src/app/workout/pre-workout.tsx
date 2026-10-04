@@ -23,10 +23,13 @@ import { WheelPicker, WheelPickerItem } from '@/components/ui/WheelPicker';
 import { useWorkoutCatalogStore } from '@/services/workout/workoutCatalogStore';
 import { useWorkoutEngineStore } from '@/services/workout/workoutEngineStore';
 import { WorkoutTargetType } from '@/services/workout/workoutTypes';
+import { getExerciseName } from '@/services/workout/workoutI18n';
 import { THEME } from '@/constants/theme';
+import { useTranslation } from 'react-i18next';
 
 export default function PreWorkoutScreen() {
   const router = useRouter();
+  const { t } = useTranslation('workout');
   const { exerciseId } = useLocalSearchParams<{ exerciseId: string }>();
 
   const exercises = useWorkoutCatalogStore((state) => state.exercises);
@@ -57,14 +60,14 @@ export default function PreWorkoutScreen() {
   const getDropdownLabel = () => {
     switch (targetType) {
       case 'DISTANCE':
-        return 'Mục tiêu quãng đường';
+        return t('preWorkout.target.distance');
       case 'TIME':
-        return 'Mục tiêu thời gian';
+        return t('preWorkout.target.time');
       case 'CALORIES':
-        return 'Mục tiêu calo';
+        return t('preWorkout.target.calories');
       case 'NONE':
       default:
-        return 'Không có mục tiêu';
+        return t('preWorkout.target.none');
     }
   };
 
@@ -127,7 +130,7 @@ export default function PreWorkoutScreen() {
 
   return (
     <ScreenWrapper
-      title={exercise?.name || 'Buổi tập'}
+      title={exercise ? getExerciseName(exercise) : t('common.workout')}
       statusBarStyle="dark"
       scrollable={false}
       className="bg-[#F2F4F7]"
@@ -193,7 +196,7 @@ export default function PreWorkoutScreen() {
               {targetType === 'NONE' && (
                 <View className="items-center justify-center py-4 px-6">
                   <Text className="text-slate-400 text-sm font-normal text-center leading-relaxed">
-                    Thúc đẩy việc tập luyện của bạn bằng mục tiêu tập luyện.
+                    {t('preWorkout.noTargetHint')}
                   </Text>
                 </View>
               )}
@@ -212,9 +215,9 @@ export default function PreWorkoutScreen() {
                       fontSize={34}
                     />
 
-                    {/* Comma separator */}
+                    {/* Decimal separator (locale-specific) */}
                     <Text className="text-3xl font-extrabold text-slate-900 mx-2 -mt-1">
-                      ,
+                      {t('common.decimalSeparator')}
                     </Text>
 
                     {/* Decimal KM Column (00-99) */}
@@ -290,7 +293,7 @@ export default function PreWorkoutScreen() {
                   className="flex-row items-center justify-between pt-3 mt-1 border-t border-slate-100"
                 >
                   <Text className="text-sm font-medium text-slate-800">
-                    Tạm dừng khi đạt mục tiêu
+                    {t('preWorkout.pauseOnTarget')}
                   </Text>
                   <Switch
                     value={pauseOnTarget}
@@ -309,7 +312,7 @@ export default function PreWorkoutScreen() {
               className="w-full py-4 rounded-full bg-[#E2E8F0] items-center justify-center active:bg-slate-300 shadow-xs"
             >
               <Text className="text-slate-950 font-bold text-base tracking-wide">
-                Bắt đầu
+                {t('preWorkout.start')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -350,7 +353,7 @@ export default function PreWorkoutScreen() {
               {targetType === 'NONE' && (
                 <View className="items-center justify-center px-6 my-auto">
                   <Text className="text-slate-400 text-xs font-normal text-center leading-relaxed">
-                    Thúc đẩy việc tập luyện của bạn bằng mục tiêu tập luyện.
+                    {t('preWorkout.noTargetHint')}
                   </Text>
                 </View>
               )}
@@ -409,7 +412,7 @@ export default function PreWorkoutScreen() {
                 className="flex-row items-center justify-between pt-4 border-t border-slate-100"
               >
                 <Text className="text-sm font-medium text-slate-800">
-                  Tạm dừng khi đạt mục tiêu
+                  {t('preWorkout.pauseOnTarget')}
                 </Text>
                 <Switch
                   value={pauseOnTarget}
@@ -430,7 +433,7 @@ export default function PreWorkoutScreen() {
             className="w-full py-4 rounded-full bg-slate-200/90 items-center justify-center active:bg-slate-300 shadow-sm"
           >
             <Text className="text-slate-950 font-bold text-base tracking-wide">
-              Bắt đầu
+              {t('preWorkout.start')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -474,7 +477,7 @@ export default function PreWorkoutScreen() {
                     : 'text-slate-800 font-medium'
                 }`}
               >
-                Không có mục tiêu
+                {t('preWorkout.target.none')}
               </Text>
               {targetType === 'NONE' && (
                 <Check color="#10B981" size={20} strokeWidth={2.6} />
@@ -498,7 +501,7 @@ export default function PreWorkoutScreen() {
                       : 'text-slate-800 font-medium'
                   }`}
                 >
-                  Mục tiêu quãng đường
+                  {t('preWorkout.target.distance')}
                 </Text>
                 {targetType === 'DISTANCE' && (
                   <Check color="#10B981" size={20} strokeWidth={2.6} />
@@ -522,7 +525,7 @@ export default function PreWorkoutScreen() {
                     : 'text-slate-800 font-medium'
                 }`}
               >
-                Mục tiêu thời gian
+                {t('preWorkout.target.time')}
               </Text>
               {targetType === 'TIME' && (
                 <Check color="#10B981" size={20} strokeWidth={2.6} />
@@ -545,7 +548,7 @@ export default function PreWorkoutScreen() {
                     : 'text-slate-800 font-medium'
                 }`}
               >
-                Mục tiêu calo
+                {t('preWorkout.target.calories')}
               </Text>
               {targetType === 'CALORIES' && (
                 <Check color="#10B981" size={20} strokeWidth={2.6} />

@@ -3,3 +3,4 @@ export * from './exerciseSeedData';
 export * from './workoutCatalogStore';
 export * from './workoutEngineStore';
 export * from './workoutApiService';
+export * from './workoutI18n';

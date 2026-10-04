@@ -2,17 +2,21 @@ import React, { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, HeartPulse, Search } from 'lucide-react-native';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
 import { nutritionApi } from '@/services/nutrition.service';
 import { GUIDANCE_STYLE, REFERENCE_SOURCES, formatNutrientAmount, getGroupIcon } from '@/constants/nutrition';
 import { DietAdviceBadge, FoodCard } from '@/components/features/nutrition/NutritionBadges';
+import { currentIntlLocale } from '@/i18n';
 import type { GuidanceType, ReferenceFoodSource } from '@/types/nutrition';
 
 const PAGE_SIZE = 20;
+type ReferenceColumn = 'energyKcal' | 'proteinG' | 'carbohydrateG' | 'fatTotalG';
 
 /** Toàn bộ thực phẩm tham chiếu (Việt Nam + USDA) của nhóm, có tìm theo tên và phân trang (giống web ReferenceFoodBrowser). */
 function ReferenceFoodBrowser({ groupId }: { groupId: string }) {
+  const { t } = useTranslation('nutrition');
   const router = useRouter();
   const [keyword, setKeyword] = useState('');
   const [query, setQuery] = useState('');
@@ -25,11 +29,12 @@ function ReferenceFoodBrowser({ groupId }: { groupId: string }) {
   });
   const items = data?.content ?? [];
   const totalPages = Math.max(1, data?.totalPages ?? 1);
+  const total = data?.totalElements ?? 0;
 
   const sources: { key?: ReferenceFoodSource; label: string }[] = [
-    { key: undefined, label: 'Tất cả' },
-    { key: 'VN_FCT', label: 'Việt Nam' },
-    { key: 'USDA_FNDDS', label: 'USDA' },
+    { key: undefined, label: t('referenceBrowser.allSources') },
+    { key: 'VN_FCT', label: REFERENCE_SOURCES.VN_FCT.short },
+    { key: 'USDA_FNDDS', label: REFERENCE_SOURCES.USDA_FNDDS.short },
   ];
 
   return (
@@ -44,7 +49,7 @@ function ReferenceFoodBrowser({ groupId }: { groupId: string }) {
             setQuery(keyword.trim());
           }}
           returnKeyType="search"
-          placeholder="Tên tiếng Việt hoặc tiếng Anh, ví dụ: rau muống, giò lụa, salmon..."
+          placeholder={t('referenceBrowser.placeholder')}
           placeholderTextColor="#94A3B8"
           className="flex-1 text-xs font-medium text-slate-900 h-full p-0"
           autoCorrect={false}
@@ -56,7 +61,7 @@ function ReferenceFoodBrowser({ groupId }: { groupId: string }) {
           }}
           className="px-2.5 h-8 rounded-lg bg-primary items-center justify-center active:opacity-90"
         >
-          <Text className="text-[11px] font-semibold text-white">Tìm</Text>
+          <Text className="text-[11px] font-semibold text-white">{t('referenceBrowser.search')}</Text>
         </Pressable>
       </View>
       <View className="flex-row" style={{ gap: 8 }}>
@@ -64,7 +69,7 @@ function ReferenceFoodBrowser({ groupId }: { groupId: string }) {
           const active = source === s.key;
           return (
             <Pressable
-              key={s.label}
+              key={s.key ?? 'ALL'}
               onPress={() => {
                 setSource(s.key);
                 setPage(1);
@@ -85,22 +90,24 @@ function ReferenceFoodBrowser({ groupId }: { groupId: string }) {
             }}
             className="px-3 py-1.5"
           >
-            <Text className="text-xs font-semibold text-primary">Xóa bộ lọc</Text>
+            <Text className="text-xs font-semibold text-primary">{t('common:actions.clearFilters')}</Text>
           </Pressable>
         ) : null}
       </View>
       <Text className="text-[11px] text-slate-500">
-        {isFetching ? 'Đang tải...' : `${(data?.totalElements ?? 0).toLocaleString('vi-VN')} kết quả${query ? ` cho “${query}”` : ''}`}
+        {isFetching
+          ? t('common:state.loading')
+          : `${t('referenceBrowser.resultCount', { value: total.toLocaleString(currentIntlLocale()), count: total })}${query ? ` ${t('referenceBrowser.forQuery')} “${query}”` : ''}`}
       </Text>
 
       {isLoading ? (
         <View className="py-10 items-center"><ActivityIndicator color="#0D6EFD" /></View>
       ) : error ? (
-        <Text className="text-xs text-rose-700">Không tải được dữ liệu dinh dưỡng.</Text>
+        <Text className="text-xs text-rose-700">{t('referenceBrowser.loadError')}</Text>
       ) : items.length === 0 ? (
         <View className="rounded-2xl border border-dashed border-slate-200 p-6 items-center" style={{ gap: 4 }}>
-          <Text className="text-sm font-semibold text-slate-700">Không tìm thấy thực phẩm phù hợp.</Text>
-          <Text className="text-xs text-slate-500 text-center">Thử tên tiếng Việt (có hoặc không dấu) hoặc tiếng Anh, ví dụ: rau muong, gio lua, chicken, rice.</Text>
+          <Text className="text-sm font-semibold text-slate-700">{t('referenceBrowser.empty')}</Text>
+          <Text className="text-xs text-slate-500 text-center">{t('referenceBrowser.emptyHint')}</Text>
         </View>
       ) : (
         <View style={{ gap: 8 }}>
@@ -119,14 +126,16 @@ function ReferenceFoodBrowser({ groupId }: { groupId: string }) {
                 </View>
               </View>
               <View className="flex-row" style={{ gap: 6 }}>
-                {[
-                  { label: 'Năng lượng', value: item.energyKcal, unit: 'kcal' },
-                  { label: 'Đạm', value: item.proteinG, unit: 'g' },
-                  { label: 'Tinh bột', value: item.carbohydrateG, unit: 'g' },
-                  { label: 'Chất béo', value: item.fatTotalG, unit: 'g' },
-                ].map((c) => (
-                  <View key={c.label} className="flex-1 rounded-lg bg-slate-50 px-2 py-1.5">
-                    <Text className="text-[10px] text-slate-500">{c.label}</Text>
+                {(
+                  [
+                    { column: 'energyKcal', value: item.energyKcal, unit: 'kcal' },
+                    { column: 'proteinG', value: item.proteinG, unit: 'g' },
+                    { column: 'carbohydrateG', value: item.carbohydrateG, unit: 'g' },
+                    { column: 'fatTotalG', value: item.fatTotalG, unit: 'g' },
+                  ] as { column: ReferenceColumn; value: number | null | undefined; unit: string }[]
+                ).map((c) => (
+                  <View key={c.column} className="flex-1 rounded-lg bg-slate-50 px-2 py-1.5">
+                    <Text className="text-[10px] text-slate-500">{t(`referenceBrowser.columns.${c.column}`)}</Text>
                     <Text className="text-xs font-semibold text-slate-800">{formatNutrientAmount(c.value)} <Text className="text-[9px] font-normal text-slate-500">{c.unit}</Text></Text>
                   </View>
                 ))}
@@ -138,12 +147,12 @@ function ReferenceFoodBrowser({ groupId }: { groupId: string }) {
 
       {totalPages > 1 ? (
         <View className="flex-row items-center justify-between mt-1">
-          <Text className="text-xs text-slate-500">Trang {page} / {totalPages}</Text>
+          <Text className="text-xs text-slate-500">{t('common:pagination.pageOf', { page, total: totalPages })}</Text>
           <View className="flex-row" style={{ gap: 8 }}>
-            <Pressable onPress={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1} className="h-9 w-9 rounded-xl border border-slate-200 bg-white items-center justify-center" style={{ opacity: page <= 1 ? 0.4 : 1 }}>
+            <Pressable onPress={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1} className="h-9 w-9 rounded-xl border border-slate-200 bg-white items-center justify-center" style={{ opacity: page <= 1 ? 0.4 : 1 }} aria-label={t('common:actions.prev')}>
               <ChevronLeft size={16} color="#334155" />
             </Pressable>
-            <Pressable onPress={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages} className="h-9 w-9 rounded-xl border border-slate-200 bg-white items-center justify-center" style={{ opacity: page >= totalPages ? 0.4 : 1 }}>
+            <Pressable onPress={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages} className="h-9 w-9 rounded-xl border border-slate-200 bg-white items-center justify-center" style={{ opacity: page >= totalPages ? 0.4 : 1 }} aria-label={t('common:actions.next')}>
               <ChevronRight size={16} color="#334155" />
             </Pressable>
           </View>
@@ -155,6 +164,7 @@ function ReferenceFoodBrowser({ groupId }: { groupId: string }) {
 
 /** Một nhóm thực phẩm (giống web CategoryView): các loại có khuyến nghị → biến thể; và toàn bộ thực phẩm tham chiếu của nhóm. */
 export default function NutritionGroupScreen() {
+  const { t } = useTranslation('nutrition');
   const router = useRouter();
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const [selectedType, setSelectedType] = useState<string | null>(null);
@@ -176,13 +186,17 @@ export default function NutritionGroupScreen() {
 
   return (
     <ScreenWrapper
-      title={selectedType ?? g?.name ?? 'Nhóm thực phẩm'}
-      description={selectedType ? `Các biến thể của ${selectedType} trong nhóm ${g?.name?.toLowerCase() ?? ''}` : g?.description || 'Khuyến nghị tim mạch và số liệu dinh dưỡng'}
+      title={selectedType ?? g?.name ?? t('category.allGroups')}
+      description={
+        selectedType
+          ? t('category.variantsSubtitle', { food: selectedType, group: g?.name?.toLowerCase() ?? '' })
+          : g?.description || t('category.defaultDescription')
+      }
       headerLeft={
         <Pressable
           onPress={() => (selectedType ? setSelectedType(null) : router.canGoBack() ? router.back() : router.replace('/nutrition' as any))}
           className="h-10 w-10 items-center justify-center bg-muted rounded-full active:opacity-70"
-          aria-label="Quay lại"
+          aria-label={t('common:actions.back')}
         >
           <ChevronLeft size={24} color="#0F172A" />
         </Pressable>
@@ -198,23 +212,23 @@ export default function NutritionGroupScreen() {
           <View className="py-16 items-center"><ActivityIndicator size="large" color="#0D6EFD" /></View>
         ) : !g ? (
           <View className="items-center py-10" style={{ gap: 10 }}>
-            <Text className="text-sm text-slate-500">Không tìm thấy nhóm thực phẩm.</Text>
+            <Text className="text-sm text-slate-500">{t('category.notFound')}</Text>
             <Pressable onPress={() => router.replace('/nutrition' as any)} className="h-10 px-4 rounded-xl bg-primary items-center justify-center">
-              <Text className="text-white text-xs font-bold">Tất cả nhóm thực phẩm</Text>
+              <Text className="text-white text-xs font-bold">{t('category.backToGroups')}</Text>
             </Pressable>
           </View>
         ) : selectedType ? (
           <>
             <View className="flex-row items-center justify-between">
-              <Text className="text-base font-bold text-slate-900 flex-1">Các lựa chọn của {selectedType}</Text>
+              <Text className="text-base font-bold text-slate-900 flex-1">{t('category.optionsTitle', { food: selectedType })}</Text>
               <Pressable onPress={() => setSelectedType(null)} className="flex-row items-center h-8 px-2.5 rounded-lg border border-slate-200 bg-white active:opacity-80" style={{ gap: 4 }}>
                 <ArrowLeft size={12} color="#334155" />
-                <Text className="text-[11px] font-medium text-slate-700">Loại khác</Text>
+                <Text className="text-[11px] font-medium text-slate-700">{t('category.otherTypesShort')}</Text>
               </Pressable>
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
               <Pressable onPress={() => setFilter('ALL')} className={`px-3 py-1.5 rounded-xl border ${filter === 'ALL' ? 'bg-slate-900 border-slate-900' : 'bg-white border-slate-200'}`}>
-                <Text className={`text-xs font-medium ${filter === 'ALL' ? 'text-white' : 'text-slate-600'}`}>Tất cả ({variants.length})</Text>
+                <Text className={`text-xs font-medium ${filter === 'ALL' ? 'text-white' : 'text-slate-600'}`}>{t('category.allWithCount', { count: variants.length })}</Text>
               </Pressable>
               {(['PRIORITIZE', 'CAUTION', 'LIMIT'] as GuidanceType[])
                 .filter((k) => counts[k] > 0)
@@ -230,7 +244,7 @@ export default function NutritionGroupScreen() {
                 })}
             </ScrollView>
             {shown.length === 0 ? (
-              <Text className="text-sm text-slate-500 text-center py-6">Không có món nào thuộc nhóm khuyến nghị này.</Text>
+              <Text className="text-sm text-slate-500 text-center py-6">{t('category.noVariants')}</Text>
             ) : (
               shown.map((food) => <FoodCard key={food.id} food={food} onPress={() => router.push(`/nutrition/food/${food.id}` as any)} />)
             )}
@@ -238,8 +252,8 @@ export default function NutritionGroupScreen() {
         ) : (
           <>
             <View>
-              <Text className="text-base font-bold text-slate-900">Tất cả thực phẩm trong nhóm ({(g.foodCount ?? 0).toLocaleString('vi-VN')})</Text>
-              <Text className="text-xs text-slate-500">Số liệu trên 100 g, từ bảng thành phần thực phẩm Việt Nam và USDA.</Text>
+              <Text className="text-base font-bold text-slate-900">{t('category.allFoodsTitle', { value: (g.foodCount ?? 0).toLocaleString(currentIntlLocale()) })}</Text>
+              <Text className="text-xs text-slate-500">{t('category.allFoodsDescription')}</Text>
             </View>
 
             {(foods.isLoading || foodNames.length > 0) && (
@@ -249,8 +263,8 @@ export default function NutritionGroupScreen() {
                     <HeartPulse size={18} color="#047857" />
                   </View>
                   <View className="flex-1">
-                    <Text className="text-sm font-semibold text-emerald-900">Có khuyến nghị cho tim mạch ({foodNames.length})</Text>
-                    <Text className="text-xs text-emerald-800/80">Chọn một loại để xem chi tiết.</Text>
+                    <Text className="text-sm font-semibold text-emerald-900">{t('category.recommendedTitle', { count: foodNames.length })}</Text>
+                    <Text className="text-xs text-emerald-800/80">{t('category.recommendedDescription')}</Text>
                   </View>
                 </View>
                 {foods.isLoading ? (
@@ -264,12 +278,16 @@ export default function NutritionGroupScreen() {
                         <View className="flex-row items-start justify-between" style={{ gap: 8 }}>
                           <Text className="font-semibold text-slate-900 text-sm flex-1">{fn}</Text>
                           <View className="px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200">
-                            <Text className="text-[11px] font-medium text-emerald-700">{vs.length} món</Text>
+                            <Text className="text-[11px] font-medium text-emerald-700">{t('category.itemCount', { count: vs.length })}</Text>
                           </View>
                         </View>
-                        {sample ? <Text className="text-xs text-slate-500 leading-4" numberOfLines={2}>Gồm có: {sample}{vs.length > 3 ? '...' : ''}</Text> : null}
+                        {sample ? (
+                          <Text className="text-xs text-slate-500 leading-4" numberOfLines={2}>
+                            {t('category.includes', { items: `${sample}${vs.length > 3 ? '...' : ''}` })}
+                          </Text>
+                        ) : null}
                         <View className="pt-2 border-t border-emerald-100 flex-row items-center justify-between">
-                          <Text className="text-xs text-emerald-700 font-medium">Xem các lựa chọn</Text>
+                          <Text className="text-xs text-emerald-700 font-medium">{t('category.viewOptions')}</Text>
                           <ArrowRight size={13} color="#047857" />
                         </View>
                       </Pressable>
@@ -283,7 +301,7 @@ export default function NutritionGroupScreen() {
 
             <Pressable onPress={() => (router.canGoBack() ? router.back() : router.replace('/nutrition' as any))} className="self-center h-10 px-4 rounded-xl border border-slate-200 bg-white flex-row items-center active:opacity-80" style={{ gap: 6 }}>
               <ArrowLeft size={14} color="#334155" />
-              <Text className="text-xs font-semibold text-slate-700">Khám phá nhóm thực phẩm khác</Text>
+              <Text className="text-xs font-semibold text-slate-700">{t('category.otherGroups')}</Text>
             </Pressable>
           </>
         )}

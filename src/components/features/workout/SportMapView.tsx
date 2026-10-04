@@ -12,6 +12,7 @@ import Svg, {
   Text as SvgText,
 } from 'react-native-svg';
 import { Layers, Crosshair, MapPin } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 interface SportMapViewProps {
   status?: 'searching' | 'detected';
   height?: number | string;
@@ -27,6 +28,7 @@ export const SportMapView: React.FC<SportMapViewProps> = ({
   onRecenter,
   onToggleLayer,
 }) => {
+  const { t } = useTranslation('workout');
   const [gpsStatus, setGpsStatus] = useState<'searching' | 'detected'>(status);
   const [layerType, setLayerType] = useState<'standard' | 'satellite'>('standard');
 
@@ -232,7 +234,7 @@ export const SportMapView: React.FC<SportMapViewProps> = ({
             className="mr-1.5"
           />
           <Text className="text-slate-800 text-xs font-semibold">
-            {gpsStatus === 'detected' ? 'Đã phát hiện' : 'Đang tìm kiếm...'}
+            {gpsStatus === 'detected' ? t('map.gpsDetected') : t('map.gpsSearching')}
           </Text>
         </View>
       </View>

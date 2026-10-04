@@ -1,18 +1,18 @@
 import React from 'react';
 import { View, Text, Pressable } from 'react-native';
-
-type FilterType = 'Ngày' | 'Tuần' | 'Tháng' | 'Năm';
-const FILTERS: FilterType[] = ['Ngày', 'Tuần', 'Tháng', 'Năm'];
+import { useTranslation } from 'react-i18next';
+import { STATISTICS_PERIODS, type StatisticsPeriod } from '@/hooks/useHealthStatistics';
 
 interface TimeFilterTabsProps {
-  activeFilter: FilterType;
-  onChange: (filter: FilterType) => void;
+  activeFilter: StatisticsPeriod;
+  onChange: (filter: StatisticsPeriod) => void;
 }
 
 export function TimeFilterTabs({ activeFilter, onChange }: TimeFilterTabsProps) {
+  const { t } = useTranslation('health');
   return (
     <View className="flex-row items-center justify-between mx-5 mt-4 p-1 bg-[#E9EEF7] rounded-2xl">
-      {FILTERS.map((filter) => (
+      {STATISTICS_PERIODS.map((filter) => (
         <Pressable
           key={filter}
           onPress={() => onChange(filter)}
@@ -25,7 +25,7 @@ export function TimeFilterTabs({ activeFilter, onChange }: TimeFilterTabsProps) 
               activeFilter === filter ? 'text-medical-500 font-bold' : 'text-slate-500 font-semibold'
             }`}
           >
-            {filter}
+            {t(`analysis.filter.${filter}`)}
           </Text>
         </Pressable>
       ))}

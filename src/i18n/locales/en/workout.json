@@ -1,0 +1,251 @@
+{
+  "common": {
+    "workout": "Workout",
+    "exercise": "Exercise",
+    "all": "All",
+    "exit": "Exit",
+    "decimalSeparator": "."
+  },
+  "weekdays": {
+    "short": {
+      "0": "S",
+      "1": "M",
+      "2": "T",
+      "3": "W",
+      "4": "T",
+      "5": "F",
+      "6": "S"
+    },
+    "abbr": {
+      "0": "Sun",
+      "1": "Mon",
+      "2": "Tue",
+      "3": "Wed",
+      "4": "Thu",
+      "5": "Fri",
+      "6": "Sat"
+    }
+  },
+  "months": {
+    "short": {
+      "1": "Jan",
+      "2": "Feb",
+      "3": "Mar",
+      "4": "Apr",
+      "5": "May",
+      "6": "Jun",
+      "7": "Jul",
+      "8": "Aug",
+      "9": "Sep",
+      "10": "Oct",
+      "11": "Nov",
+      "12": "Dec"
+    },
+    "long": {
+      "1": "January",
+      "2": "February",
+      "3": "March",
+      "4": "April",
+      "5": "May",
+      "6": "June",
+      "7": "July",
+      "8": "August",
+      "9": "September",
+      "10": "October",
+      "11": "November",
+      "12": "December"
+    }
+  },
+  "date": {
+    "dayMonth": "{{monthShort}} {{day}}",
+    "weekRange": "{{monthShort}} {{startDay}} - {{endDay}}",
+    "monthYear": "{{monthLong}} {{year}}",
+    "dayHeader": "{{prefix}}, {{monthShort}} {{day}}",
+    "dateTime": "{{weekday}}, {{monthShort}} {{day}}, {{year}} {{time}}"
+  },
+  "categories": {
+    "GENERAL": "General",
+    "AEROBIC": "Cardio",
+    "FREE_WEIGHT": "Free weights",
+    "MACHINE_WEIGHT": "Weight machines",
+    "WILDERNESS": "Outdoor",
+    "WATER": "Water",
+    "WINTER": "Winter",
+    "BALL": "Ball sports"
+  },
+  "trackingTypes": {
+    "TIME_CALORIES": "Time & calories (no GPS)",
+    "DISTANCE_GPS": "Distance, speed & route (GPS)",
+    "SETS_REST": "Sets & rest"
+  },
+  "exercises": {
+    "walking": "Walking",
+    "combined_workout": "Combined workout",
+    "stretching": "Stretching",
+    "yoga": "Yoga",
+    "calisthenics": "Calisthenics",
+    "running": "Running",
+    "cycling": "Cycling",
+    "treadmill": "Treadmill",
+    "elliptical": "Elliptical",
+    "jump_rope": "Jump rope",
+    "burpee": "Burpees",
+    "aerobic_dance": "Aerobics",
+    "push_up": "Push-ups",
+    "squats": "Squats",
+    "lunges": "Lunges",
+    "crunches": "Crunches",
+    "dumbbell_curl": "Dumbbell curls",
+    "pull_up": "Pull-ups",
+    "lat_pulldown": "Lat pulldown",
+    "leg_press": "Leg press",
+    "chest_press_machine": "Chest press machine",
+    "hiking": "Hiking",
+    "trail_running": "Trail running",
+    "pool_swimming": "Pool swimming",
+    "open_water_swimming": "Open water swimming",
+    "skiing": "Skiing",
+    "ice_skating": "Ice skating",
+    "badminton": "Badminton",
+    "table_tennis": "Table tennis",
+    "soccer": "Soccer",
+    "volleyball": "Volleyball"
+  },
+  "hub": {
+    "title": "Workout hub",
+    "banner": "Track your fitness level to get content and goals tailored to your training focus.",
+    "steps": "Steps",
+    "stepsTarget": "{{value}} steps",
+    "runningCoach": "Running coach",
+    "beta": "Beta",
+    "runningLevelTitle": "Find your running level",
+    "runningLevelDescription": "Get a detailed training plan to reach your running goals."
+  },
+  "weekly": {
+    "title": "This week's workouts",
+    "sessions_one": "{{count}} session",
+    "sessions_other": "{{count}} sessions"
+  },
+  "favorites": {
+    "title": "Workouts",
+    "more": "More",
+    "empty": "Pick your favorite workouts so you can reach them quickly."
+  },
+  "catalog": {
+    "title": "Your workouts",
+    "favorites": "Favorites",
+    "others": "Other workouts",
+    "addMenuTitle": "Add a workout",
+    "chooseFromList": "Choose from the exercise list",
+    "createExercise": "Create a new workout",
+    "createRoutine": "Create a routine",
+    "maxFavorites": "You can't have more than 3 favorite workouts."
+  },
+  "select": {
+    "title": "Choose an exercise",
+    "searchPlaceholder": "Search exercises...",
+    "empty": "No matching exercises found"
+  },
+  "createExercise": {
+    "nameLabel": "Exercise name",
+    "namePlaceholder": "Exercise name",
+    "nameRequired": "Please enter an exercise name",
+    "trackingLabel": "Data to track",
+    "categoryLabel": "Category",
+    "customDescription": "Custom exercise created by you."
+  },
+  "createRoutine": {
+    "defaultName": "My routine {{n}}",
+    "subtitle": "Combine a series of exercises into a custom routine.",
+    "namePlaceholder": "Enter routine name...",
+    "nameRequired": "Please enter a routine name",
+    "savedTitle": "Saved",
+    "savedMessage": "Your routine has been saved.",
+    "exercisesSection": "Exercises",
+    "warmup": "Warm-up",
+    "warmupHint": "3-minute joint warm-up",
+    "cooldown": "Cool-down",
+    "cooldownHint": "3-minute stretch & recovery",
+    "setsReps": "{{sets}} sets • {{reps}} reps",
+    "seconds": "{{value}} sec",
+    "addExercise": "Add exercise",
+    "pickerTitle": "Add an exercise to the routine"
+  },
+  "preWorkout": {
+    "target": {
+      "none": "No goal",
+      "distance": "Distance goal",
+      "time": "Time goal",
+      "calories": "Calorie goal"
+    },
+    "noTargetHint": "Push your workout further with a training goal.",
+    "pauseOnTarget": "Pause when goal is reached",
+    "start": "Start"
+  },
+  "active": {
+    "remainingDistance": "Distance left | {{value}} km",
+    "remainingTime": "Time left | {{value}}",
+    "remainingCalories": "Calories left | {{value}} kcal",
+    "goalReached": "Goal reached!",
+    "duration": "Duration",
+    "distance": "Distance",
+    "calories": "Calories",
+    "pace": "Pace",
+    "cadence": "Cadence",
+    "heartRate": "Heart rate",
+    "speed": "Speed",
+    "steps": "Steps",
+    "pause": "Pause",
+    "resume": "Resume",
+    "finish": "Finish",
+    "screenLocked": "Screen locked",
+    "tapToUnlock": "Tap here to unlock",
+    "exitTitle": "Stop this workout?",
+    "exitMessage": "Are you sure you want to leave the current session? Workout data will not be saved unless you finish it.",
+    "keepGoing": "Keep going"
+  },
+  "summary": {
+    "details": "Workout details",
+    "totalTime": "Total time",
+    "distance": "Distance",
+    "activeCalories": "Active calories",
+    "totalCalories": "Total calories",
+    "avgHeartRate": "Avg heart rate",
+    "notePlaceholder": "Notes"
+  },
+  "history": {
+    "title": "Workouts",
+    "tabs": {
+      "days": "Days",
+      "weeks": "Weeks",
+      "months": "Months"
+    },
+    "monthRange": "{{startMonthShort}} - {{endMonthShort}} {{year}}",
+    "monthColumn": "{{monthShort}}",
+    "caloriesLabel": "Calories",
+    "sessionsLabel": "sessions",
+    "axisDuration": "(h:m)",
+    "axisDistance": "(km)",
+    "otherData": "Other data in this period",
+    "avgHeartRate": "Avg heart rate",
+    "steps": "Steps",
+    "caloriesBurned": "Calories burned"
+  },
+  "calendar": {
+    "monthYear": "{{monthLong}} {{year}}"
+  },
+  "map": {
+    "gpsDetected": "Location found",
+    "gpsSearching": "Searching..."
+  },
+  "afib": {
+    "workoutInProgress": {
+      "title": "AFib screening paused",
+      "message": "You are in the middle of a workout. To keep the reading medically accurate and avoid false alerts caused by movement, AFib screening is paused while you exercise. Please finish your workout before measuring."
+    },
+    "cooldown": {
+      "title": "Heart recovery period (10 minutes)",
+      "message": "You just finished a workout. To let your heart rate settle and avoid false alerts from post-exercise sinus recovery, please rest quietly for another {{time}} before starting AFib screening."
+    }
+  }
+}

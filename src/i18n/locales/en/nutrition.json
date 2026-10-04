@@ -1,0 +1,227 @@
+{
+  "common": {
+    "comingSoon": "Coming soon"
+  },
+  "dietRules": {
+    "summary": {
+      "ALCOHOL": "Alcohol is the clearest trigger of atrial fibrillation episodes: anything containing alcohol is red.",
+      "CAFFEINE": "High doses of caffeine speed up the heart rate: above the threshold is yellow.",
+      "SUGARS": "Based on total sugars (no data on added sugars yet); does not apply to fruit and milk.",
+      "NA_K_RATIO": "Potassium equal to or higher than sodium helps stabilize heart rhythm; a salty food with many times more sodium than potassium is red.",
+      "SODIUM": "Too much salt causes fluid retention and puts more strain on the heart.",
+      "SATURATED_FAT": "A lot of saturated fat raises cardiovascular risk.",
+      "MAGNESIUM": "Rich in magnesium yet low in salt (nuts, beans, whole grains) is a plus for the heart.",
+      "VITAMIN_K": "On warfarin: no need to avoid it, but keep your vitamin K intake consistent every day."
+    },
+    "describe": {
+      "naKLimit": "red when Na/K is above {{value}}",
+      "naKLimitWithSodium": "red when Na/K is above {{value}} and sodium is above {{sodium}} mg",
+      "naKGood": "good when Na/K is {{value}} or lower",
+      "magnesiumGood": "Good when at least {{value}} {{unit}} per 100 g",
+      "magnesiumGoodWithSodium": "Good when at least {{value}} {{unit}} per 100 g and sodium is no more than {{sodium}} mg",
+      "limit": "red when above {{value}} {{unit}}",
+      "caution": "yellow when above {{value}} {{unit}}",
+      "per100g": "{{text}} (per 100 g)"
+    }
+  },
+  "sources": {
+    "vnFct": {
+      "short": "Vietnam",
+      "label": "Vietnamese Food Composition Table 2007",
+      "citation": "National Institute of Nutrition - Ministry of Health (2007). Vietnamese Food Composition Table. Medical Publishing House, Hanoi."
+    },
+    "usdaFndds": {
+      "short": "USDA",
+      "label": "USDA FNDDS 2021-2023",
+      "citation": "U.S. Department of Agriculture, Agricultural Research Service. FoodData Central: FNDDS 2021-2023."
+    }
+  },
+  "home": {
+    "title": "Diet & Nutrition",
+    "description": "Food suggestions for heart health and atrial fibrillation.",
+    "tabs": {
+      "foods": "Food lookup",
+      "diet": "Diet prescription",
+      "scan": "Calorie estimate"
+    },
+    "scan": {
+      "title": "Snap a photo of your meal, estimate calories",
+      "description": "Take a photo of your meal and answer a few questions about the portion, and HealthSense will estimate the energy and main nutrients.",
+      "highlights": {
+        "recognize": "Recognize dishes from photos",
+        "portion": "Ask about portion size and cooking method for a closer estimate",
+        "calculate": "Calculate calories, protein, carbohydrates and fat from the nutrition database"
+      },
+      "note": "Results are only estimates and do not replace weighing food or nutrition counseling."
+    },
+    "disclaimer": "<strong>Medical note:</strong> The nutrition recommendations on HealthSense are based on clinical guidelines from the American College of Cardiology/American Heart Association (ACC/AHA) and systematic medical reviews. No food can cure or fully prevent atrial fibrillation on its own. Any major change in diet or use of supplements should be discussed with your treating physician."
+  },
+  "dietAdvice": {
+    "level": {
+      "GOOD": "Good for heart rhythm",
+      "OK": "No concerns",
+      "CAUTION": "Use caution",
+      "LIMIT": "Should limit",
+      "UNKNOWN": "Insufficient data"
+    },
+    "noteTitle": "{{level}} according to your doctor's diet prescription",
+    "noReasons": "Nothing to watch out for, but nothing that stands out for heart rhythm either (more potassium than sodium, or rich in magnesium yet low in salt).",
+    "notPersonalized": "Your doctor has not prescribed a personal diet for you yet. Once your doctor prescribes one during a consultation, the rating will include their instructions."
+  },
+  "dietPrescription": {
+    "rule": "{{text}}.",
+    "ruleCustom": "{{text}} (set by your doctor specifically for you).",
+    "legend": {
+      "GOOD": "No downsides and something good for heart rhythm.",
+      "OK": "Breaks no rules, but has no standout benefits either.",
+      "CAUTION": "Fine to eat, watch the amount.",
+      "LIMIT": "Should be limited or avoided.",
+      "UNKNOWN": "The data source lacks the figures needed for a rating."
+    },
+    "loadError": "Could not load the diet prescription.",
+    "title": "Your diet prescription",
+    "subtitle": "Prescribed by your doctor during a consultation. Foods are color-rated according to the rules below.",
+    "subtitleUpdated": "Prescribed by your doctor during a consultation (updated {{date}}). Foods are color-rated according to the rules below.",
+    "subtitleEmpty": "Your doctor has not prescribed any diet rules for you yet, so foods are not color-rated; only nutrition figures are shown.",
+    "searchFoods": "Look up foods",
+    "doctorNote": "Additional notes from your doctor",
+    "legendTitle": "How to read food colors",
+    "legendNote": "If anything is red, the food is red; if nothing is red but something is yellow, it is yellow. Open each food to see why. The rating only compares the per-100 g figures against the thresholds and does not replace direct advice from your doctor."
+  },
+  "foodCard": {
+    "highlights": "Key nutrients (per 100g):",
+    "per100g": "Per 100g",
+    "viewDetail": "View details"
+  },
+  "search": {
+    "placeholder": "Search foods (e.g. coffee, low-fat milk, salmon, banana, beer)...",
+    "clear": "Clear search",
+    "results": "Food results ({{count}})",
+    "searching": "Searching...",
+    "noResults": "No foods found matching “{{query}}”.",
+    "suggestions": "Try keywords such as: milk, salmon, coffee, banana..."
+  },
+  "foods": {
+    "groupFoodCount": "{{value}} foods",
+    "groupFoodCount_one": "{{value}} food",
+    "groupGuidanceDescription": "{{count}} items with heart-health recommendations.",
+    "groupGuidanceDescription_one": "{{count}} item with heart-health recommendations.",
+    "groupDefaultDescription": "Look up nutrition data for this group.",
+    "exploreWithGuidance": "Explore types · {{count}} with recommendations",
+    "explore": "Explore types",
+    "groupsLoadError": "Could not load the food groups.",
+    "sectionTitle": "Explore by food group",
+    "sectionDescription": "Pick a group to see recommendations."
+  },
+  "guidance": {
+    "PRIORITIZE": "Recommended",
+    "LIMIT": "Should limit",
+    "CAUTION": "Use caution",
+    "reference": "For reference"
+  },
+  "nutrientShort": {
+    "energy": "Energy",
+    "protein": "Protein",
+    "carbohydrate": "Carbs",
+    "fiber": "Fiber",
+    "fiberCrude": "Crude fiber",
+    "sugars": "Sugars",
+    "fatTotal": "Total fat",
+    "fatSaturated": "Saturated fat",
+    "fatMonounsaturated": "Monounsaturated fat",
+    "fatPolyunsaturated": "Polyunsaturated fat",
+    "cholesterol": "Cholesterol",
+    "sodium": "Sodium",
+    "potassium": "Potassium",
+    "magnesium": "Magnesium",
+    "caffeine": "Caffeine",
+    "alcohol": "Alcohol",
+    "vitaminK": "Vitamin K",
+    "epa": "Omega-3 EPA",
+    "dha": "Omega-3 DHA"
+  },
+  "referenceBrowser": {
+    "columns": {
+      "energyKcal": "Energy",
+      "proteinG": "Protein",
+      "carbohydrateG": "Carbs",
+      "fatTotalG": "Fat"
+    },
+    "allSources": "All",
+    "placeholder": "Vietnamese or English name, e.g. rau muống, giò lụa, salmon...",
+    "search": "Search",
+    "resultCount": "{{value}} results",
+    "resultCount_one": "{{value}} result",
+    "forQuery": "for",
+    "loadError": "Could not load nutrition data.",
+    "empty": "No matching foods found.",
+    "emptyHint": "Try a Vietnamese name (with or without diacritics) or an English one, e.g. rau muong, gio lua, chicken, rice."
+  },
+  "category": {
+    "notFound": "Food group not found.",
+    "backToGroups": "All food groups",
+    "allGroups": "Food groups",
+    "defaultDescription": "Heart-health recommendations and nutrition data",
+    "variantsSubtitle": "Variants of {{food}} in the {{group}} group",
+    "recommendedTitle": "With heart-health recommendations ({{count}})",
+    "recommendedDescription": "Pick a type to see details.",
+    "itemCount": "{{count}} items",
+    "itemCount_one": "{{count}} item",
+    "includes": "Includes: {{items}}",
+    "viewOptions": "View options",
+    "optionsTitle": "Options for {{food}}",
+    "otherTypesShort": "Other types",
+    "allWithCount": "All ({{count}})",
+    "noVariants": "No items in this recommendation group.",
+    "allFoodsTitle": "All foods in this group ({{value}})",
+    "allFoodsDescription": "Per 100 g, from the Vietnamese and USDA food composition tables.",
+    "otherGroups": "Explore other food groups"
+  },
+  "databaseFood": {
+    "title": "Food",
+    "defaultPortion": "Typical serving",
+    "notFoundTitle": "Food not found",
+    "notFoundDescription": "This food is not in the nutrition database.",
+    "sourceCode": "{{source}} · code {{code}}",
+    "sourceCategory": "Original category: {{category}}",
+    "wastePct": "Refuse (waste) during preparation: <strong>{{value}}%</strong>. The figures below are for the edible portion.",
+    "nutritionTitle": "Nutrition facts",
+    "calculatingFor": "Calculated for <strong>{{grams}} g</strong>.",
+    "calculatingForPortion": "Calculated for <strong>{{grams}} g</strong> ({{portion}}).",
+    "footer": {
+      "vnFct": "Figures are per 100 g of edible portion. Nutrients with no data in the book are not shown. Fiber in this table is crude fiber (cellulose), which differs from USDA dietary fiber.",
+      "usda": "Servings and figures follow USDA FNDDS and reflect foods common in the US; actual servings in Vietnam may differ.",
+      "disclaimer": "These are reference figures; the color rating (if you have a diet prescription) only compares the figures with the rules your doctor prescribed and does not replace advice from a doctor or dietitian."
+    },
+    "citation": "Source: {{citation}}"
+  },
+  "foodDetail": {
+    "title": "Food details",
+    "notFoundTitle": "Food not found",
+    "notFoundDescription": "The food you are looking for does not exist or has been updated.",
+    "evidenceType": {
+      "GUIDELINE": "Clinical guideline",
+      "SYSTEMATIC_REVIEW": "Systematic review",
+      "META_ANALYSIS": "Meta-analysis",
+      "RCT": "Randomized controlled trial (RCT)",
+      "OTHER": "Clinical review"
+    },
+    "fnddsSource": "FNDDS reference: {{source}}",
+    "type": "Type: {{name}}",
+    "standardServing": "Standard amount: 100 g",
+    "nutritionTitle": "Nutrition facts",
+    "nutritionSubtitle": "Per 100g of food (based on the USDA FNDDS 2021-2023 database)",
+    "collapseNutrients": "Hide micronutrients",
+    "showMoreNutrients": "Show {{count}} more detailed nutrients",
+    "showMoreNutrients_one": "Show {{count}} more detailed nutrient",
+    "healthMeaning": "What it means for your health",
+    "cardiovascular": "Heart health & Blood pressure",
+    "af": "Atrial fibrillation & Heart rhythm",
+    "medication": "Notes when taking medication",
+    "evidenceTitle": "References & Medical evidence",
+    "evidenceDescription": "The nutrition recommendations above are cross-checked against clinical guidelines and established medical trials.",
+    "year": "Year {{year}}",
+    "viewSource": "View original source",
+    "footer": "Nutrition data is taken from the USDA Food and Nutrient Database for Dietary Studies (FNDDS 2021-2023). Information about atrial fibrillation and heart health is for health education only and does not replace a diagnosis or treatment plan from a cardiologist."
+  }
+}

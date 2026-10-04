@@ -12,15 +12,14 @@ import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
 import { ExerciseIcon } from '@/components/features/workout/ExerciseIcon';
 import { CreateExerciseModal } from '@/components/features/workout/CreateExerciseModal';
 import { useWorkoutCatalogStore } from '@/services/workout/workoutCatalogStore';
-import {
-  ExerciseCategory,
-  EXERCISE_CATEGORY_LABELS,
-  Exercise,
-} from '@/services/workout/workoutTypes';
+import { ExerciseCategory, Exercise } from '@/services/workout/workoutTypes';
+import { getCategoryLabel, getExerciseName } from '@/services/workout/workoutI18n';
 import { THEME } from '@/constants/theme';
+import { useTranslation } from 'react-i18next';
 
 export default function SelectExerciseScreen() {
   const router = useRouter();
+  const { t } = useTranslation('workout');
   const params = useLocalSearchParams<{ mode?: string }>();
   const isRoutinePicker = params.mode === 'routine';
 
@@ -44,9 +43,11 @@ export default function SelectExerciseScreen() {
 
   const filteredExercises = exercises.filter((ex) => {
     const matchesCategory = selectedCategory === 'ALL' || ex.category === selectedCategory;
+    const query = searchQuery.toLowerCase().trim();
     const matchesSearch =
-      searchQuery.trim().length === 0 ||
-      ex.name.toLowerCase().includes(searchQuery.toLowerCase().trim());
+      query.length === 0 ||
+      getExerciseName(ex).toLowerCase().includes(query) ||
+      ex.name.toLowerCase().includes(query);
     return matchesCategory && matchesSearch;
   });
 
@@ -65,7 +66,7 @@ export default function SelectExerciseScreen() {
 
   return (
     <ScreenWrapper
-      title="Chọn bài tập"
+      title={t('select.title')}
       headerLeft={
         <TouchableOpacity
           onPress={() => router.back()}
@@ -92,7 +93,7 @@ export default function SelectExerciseScreen() {
               <TextInput
                 value={searchQuery}
                 onChangeText={setSearchQuery}
-                placeholder="Tìm kiếm bài tập..."
+                placeholder={t('select.searchPlaceholder')}
                 placeholderTextColor="#94A3B8"
                 autoFocus
                 className="flex-1 ml-2.5 text-slate-800 text-base font-medium"
@@ -115,7 +116,7 @@ export default function SelectExerciseScreen() {
           >
             {categories.map((cat) => {
               const isSelected = selectedCategory === cat;
-              const label = cat === 'ALL' ? 'Tất cả' : EXERCISE_CATEGORY_LABELS[cat];
+              const label = cat === 'ALL' ? t('common.all') : getCategoryLabel(cat);
 
               return (
                 <TouchableOpacity
@@ -147,7 +148,7 @@ export default function SelectExerciseScreen() {
             {filteredExercises.length === 0 ? (
               <View className="p-8 items-center justify-center">
                 <Text className="text-slate-400 text-sm font-medium">
-                  Không tìm thấy bài tập phù hợp
+                  {t('select.empty')}
                 </Text>
               </View>
             ) : (
@@ -180,7 +181,7 @@ export default function SelectExerciseScreen() {
                       className="text-base font-semibold text-slate-800 flex-1"
                       numberOfLines={1}
                     >
-                      {exercise.name}
+                      {getExerciseName(exercise)}
                     </Text>
                   </TouchableOpacity>
                 );
@@ -199,7 +200,7 @@ export default function SelectExerciseScreen() {
           >
             <Plus color="#10B981" size={20} className="mr-2" />
             <Text className="text-white font-bold text-base">
-              Tạo bài tập thể dục mới
+              {t('catalog.createExercise')}
             </Text>
           </TouchableOpacity>
         </View>

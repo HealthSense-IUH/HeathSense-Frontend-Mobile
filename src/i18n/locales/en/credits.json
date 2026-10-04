@@ -1,0 +1,301 @@
+{
+  "orderStatus": {
+    "paid": "Paid",
+    "pendingPayment": "Awaiting payment",
+    "cancelled": "Cancelled",
+    "expired": "Expired",
+    "requiresReview": "Under review"
+  },
+  "reservationStatus": {
+    "held": "Credit on hold",
+    "captured": "Credit used",
+    "released": "Credit returned",
+    "none": "No hold"
+  },
+  "paymentStatus": {
+    "creating": "Initializing",
+    "pending": "Awaiting payment",
+    "paid": "Paid",
+    "cancelled": "Cancelled",
+    "expired": "Expired",
+    "requiresReview": "Under review"
+  },
+  "paymentProvider": {
+    "mock": {
+      "label": "Simulated payment",
+      "description": "System testing, no real money is charged"
+    },
+    "payos": {
+      "label": "PayOS payment gateway",
+      "description": "PayOS online payment gateway"
+    },
+    "fallbackDescription": "Payment method"
+  },
+  "operation": {
+    "purchase": {
+      "label": "Credit purchase",
+      "description": "Credits added when a purchase order is paid"
+    },
+    "reserve": {
+      "label": "Consultation credit hold",
+      "description": "Credit held when joining a consultation session"
+    },
+    "capture": {
+      "label": "Credit used",
+      "description": "Held consultation credit consumed"
+    },
+    "release": {
+      "label": "Hold released",
+      "description": "Held credit returned to available balance"
+    },
+    "sessionCharge": {
+      "label": "Credit used at session start",
+      "description": "Consultation credit consumed when you confirm the session start"
+    },
+    "adjustment": {
+      "label": "Adjustment",
+      "description": "Credits adjusted by an administrator"
+    },
+    "sessionRefund": {
+      "label": "Credit refund",
+      "description": "Session consultation credit refunded"
+    },
+    "fallbackLabel": "Other",
+    "fallbackDescription": "Credit change"
+  },
+  "sourceType": {
+    "purchaseOrder": "Purchase order",
+    "consultationRequest": "Consultation request",
+    "consultationSession": "Consultation session",
+    "adminAdjustment": "Admin adjustment",
+    "fallback": "Other source"
+  },
+  "errorCode": {
+    "c1003": "Your account is currently inactive. Please contact an administrator.",
+    "c1201": "Invalid request information.",
+    "c1203": "The data sent to the server is not in the correct format.",
+    "c3001": "A data constraint was violated.",
+    "c4008": "Member information not found.",
+    "c4100": "Insufficient consultation credit balance for this action.",
+    "c4103": "Request key conflict (Idempotency Key). Please try again with a new request.",
+    "c4104": "Your credit wallet balance has reached the maximum allowed. Please contact support.",
+    "c4105": "This consultation credit package is unavailable or no longer on sale.",
+    "c4106": "Credit purchase order not found, or it does not belong to you.",
+    "c4108": "Purchasing consultation credits is temporarily unavailable.",
+    "c4109": "Credit package not found.",
+    "c4110": "This package was modified by another administrator. Please reload the latest data.",
+    "c4111": "This consultation session is not eligible for a credit refund.",
+    "c9999": "The system is under maintenance or encountered a processing error. Please try again later."
+  },
+  "confirmError": {
+    "c4100": "Not enough credits at session start. Please top up your credits.",
+    "c4026": "Consultation invitation not found or it has been withdrawn.",
+    "c4027": "The consultation invitation is outdated or no longer valid.",
+    "c4028": "The consultation invitation's confirmation window has expired.",
+    "c4009": "The consultation request can no longer be confirmed.",
+    "c4014": "The doctor is no longer eligible for this session. Reassigning...",
+    "c4002": "This consultation request does not belong to your account.",
+    "c4004": "You already have another active consultation session."
+  },
+  "display": {
+    "unknown": "Unknown",
+    "creditUsed": "Consultation credit used",
+    "chargedOnConfirm": "A credit will be deducted when you confirm the session start",
+    "held": "Credit on hold",
+    "released": "Credit returned"
+  },
+  "quantity": {
+    "credits": "{{value}} credits",
+    "credits_one": "{{value}} credit",
+    "credits_other": "{{value}} credits"
+  },
+  "page": {
+    "title": "Consultation credit wallet",
+    "description": "Manage your consultation credit balance, buy more credits and track a transparent transaction history.",
+    "refresh": "Refresh wallet & packages",
+    "tabs": {
+      "packages": "Credit packages",
+      "orders": "Order history",
+      "ledger": "Credit activity"
+    },
+    "tabsShort": {
+      "packages": "Packages",
+      "orders": "Orders",
+      "ledger": "Activity"
+    },
+    "packagesTitle": "Credit packages on sale",
+    "packagesDescription": "Choose a suitable package to top up your consultation wallet.",
+    "ordersTitle": "Summary & order history",
+    "ordersSummaryDescription": "Track an overview of the amount paid and the details of your consultation credit orders.",
+    "ledgerTitle": "Credit activity history",
+    "ledgerDescription": "Detailed log of purchases, credit holds and consultation credit usage."
+  },
+  "wallet": {
+    "loadError": "Unable to load credit wallet information",
+    "availableTitle": "Available consultation credits",
+    "unit": "credits",
+    "unit_one": "credit",
+    "unit_other": "credits",
+    "readyHint": "Ready to start an online health consultation",
+    "reservedHint": "({{count}} credits on hold for the current session)",
+    "reservedHint_one": "({{count}} credit on hold for the current session)",
+    "reservedHint_other": "({{count}} credits on hold for the current session)"
+  },
+  "purchase": {
+    "errors": {
+      "missingInfo": "Missing package information or login session.",
+      "inFlight": "The transaction is already being processed.",
+      "creatingNotice": "The transaction is being initialized. Please check again later.",
+      "insecureCheckoutUrl": "The payment link from the payment gateway is not secure (HTTPS required).",
+      "insecureLink": "The payment link is not secure.",
+      "requiresReview": "The transaction has been recorded and is being reviewed by the system.",
+      "featureDisabled": "Purchasing consultation credits is temporarily unavailable.",
+      "idempotencyConflict": "Transaction key conflict (Idempotency). Please retry with the same package or check your order history.",
+      "packageUnavailable": "This credit package is no longer on sale. Please reload the package list.",
+      "payosNotConfigured": "The PayOS payment gateway has not been configured on the system.",
+      "payosUnavailable": "The PayOS payment gateway did not respond or rejected the operation. Please try again later.",
+      "network": "Unable to connect to the server. The transaction status is not confirmed yet; please press Retry to check with the same request key.",
+      "generic": "The purchase was not successful. Please try again."
+    }
+  },
+  "data": {
+    "errors": {
+      "wallet": "Unable to load wallet information.",
+      "packages": "Unable to load the credit package list.",
+      "orders": "Unable to load order history.",
+      "ledger": "Unable to load credit activity history."
+    }
+  },
+  "packagesGrid": {
+    "disabledTitle": "Credit purchasing is temporarily unavailable",
+    "disabledDescription": "Consultation credit purchasing is currently turned off in this environment. Please come back later.",
+    "checkAgain": "Check again",
+    "loadError": "Unable to load the credit package list",
+    "emptyTitle": "No credit packages yet",
+    "emptyDescription": "There are no consultation credit packages on sale right now. Please come back later or contact support.",
+    "defaultCode": "CONSULTATION PACKAGE",
+    "defaultDescription": "In-depth consultation credit package with specialist doctors",
+    "creditsReceived": "Credits received:",
+    "price": "Price:",
+    "buy": "Buy credits"
+  },
+  "purchaseDialog": {
+    "successTitle": "Consultation credits purchased successfully!",
+    "creditsAdded": "The consultation credits have been added to your wallet.",
+    "orderId": "Order ID:",
+    "packagePurchased": "Package purchased:",
+    "creditsReceived": "Credits received:",
+    "totalPaid": "Total paid:",
+    "method": "Method:",
+    "status": "Status:",
+    "currentAvailable": "Current available balance",
+    "walletBreakdown": "Total: {{balance}} | On hold: {{reserved}}",
+    "viewOrder": "View order details",
+    "done": "Done",
+    "confirmBadge": "Confirm credit purchase",
+    "reviewBeforePayment": "Please review the package details before proceeding to payment.",
+    "protectedTitle": "Protected transaction",
+    "protectedDescription": "The system automatically preserves a unique transaction key (Idempotency-Key) to keep the transaction fully safe and prevent duplicates.",
+    "packageRef": "Package reference:",
+    "consultationCreditsReceived": "Consultation credits received:",
+    "packagePrice": "Package price (VND):",
+    "pendingRetryTitle": "Continue previous request",
+    "pendingRetryDescription": "The previous attempt was interrupted by a network issue or no result was received. The system will check again using the same safe transaction key.",
+    "pendingDescription": "The system syncs automatically once the transaction is received from PayOS. If you have already paid, tap “Check again”.",
+    "featureNotOpen": "Feature not available",
+    "cannotComplete": "Unable to complete the transaction",
+    "processing": "Processing purchase...",
+    "retryTransaction": "Retry transaction",
+    "confirmPurchase": "Confirm purchase"
+  },
+  "ordersTable": {
+    "filteredEmptyTitle": "No matching orders found",
+    "filteredEmptyDescription": "No orders match the selected date or status filter.",
+    "emptyTitle": "No credit orders yet",
+    "emptyDescription": "When you buy consultation credit packages, your orders will be fully recorded here.",
+    "orderNumber": "Order #{{id}}",
+    "columns": {
+      "amount": "Total"
+    },
+    "resumePayment": "Continue payment",
+    "pagination": "Page <strong>{{page}}</strong> / {{totalPages}} ({{total}} orders total)"
+  },
+  "orderDetail": {
+    "toast": {
+      "cancelledTitle": "Order cancelled",
+      "cancelledDescription": "The consultation credit order was cancelled successfully.",
+      "cancelFailedTitle": "Unable to cancel the order",
+      "tryLater": "Please try again later."
+    },
+    "loadError": "Unable to load the order details.",
+    "badge": "Credit order details",
+    "titleWithId": "Order #{{id}}",
+    "title": "Order details",
+    "orderInfo": "Order information",
+    "packageName": "Package name:",
+    "packageCode": "Package code:",
+    "creditsGranted": "Credits granted:",
+    "totalAmount": "Total amount:",
+    "createdAt": "Order created at:",
+    "paidAt": "Payment recorded at:",
+    "payment": "Payment",
+    "gateway": "Gateway / Method:",
+    "payosOrderCode": "PayOS transaction code:",
+    "expiresAt": "Payment due:",
+    "attemptId": "Payment attempt (Attempt ID):",
+    "linkExpired": "The payment link has expired",
+    "currentBalance": "Current wallet balance",
+    "walletBreakdown": "Total balance: {{balance}} • On hold: {{reserved}}",
+    "cancelConfirm": "Are you sure you want to cancel this credit order?",
+    "cancelling": "Cancelling...",
+    "cancelOrder": "Cancel order"
+  },
+  "ledgerTable": {
+    "emptyTitle": "No consultation credit activity yet",
+    "emptyDescription": "Every credit purchase, hold or refund will be transparently recorded here.",
+    "columns": {
+      "available": "Available credits",
+      "total": "Total credits",
+      "balanceAfter": "Balance after",
+      "source": "Source"
+    },
+    "deltaCredits": "{{value}} credits",
+    "deltaCredits_one": "{{value}} credit",
+    "deltaCredits_other": "{{value}} credits",
+    "availableAfter": "{{value}} available",
+    "viewOrder": "View order",
+    "pagination": "Page <strong>{{page}}</strong> / {{totalPages}} ({{total}} entries total)"
+  },
+  "filters": {
+    "allTime": "All time",
+    "today": "Today",
+    "last7days": "Last 7 days",
+    "thisMonth": "This month",
+    "allStatuses": "All statuses"
+  },
+  "memberKpi": {
+    "totalPaid": "Total amount paid",
+    "totalPaidHint": "Completed transactions only",
+    "totalPurchasedCredits": "Total credits purchased",
+    "totalPurchasedHint": "From successfully purchased packages",
+    "successfulOrders": "Successful purchases",
+    "orderUnit": "orders",
+    "orderUnit_one": "order",
+    "orderUnit_other": "orders",
+    "successfulOrdersHint": "Confirmed top-up transactions",
+    "availableCreditsNow": "Currently available credits",
+    "balance": "Balance: {{value}}",
+    "reserved": "On hold: {{value}}",
+    "firstPaidAt": "First payment:",
+    "lastPaidAt": "Latest payment:"
+  },
+  "paymentResult": {
+    "pending": {
+      "title": "Awaiting payment"
+    },
+    "packageName": "Package name:",
+    "orderStatus": "Order status:",
+    "paymentStatus": "Payment status:",
+    "openPayos": "Open PayOS payment page"
+  }
+}

@@ -8,6 +8,7 @@ import {
 import { useWorkoutCatalogStore } from './workoutCatalogStore';
 import { useBleStore } from '@/services/ble-management/bleStore';
 import { encodePolyline } from '@/utils/polylineEncoder';
+import i18n from '@/i18n';
 
 // Decouple bleService to avoid require cycle (bleService <-> workoutEngineStore)
 const sendBleWorkoutCommand = (cmd: string) => {
@@ -545,6 +546,9 @@ export interface AFibScreeningAvailability {
   reason?: 'WORKOUT_IN_PROGRESS' | 'COOLDOWN_ACTIVE';
   remainingSeconds: number;
   formattedRemainingTime: string;
+  /** Tiêu đề/nội dung giải thích lý do chặn đo, đã dịch theo ngôn ngữ đang chọn (chỉ có khi canScreen = false). */
+  reasonTitle?: string;
+  reasonMessage?: string;
 }
 
 /**
@@ -561,6 +565,8 @@ export const getAFibScreeningAvailability = (): AFibScreeningAvailability => {
       reason: 'WORKOUT_IN_PROGRESS',
       remainingSeconds: 0,
       formattedRemainingTime: '00:00',
+      reasonTitle: i18n.t('workout:afib.workoutInProgress.title'),
+      reasonMessage: i18n.t('workout:afib.workoutInProgress.message'),
     };
   }
 
@@ -577,6 +583,8 @@ export const getAFibScreeningAvailability = (): AFibScreeningAvailability => {
         reason: 'COOLDOWN_ACTIVE',
         remainingSeconds,
         formattedRemainingTime,
+        reasonTitle: i18n.t('workout:afib.cooldown.title'),
+        reasonMessage: i18n.t('workout:afib.cooldown.message', { time: formattedRemainingTime }),
       };
     }
   }

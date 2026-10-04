@@ -4,6 +4,7 @@ import { PresignedUrlRequest } from '@/types/request';
 import axiosClient from '@/utils/axiosClient';
 import { HealthRecordResponse, PresignedUrlResponse } from '@/types/response';
 import { PpgRecordingResult } from './ppgRecorder';
+import i18n from '@/i18n';
 
 /**
  * Lấy Presigned URL từ Backend (POST /api/health-records/presigned-url)
@@ -40,7 +41,7 @@ const uploadFileToS3 = async (uploadUrl: string, fileUri: string, maxRetries = 2
             });
 
             if (response.status < 200 || response.status >= 300) {
-                throw new Error(`Upload file lên S3 thất bại với mã HTTP: ${response.status}. Chi tiết: ${response.body}`);
+                throw new Error(i18n.t('health:ppg.uploadFailed', { status: response.status, detail: response.body }));
             }
             return; // Thành công thì thoát hàm
         } catch (err) {
@@ -102,7 +103,7 @@ export const uploadPpgRecord = async (
         }
 
         if (fileSize <= 0) {
-            throw new Error('File CSV dữ liệu PPG rỗng, không thể gửi.');
+            throw new Error(i18n.t('health:ppg.emptyFile'));
         }
 
         // 2. Gọi API lấy presigned URL từ Backend
@@ -112,7 +113,7 @@ export const uploadPpgRecord = async (
         });
 
         if (!presigned || !presigned.uploadUrl || !presigned.recordId) {
-            throw new Error('Presigned URL trả về không hợp lệ.');
+            throw new Error(i18n.t('health:ppg.invalidPresignedUrl'));
         }
 
         // 3. Tải file CSV lên S3
@@ -127,7 +128,7 @@ export const uploadPpgRecord = async (
         
         while (recordResponse.status === 'PROCESSING' || recordResponse.status === 'PENDING_UPLOAD') {
             if (attempts >= maxAttempts) {
-                throw new Error('Quá thời gian chờ AI phân tích (Timeout).');
+                throw new Error(i18n.t('health:ppg.analysisTimeout'));
             }
             // Đợi 2 giây
             await new Promise(resolve => setTimeout(resolve, 2000));
@@ -136,7 +137,7 @@ export const uploadPpgRecord = async (
         }
 
         if (recordResponse.status === 'FAILED') {
-            throw new Error('Backend báo lỗi phân tích AI thất bại.');
+            throw new Error(i18n.t('health:ppg.analysisFailed'));
         }
 
         return recordResponse;

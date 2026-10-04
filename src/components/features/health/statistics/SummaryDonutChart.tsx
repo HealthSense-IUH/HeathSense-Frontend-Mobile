@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import { PieChart } from 'react-native-gifted-charts';
 import { Check, AlertTriangle, ShieldAlert } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
+import { currentIntlLocale } from '@/i18n';
 
 interface SummaryStats {
   normal: number;
@@ -23,7 +25,8 @@ const STAT_COLORS = {
   AFIB_RISK: '#EF4444',
 };
 
-export function SummaryDonutChart({ total, stats, badgeLabel = 'Hôm nay' }: SummaryDonutChartProps) {
+export function SummaryDonutChart({ total, stats, badgeLabel }: SummaryDonutChartProps) {
+  const { t } = useTranslation('health');
   const pieData = [
     { value: stats.normal || (total === 0 ? 1 : 0), color: STAT_COLORS.NORMAL },
     { value: stats.afibRisk, color: STAT_COLORS.AFIB_RISK },
@@ -48,12 +51,12 @@ export function SummaryDonutChart({ total, stats, badgeLabel = 'Hôm nay' }: Sum
       {/* Card Title */}
       <View className="flex-row items-center justify-between pb-4 border-b border-slate-100">
         <View className="flex-row items-baseline space-x-1.5">
-          <Text className="text-sm font-semibold text-slate-600 mr-1">Tổng số lần kiểm tra</Text>
-          <Text className="text-2xl font-extrabold text-slate-900 mr-1">{total.toLocaleString()}</Text>
-          <Text className="text-xs font-semibold text-slate-500">lần</Text>
+          <Text className="text-sm font-semibold text-slate-600 mr-1">{t('analysis.donut.totalChecks')}</Text>
+          <Text className="text-2xl font-extrabold text-slate-900 mr-1">{total.toLocaleString(currentIntlLocale())}</Text>
+          <Text className="text-xs font-semibold text-slate-500">{t('common:units.times')}</Text>
         </View>
         <View className="bg-blue-50 px-2.5 py-1 rounded-full">
-          <Text className="text-[11px] font-semibold text-brand-600">{badgeLabel}</Text>
+          <Text className="text-[11px] font-semibold text-brand-600">{badgeLabel ?? t('common:date.today')}</Text>
         </View>
       </View>
 
@@ -73,17 +76,17 @@ export function SummaryDonutChart({ total, stats, badgeLabel = 'Hôm nay' }: Sum
             {hasRisk ? (
               <>
                 <ShieldAlert color="#EF4444" size={20} strokeWidth={2.4} />
-                <Text className="text-[10px] font-bold text-rose-600 mt-0.5">Nguy cơ</Text>
+                <Text className="text-[10px] font-bold text-rose-600 mt-0.5">{t('analysis.donut.centerRisk')}</Text>
               </>
             ) : hasSuspected ? (
               <>
                 <AlertTriangle color="#F59E0B" size={20} strokeWidth={2.4} />
-                <Text className="text-[10px] font-bold text-amber-600 mt-0.5">Nghi ngờ</Text>
+                <Text className="text-[10px] font-bold text-amber-600 mt-0.5">{t('analysis.donut.centerSuspected')}</Text>
               </>
             ) : (
               <>
                 <Check color="#10B981" size={22} strokeWidth={2.6} />
-                <Text className="text-[10px] font-bold text-slate-600 mt-0.5">Ổn định</Text>
+                <Text className="text-[10px] font-bold text-slate-600 mt-0.5">{t('analysis.donut.centerStable')}</Text>
               </>
             )}
           </View>
@@ -91,25 +94,25 @@ export function SummaryDonutChart({ total, stats, badgeLabel = 'Hôm nay' }: Sum
 
         {/* Counter Details Column */}
         <View className="ml-4 flex-1 space-y-2.5">
-          <StatRow 
-            label="Nguy cơ rung tâm nhĩ" 
-            count={stats.afibRisk} 
-            color={STAT_COLORS.AFIB_RISK} 
+          <StatRow
+            label={t('analysis.legend.afibRisk')}
+            count={stats.afibRisk}
+            color={STAT_COLORS.AFIB_RISK}
           />
-          <StatRow 
-            label="Nghi ngờ rung tâm nhĩ" 
-            count={stats.afibSuspected} 
-            color={STAT_COLORS.AFIB_SUSPECTED} 
+          <StatRow
+            label={t('analysis.legend.afibSuspected')}
+            count={stats.afibSuspected}
+            color={STAT_COLORS.AFIB_SUSPECTED}
           />
-          <StatRow 
-            label="Không rõ ràng" 
-            count={stats.uncertain} 
-            color={STAT_COLORS.UNCERTAIN} 
+          <StatRow
+            label={t('analysis.legend.uncertain')}
+            count={stats.uncertain}
+            color={STAT_COLORS.UNCERTAIN}
           />
-          <StatRow 
-            label="Không có bất thường" 
-            count={stats.normal} 
-            color={STAT_COLORS.NORMAL} 
+          <StatRow
+            label={t('analysis.legend.normal')}
+            count={stats.normal}
+            color={STAT_COLORS.NORMAL}
           />
         </View>
       </View>
@@ -118,6 +121,7 @@ export function SummaryDonutChart({ total, stats, badgeLabel = 'Hôm nay' }: Sum
 }
 
 function StatRow({ label, count, color }: { label: string; count: number; color: string }) {
+  const { t } = useTranslation('health');
   return (
     <View className="flex-row items-center justify-between mb-2.5">
       <View className="flex-row items-center flex-1 space-x-1.5 pr-2">
@@ -125,7 +129,7 @@ function StatRow({ label, count, color }: { label: string; count: number; color:
         <Text className="text-slate-600 text-xs" numberOfLines={1}>{label}</Text>
       </View>
       <Text className="font-bold text-slate-900 text-xs">
-        {count.toLocaleString()} <Text className="text-[11px] font-normal text-slate-400">lần</Text>
+        {count.toLocaleString(currentIntlLocale())} <Text className="text-[11px] font-normal text-slate-400">{t('common:units.times')}</Text>
       </Text>
     </View>
   );

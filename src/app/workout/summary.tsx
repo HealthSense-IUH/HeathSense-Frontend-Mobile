@@ -22,9 +22,17 @@ import {
 } from '@/components/features/workout/SportSummaryHeaderGraphic';
 import { useWorkoutEngineStore } from '@/services/workout/workoutEngineStore';
 import { useWorkoutCatalogStore } from '@/services/workout/workoutCatalogStore';
+import {
+  formatWorkoutDecimal,
+  getExerciseName,
+  getMonthShort,
+  getWeekdayAbbr,
+} from '@/services/workout/workoutI18n';
+import { useTranslation } from 'react-i18next';
 
 export default function WorkoutSummaryScreen() {
   const router = useRouter();
+  const { t } = useTranslation('workout');
   const params = useLocalSearchParams();
   const lastSession = useWorkoutEngineStore((state) => state.lastCompletedSession);
   const sessions = useWorkoutCatalogStore((state) => state.sessions);
@@ -35,7 +43,11 @@ export default function WorkoutSummaryScreen() {
   const session = (sessionId && sessions.find((s) => s.id === sessionId)) || (!sessionId ? lastSession : null);
 
   const exerciseId = (params.exerciseId as string) || session?.exerciseId || '';
-  const exerciseName = (params.exerciseName as string) || session?.exerciseName || 'Buổi tập';
+  // Tên gốc (tiếng Việt, lưu trong session) dùng để nhận diện theme; tên hiển thị dịch theo id
+  const exerciseName = (params.exerciseName as string) || session?.exerciseName || t('common.workout');
+  const displayExerciseName = exerciseId
+    ? getExerciseName({ id: exerciseId, name: exerciseName })
+    : exerciseName;
   const durationSeconds = Number(params.durationSeconds) || session?.durationSeconds || 0;
   const caloriesBurned = Number(params.caloriesBurned) || session?.caloriesBurned || 0;
   const totalCalories = Number(params.totalCalories) || session?.totalCalories || caloriesBurned;
@@ -64,14 +76,15 @@ export default function WorkoutSummaryScreen() {
 
   const formatSummaryDate = (timestamp: number) => {
     const date = new Date(timestamp);
-    const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
-    const dayName = days[date.getDay()];
-    const d = date.getDate();
-    const m = date.getMonth() + 1;
-    const y = date.getFullYear();
     const hrs = date.getHours().toString().padStart(2, '0');
     const mins = date.getMinutes().toString().padStart(2, '0');
-    return `${dayName}, ${d} Th${m}, ${y} ${hrs}:${mins}`;
+    return t('date.dateTime', {
+      weekday: getWeekdayAbbr(date.getDay()),
+      day: date.getDate(),
+      monthShort: getMonthShort(date.getMonth() + 1),
+      year: date.getFullYear(),
+      time: `${hrs}:${mins}`,
+    });
   };
 
   return (
@@ -122,7 +135,7 @@ export default function WorkoutSummaryScreen() {
           {/* Session Overview Titles */}
           <View className="pr-28">
             <Text className="text-white text-base font-medium">
-              {exerciseName}
+              {displayExerciseName}
             </Text>
             <Text className="text-white text-5xl font-extrabold mt-1 tracking-tight">
               {formatDuration(durationSeconds)}
@@ -141,7 +154,7 @@ export default function WorkoutSummaryScreen() {
           style={{ minHeight: 460 }}
         >
           <Text className="text-slate-900 text-lg font-bold mb-4">
-            Chi tiết tập luyện
+            {t('summary.details')}
           </Text>
 
           {/* 3 Metric Cards Grid */}
@@ -149,7 +162,7 @@ export default function WorkoutSummaryScreen() {
             {/* Card 1: Tổng thời gian */}
             <View className="w-[48%] bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm">
               <Text className="text-cyan-500 font-semibold text-xs mb-1.5">
-                Tổng thời gian
+                {t('summary.totalTime')}
               </Text>
               <Text className="text-slate-900 font-bold text-2xl tracking-tight">
                 {formatDuration(durationSeconds)}
@@ -160,10 +173,10 @@ export default function WorkoutSummaryScreen() {
             {distanceKm && distanceKm > 0 ? (
               <View className="w-[48%] bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm">
                 <Text className="text-emerald-500 font-semibold text-xs mb-1.5">
-                  Khoảng cách
+                  {t('summary.distance')}
                 </Text>
                 <Text className="text-slate-900 font-bold text-2xl tracking-tight">
-                  {distanceKm.toFixed(2).replace('.', ',')}{' '}
+                  {formatWorkoutDecimal(distanceKm, 2)}{' '}
                   <Text className="text-base font-normal text-slate-700">km</Text>
                 </Text>
               </View>
@@ -172,7 +185,7 @@ export default function WorkoutSummaryScreen() {
             {/* Card 2: Calo tập luyện */}
             <View className="w-[48%] bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm">
               <Text className="text-purple-400 font-semibold text-xs mb-1.5">
-                Calo tập luyện
+                {t('summary.activeCalories')}
               </Text>
               <Text className="text-slate-900 font-bold text-2xl tracking-tight">
                 {caloriesBurned} <Text className="text-base font-normal text-slate-700">kcal</Text>
@@ -182,7 +195,7 @@ export default function WorkoutSummaryScreen() {
             {/* Card 3: Tổng lượng calo */}
             <View className="w-[48%] bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm">
               <Text className="text-purple-400 font-semibold text-xs mb-1.5">
-                Tổng lượng calo
+                {t('summary.totalCalories')}
               </Text>
               <Text className="text-slate-900 font-bold text-2xl tracking-tight">
                 {totalCalories} <Text className="text-base font-normal text-slate-700">kcal</Text>
@@ -193,7 +206,7 @@ export default function WorkoutSummaryScreen() {
             {avgHeartRate && avgHeartRate > 0 ? (
               <View className="w-[48%] bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm">
                 <Text className="text-rose-500 font-semibold text-xs mb-1.5">
-                  Nhịp tim TB
+                  {t('summary.avgHeartRate')}
                 </Text>
                 <Text className="text-slate-900 font-bold text-2xl tracking-tight">
                   {avgHeartRate} <Text className="text-base font-normal text-slate-700">bpm</Text>
@@ -220,7 +233,7 @@ export default function WorkoutSummaryScreen() {
               }}
               onBlur={handleNoteBlur}
               editable={!!session}
-              placeholder="Ghi chú"
+              placeholder={t('summary.notePlaceholder')}
               placeholderTextColor="#94A3B8"
               multiline
               className="flex-1 text-slate-800 font-medium text-sm p-0 m-0 leading-5"

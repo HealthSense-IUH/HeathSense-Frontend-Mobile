@@ -1,0 +1,49 @@
+{
+  "page": {
+    "description": "Quản lý tài khoản, kết nối"
+  },
+  "device": {
+    "sectionTitle": "Quản lý kết nối Bluetooth (BLE)",
+    "wearable": "Thiết bị đeo",
+    "notPaired": "Chưa ghép đôi thiết bị",
+    "statusConnected": "Trạng thái: Đã kết nối",
+    "statusDisconnected": "Trạng thái: Chưa kết nối",
+    "tapToScan": "Nhấn nút bên dưới để quét",
+    "rescan": "Quét & Đổi thiết bị",
+    "findAndConnect": "Tìm & Kết nối thiết bị",
+    "unpair": "Hủy ghép đôi"
+  },
+  "account": {
+    "sectionTitle": "Tài khoản",
+    "profile": "Hồ sơ cá nhân"
+  },
+  "about": {
+    "appName": "Ứng dụng HealthSense",
+    "version": "Phiên bản {{version}}"
+  },
+  "ble": {
+    "channelName": "HuyWatch Theo Dõi Sức Khỏe Ngầm",
+    "notification": {
+      "titleIdle": "HuyWatch đang chạy ngầm",
+      "titleVitals": "HuyWatch: {{bpm}} BPM | SpO2 {{spo2}}%",
+      "restoring": "Đang khôi phục kết nối HuyWatch",
+      "lostReconnecting": "Mất kết nối, đang tự kết nối lại",
+      "recording": "Đang ghi dữ liệu PPG: {{count}} mẫu",
+      "receiving": "Đang nhận dữ liệu từ thiết bị {{deviceId}}",
+      "monitoring": "Đang theo dõi dữ liệu từ thiết bị {{deviceId}}"
+    },
+    "errors": {
+      "initFailed": "Không thể khởi tạo BLE manager.",
+      "permissionMissing": "Thiếu quyền Bluetooth.",
+      "connectTimeout": "Kết nối BLE quá thời gian chờ.",
+      "connectFailed": "Không thể kết nối BLE.",
+      "notConnected": "Chưa kết nối thiết bị",
+      "reconnectScanFailed": "Không thể quét để kết nối lại."
+    },
+    "recording": {
+      "notEnoughSamples": "Số lượng mẫu không đủ 1 phút Pha 1. Hủy phiên ghi.",
+      "interruptedMotion": "Quá trình đo Rung nhĩ bị gián đoạn do cử động tay.",
+      "interruptedRemoved": "Quá trình đo bị gián đoạn do tháo thiết bị."
+    }
+  }
+}

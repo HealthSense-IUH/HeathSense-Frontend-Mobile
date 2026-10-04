@@ -35,6 +35,8 @@ import {
 } from 'lucide-react-native';
 import { useWorkoutCatalogStore } from '@/services/workout/workoutCatalogStore';
 import { Exercise } from '@/services/workout/workoutTypes';
+import { getExerciseName } from '@/services/workout/workoutI18n';
+import { useTranslation } from 'react-i18next';
 
 // Lucide icon mapping
 const ICON_MAP: Record<string, any> = {
@@ -110,6 +112,7 @@ export { getExerciseCircleColor };
 
 export const FavoriteWorkoutSection: React.FC = () => {
   const router = useRouter();
+  const { t } = useTranslation('workout');
   const exercises = useWorkoutCatalogStore((state) => state.exercises);
   const favoriteIds = useWorkoutCatalogStore((state) => state.favoriteIds);
 
@@ -149,7 +152,7 @@ export const FavoriteWorkoutSection: React.FC = () => {
         activeOpacity={0.7}
         className="flex-row items-center justify-between mb-3"
       >
-        <Text className="text-base font-bold text-slate-900 tracking-tight">Tập thể dục</Text>
+        <Text className="text-base font-bold text-slate-900 tracking-tight">{t('favorites.title')}</Text>
         <ChevronRight color="#94A3B8" size={18} />
       </TouchableOpacity>
 
@@ -181,7 +184,7 @@ export const FavoriteWorkoutSection: React.FC = () => {
                   className="text-xs font-semibold text-slate-800 text-center mt-2.5 leading-4"
                   numberOfLines={1}
                 >
-                  {exercise.name}
+                  {getExerciseName(exercise)}
                 </Text>
               </TouchableOpacity>
             );
@@ -203,7 +206,7 @@ export const FavoriteWorkoutSection: React.FC = () => {
               className="text-xs font-semibold text-slate-700 text-center mt-2.5 leading-4"
               numberOfLines={1}
             >
-              Nhiều hơn
+              {t('favorites.more')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -215,7 +218,7 @@ export const FavoriteWorkoutSection: React.FC = () => {
           className="pt-6 pb-2 min-h-[95px] justify-end"
         >
           <Text className="text-xs text-slate-600 leading-relaxed font-normal">
-            Chọn các bài tập thể dục yêu thích của bạn để bạn có thể truy cập chúng một cách dễ dàng.
+            {t('favorites.empty')}
           </Text>
         </TouchableOpacity>
       )}
