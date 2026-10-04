@@ -25,6 +25,7 @@ export interface ScreenWrapperProps {
   statusBarStyle?: 'light' | 'dark' | 'auto';
   backgroundComponent?: React.ReactNode;
   refreshControl?: React.ReactElement<RefreshControlProps>;
+  titleClassName?: string;
   className?: string;
   withKeyboardHandling?: boolean;
   withBottomNav?: boolean;
@@ -43,6 +44,7 @@ export function ScreenWrapper({
   statusBarStyle = 'dark',
   backgroundComponent,
   refreshControl,
+  titleClassName = '',
   className = '',
   withKeyboardHandling = false,
   withBottomNav = false,
@@ -155,7 +157,7 @@ export function ScreenWrapper({
           <View className="flex-row items-center">
             {headerLeft && <View className="w-12" />}
             <View>
-              <Text className="text-[26px] font-extrabold text-foreground tracking-tight">{title}</Text>
+              <Text className={`text-[20px] font-bold text-foreground tracking-tight ${titleClassName}`.trim()}>{title}</Text>
               {description && <Text className="text-xs text-muted-foreground mt-0.5">{description}</Text>}
             </View>
           </View>

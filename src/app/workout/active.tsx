@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
-  TouchableOpacity,
+  Pressable,
   Modal,
   Vibration,
 } from 'react-native';
@@ -302,27 +302,28 @@ export default function ActiveWorkoutScreen() {
         {/* ========================================================================= */}
         <View className="flex-row items-center justify-between pt-1 pb-1">
           <View className="flex-row items-center gap-2">
-            <TouchableOpacity
+            <Pressable
               onPress={() => setShowExitConfirm(true)}
               className="w-10 h-10 items-center justify-center -ml-2 active:opacity-70"
+              hitSlop={8}
             >
               <ArrowLeft color="#0F172A" size={24} strokeWidth={2.2} />
-            </TouchableOpacity>
+            </Pressable>
             <Text className="text-slate-900 font-bold text-xl tracking-tight">
               {exerciseTitle}
             </Text>
           </View>
 
           <View className="flex-row items-center gap-2">
-            <TouchableOpacity className="w-10 h-10 items-center justify-center active:opacity-70">
+            <Pressable className="w-10 h-10 items-center justify-center active:opacity-70" hitSlop={6}>
               <Headphones color="#0F172A" size={22} strokeWidth={2} />
-            </TouchableOpacity>
-            <TouchableOpacity className="w-10 h-10 items-center justify-center active:opacity-70">
+            </Pressable>
+            <Pressable className="w-10 h-10 items-center justify-center active:opacity-70" hitSlop={6}>
               <Music color="#0F172A" size={22} strokeWidth={2} />
-            </TouchableOpacity>
-            <TouchableOpacity className="w-10 h-10 items-center justify-center active:opacity-70">
+            </Pressable>
+            <Pressable className="w-10 h-10 items-center justify-center active:opacity-70" hitSlop={6}>
               <MoreVertical color="#0F172A" size={22} strokeWidth={2} />
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </View>
 
@@ -658,21 +659,23 @@ export default function ActiveWorkoutScreen() {
 
               {/* Pagination Indicator Dots (Screenshot 4) */}
               <View className="flex-row items-center justify-center gap-2 pt-2 pb-0.5">
-                <TouchableOpacity
+                <Pressable
                   onPress={() => setActiveMetricPage(0)}
                   className={`rounded-full ${
                     activeMetricPage === 0
                       ? 'w-2.5 h-2.5 bg-slate-700'
                       : 'w-2 h-2 bg-slate-300'
                   }`}
+                  hitSlop={8}
                 />
-                <TouchableOpacity
+                <Pressable
                   onPress={() => setActiveMetricPage(1)}
                   className={`rounded-full ${
                     activeMetricPage === 1
                       ? 'w-2.5 h-2.5 bg-slate-700'
                       : 'w-2 h-2 bg-slate-300'
                   }`}
+                  hitSlop={8}
                 />
               </View>
             </View>
@@ -765,12 +768,13 @@ export default function ActiveWorkoutScreen() {
         {/* ========================================================================= */}
         <View className="flex-row items-center justify-between pt-2">
           {/* Lock Button */}
-          <TouchableOpacity
-            onPress={status === 'COUNTDOWN' ? undefined : toggleScreenLock}
-            activeOpacity={status === 'COUNTDOWN' ? 1 : 0.7}
+          <Pressable
+            disabled={status === 'COUNTDOWN'}
+            onPress={toggleScreenLock}
             className={`w-[50px] h-[50px] rounded-full items-center justify-center shadow-sm ${
               status === 'COUNTDOWN' ? 'bg-[#EAECEF]/60' : 'bg-[#EAECEF] active:bg-slate-300'
             }`}
+            hitSlop={6}
           >
             {isScreenLocked ? (
               <Unlock color="#1E232A" size={22} strokeWidth={2.2} />
@@ -781,7 +785,7 @@ export default function ActiveWorkoutScreen() {
                 strokeWidth={2.2}
               />
             )}
-          </TouchableOpacity>
+          </Pressable>
 
           {/* Central Actions depending on Status */}
           {status === 'COUNTDOWN' ? (
@@ -793,64 +797,61 @@ export default function ActiveWorkoutScreen() {
             </View>
           ) : status === 'ACTIVE' ? (
             /* Active "Tạm dừng" button (Image 2) */
-            <TouchableOpacity
+            <Pressable
               onPress={pauseWorkout}
-              activeOpacity={0.8}
               className="flex-1 py-4 bg-[#EAECEF] active:bg-slate-300 rounded-full items-center justify-center mx-3 shadow-sm"
             >
               <Text className="text-[#1E232A] font-bold text-base tracking-wide">
                 {t('active.pause')}
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           ) : (
             /* Paused State: "Tiếp tục" + "Hoàn tất" (Image 3) */
             <View className="flex-1 flex-row mx-2">
               {/* Nút Tiếp tục */}
-              <TouchableOpacity
+              <Pressable
                 onPress={resumeWorkout}
-                activeOpacity={0.8}
                 className="flex-1 py-4 bg-[#EAECEF] active:bg-slate-300 rounded-full items-center justify-center mr-2 shadow-sm"
               >
                 <Text className="text-[#1E232A] font-bold text-base tracking-wide">
                   {t('active.resume')}
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
 
               {/* Nút Hoàn tất (Red Pill) */}
-              <TouchableOpacity
+              <Pressable
                 onPress={handleFinish}
-                activeOpacity={0.8}
                 className="flex-1 py-4 bg-[#D91B1B] active:bg-red-700 rounded-full items-center justify-center ml-2 shadow-md"
               >
                 <Text className="text-white font-bold text-base tracking-wide">
                   {t('active.finish')}
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             </View>
           )}
 
           {/* Settings Gear Button */}
-          <TouchableOpacity
-            activeOpacity={status === 'COUNTDOWN' ? 1 : 0.7}
+          <Pressable
+            disabled={status === 'COUNTDOWN'}
             className={`w-[50px] h-[50px] rounded-full items-center justify-center shadow-sm ${
               status === 'COUNTDOWN' ? 'bg-[#EAECEF]/60' : 'bg-[#EAECEF] active:bg-slate-300'
             }`}
+            hitSlop={6}
           >
             <Settings
               color={status === 'COUNTDOWN' ? '#94A3B8' : '#1E232A'}
               size={22}
               strokeWidth={2.2}
             />
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
         {/* SCREEN LOCK OVERLAY */}
         {isScreenLocked && (
           <View className="absolute inset-0 bg-black/60 z-50 items-center justify-center rounded-[32px] m-4">
-            <TouchableOpacity
+            <Pressable
               onPress={toggleScreenLock}
-              activeOpacity={0.85}
-              className="items-center p-6 bg-white rounded-3xl border border-slate-200 shadow-2xl"
+              className="items-center p-6 bg-white rounded-3xl border border-slate-200 shadow-2xl active:opacity-85"
             >
               <Lock color="#10B981" size={40} className="mb-3" />
               <Text className="text-slate-900 font-bold text-base mb-1">
@@ -859,7 +860,7 @@ export default function ActiveWorkoutScreen() {
               <Text className="text-slate-500 text-xs">
                 {t('active.tapToUnlock')}
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         )}
       </View>
@@ -881,14 +882,14 @@ export default function ActiveWorkoutScreen() {
             </Text>
 
             <View className="flex-row gap-3">
-              <TouchableOpacity
+              <Pressable
                 onPress={() => setShowExitConfirm(false)}
                 className="flex-1 py-3 rounded-2xl bg-slate-100 active:bg-slate-200 items-center justify-center"
               >
                 <Text className="text-slate-700 font-semibold">{t('active.keepGoing')}</Text>
-              </TouchableOpacity>
+              </Pressable>
 
-              <TouchableOpacity
+              <Pressable
                 onPress={() => {
                   setShowExitConfirm(false);
                   resetWorkout();
@@ -897,7 +898,7 @@ export default function ActiveWorkoutScreen() {
                 className="flex-1 py-3 rounded-2xl bg-red-600 active:bg-red-700 items-center justify-center"
               >
                 <Text className="text-white font-bold">{t('common.exit')}</Text>
-              </TouchableOpacity>
+              </Pressable>
             </View>
           </View>
         </View>

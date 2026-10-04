@@ -2,12 +2,12 @@ import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
-  TouchableOpacity,
   Modal,
   Pressable,
   Switch,
 } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
+import { safeRouter } from '@/utils/safeNavigation';
 import {
   ArrowLeft,
   Headphones,
@@ -28,7 +28,6 @@ import { THEME } from '@/constants/theme';
 import { useTranslation } from 'react-i18next';
 
 export default function PreWorkoutScreen() {
-  const router = useRouter();
   const { t } = useTranslation('workout');
   const { exerciseId } = useLocalSearchParams<{ exerciseId: string }>();
 
@@ -125,7 +124,7 @@ export default function PreWorkoutScreen() {
     }
 
     setupWorkout(exercise, targetType, finalValue, undefined, pauseOnTarget);
-    router.push('/workout/active' as any);
+    safeRouter.navigate('/workout/active');
   };
 
   return (
@@ -135,24 +134,25 @@ export default function PreWorkoutScreen() {
       scrollable={false}
       className="bg-[#F2F4F7]"
       headerLeft={
-        <TouchableOpacity
-          onPress={() => router.back()}
+        <Pressable
+          onPress={() => safeRouter.back()}
           className="w-10 h-10 rounded-full items-center justify-center active:opacity-70"
+          hitSlop={8}
         >
           <ArrowLeft color={THEME.colors.textPrimary} size={22} />
-        </TouchableOpacity>
+        </Pressable>
       }
       headerRight={
         <View className="flex-row items-center gap-1">
-          <TouchableOpacity className="w-10 h-10 rounded-full items-center justify-center active:opacity-70">
+          <Pressable className="w-10 h-10 rounded-full items-center justify-center active:opacity-70" hitSlop={6}>
             <Headphones color={THEME.colors.textPrimary} size={20} />
-          </TouchableOpacity>
-          <TouchableOpacity className="w-10 h-10 rounded-full items-center justify-center active:opacity-70">
+          </Pressable>
+          <Pressable className="w-10 h-10 rounded-full items-center justify-center active:opacity-70" hitSlop={6}>
             <Music color={THEME.colors.textPrimary} size={20} />
-          </TouchableOpacity>
-          <TouchableOpacity className="w-10 h-10 rounded-full items-center justify-center active:opacity-70">
+          </Pressable>
+          <Pressable className="w-10 h-10 rounded-full items-center justify-center active:opacity-70" hitSlop={6}>
             <MoreVertical color={THEME.colors.textPrimary} size={20} />
-          </TouchableOpacity>
+          </Pressable>
         </View>
       }
     >
@@ -181,16 +181,15 @@ export default function PreWorkoutScreen() {
               }}
             >
               {/* Target Dropdown Button */}
-              <TouchableOpacity
+              <Pressable
                 onPress={() => setShowDropdown(true)}
-                activeOpacity={0.7}
-                className="flex-row items-center justify-center gap-1.5 self-center py-1.5 px-3 mb-2"
+                className="flex-row items-center justify-center gap-1.5 self-center py-1.5 px-3 mb-2 active:opacity-70"
               >
                 <Text className="text-slate-900 text-base font-semibold">
                   {getDropdownLabel()}
                 </Text>
                 <ChevronDown color="#0F172A" size={18} strokeWidth={2.4} />
-              </TouchableOpacity>
+              </Pressable>
 
               {/* STATE 1: KHÔNG CÓ MỤC TIÊU (Screenshot 1) */}
               {targetType === 'NONE' && (
@@ -287,10 +286,9 @@ export default function PreWorkoutScreen() {
 
               {/* Bottom Toggle: Tạm dừng khi đạt mục tiêu (Screenshot 3) */}
               {targetType !== 'NONE' && (
-                <TouchableOpacity
-                  activeOpacity={0.8}
+                <Pressable
                   onPress={() => setPauseOnTarget(!pauseOnTarget)}
-                  className="flex-row items-center justify-between pt-3 mt-1 border-t border-slate-100"
+                  className="flex-row items-center justify-between pt-3 mt-1 border-t border-slate-100 active:opacity-75"
                 >
                   <Text className="text-sm font-medium text-slate-800">
                     {t('preWorkout.pauseOnTarget')}
@@ -301,20 +299,19 @@ export default function PreWorkoutScreen() {
                     trackColor={{ false: '#CBD5E1', true: '#10B981' }}
                     thumbColor="#FFFFFF"
                   />
-                </TouchableOpacity>
+                </Pressable>
               )}
             </View>
 
             {/* Bottom Button: Bắt đầu (Screenshot 1, 3) */}
-            <TouchableOpacity
+            <Pressable
               onPress={handleStart}
-              activeOpacity={0.8}
               className="w-full py-4 rounded-full bg-[#E2E8F0] items-center justify-center active:bg-slate-300 shadow-xs"
             >
               <Text className="text-slate-950 font-bold text-base tracking-wide">
                 {t('preWorkout.start')}
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </View>
       ) : (
@@ -339,16 +336,15 @@ export default function PreWorkoutScreen() {
 
             {/* Target Selector */}
             <View className="items-center justify-center py-2 flex-1">
-              <TouchableOpacity
+              <Pressable
                 onPress={() => setShowDropdown(true)}
-                activeOpacity={0.7}
                 className="flex-row items-center justify-center gap-2 py-2 px-4 rounded-full bg-slate-50 border border-slate-200/80 mb-2 active:bg-slate-100"
               >
                 <Text className="text-slate-900 text-base font-semibold">
                   {getDropdownLabel()}
                 </Text>
                 <ChevronDown color="#334155" size={18} strokeWidth={2.4} />
-              </TouchableOpacity>
+              </Pressable>
 
               {targetType === 'NONE' && (
                 <View className="items-center justify-center px-6 my-auto">
@@ -406,10 +402,9 @@ export default function PreWorkoutScreen() {
 
             {/* Toggle switch for non-GPS */}
             {targetType !== 'NONE' ? (
-              <TouchableOpacity
-                activeOpacity={0.8}
+              <Pressable
                 onPress={() => setPauseOnTarget(!pauseOnTarget)}
-                className="flex-row items-center justify-between pt-4 border-t border-slate-100"
+                className="flex-row items-center justify-between pt-4 border-t border-slate-100 active:opacity-75"
               >
                 <Text className="text-sm font-medium text-slate-800">
                   {t('preWorkout.pauseOnTarget')}
@@ -420,22 +415,21 @@ export default function PreWorkoutScreen() {
                   trackColor={{ false: '#CBD5E1', true: '#10B981' }}
                   thumbColor="#FFFFFF"
                 />
-              </TouchableOpacity>
+              </Pressable>
             ) : (
               <View className="h-4" />
             )}
           </View>
 
           {/* Bottom Action Button */}
-          <TouchableOpacity
+          <Pressable
             onPress={handleStart}
-            activeOpacity={0.8}
             className="w-full py-4 rounded-full bg-slate-200/90 items-center justify-center active:bg-slate-300 shadow-sm"
           >
             <Text className="text-slate-950 font-bold text-base tracking-wide">
               {t('preWorkout.start')}
             </Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       )}
 
@@ -462,13 +456,12 @@ export default function PreWorkoutScreen() {
             onPress={(e) => e.stopPropagation()}
           >
             {/* Option 1: Không có mục tiêu */}
-            <TouchableOpacity
+            <Pressable
               onPress={() => {
                 setTargetType('NONE');
                 setShowDropdown(false);
               }}
-              activeOpacity={0.7}
-              className="flex-row items-center justify-between py-3.5 px-3 border-b border-slate-100"
+              className="flex-row items-center justify-between py-3.5 px-3 border-b border-slate-100 active:bg-slate-50"
             >
               <Text
                 className={`text-base ${
@@ -482,17 +475,16 @@ export default function PreWorkoutScreen() {
               {targetType === 'NONE' && (
                 <Check color="#10B981" size={20} strokeWidth={2.6} />
               )}
-            </TouchableOpacity>
+            </Pressable>
 
             {/* Option 2: Mục tiêu quãng đường (GPS Sports Only) */}
             {isGpsSport && (
-              <TouchableOpacity
+              <Pressable
                 onPress={() => {
                   setTargetType('DISTANCE');
                   setShowDropdown(false);
                 }}
-                activeOpacity={0.7}
-                className="flex-row items-center justify-between py-3.5 px-3 border-b border-slate-100"
+                className="flex-row items-center justify-between py-3.5 px-3 border-b border-slate-100 active:bg-slate-50"
               >
                 <Text
                   className={`text-base ${
@@ -506,17 +498,16 @@ export default function PreWorkoutScreen() {
                 {targetType === 'DISTANCE' && (
                   <Check color="#10B981" size={20} strokeWidth={2.6} />
                 )}
-              </TouchableOpacity>
+              </Pressable>
             )}
 
             {/* Option 3: Mục tiêu thời gian */}
-            <TouchableOpacity
+            <Pressable
               onPress={() => {
                 setTargetType('TIME');
                 setShowDropdown(false);
               }}
-              activeOpacity={0.7}
-              className="flex-row items-center justify-between py-3.5 px-3 border-b border-slate-100"
+              className="flex-row items-center justify-between py-3.5 px-3 border-b border-slate-100 active:bg-slate-50"
             >
               <Text
                 className={`text-base ${
@@ -530,16 +521,15 @@ export default function PreWorkoutScreen() {
               {targetType === 'TIME' && (
                 <Check color="#10B981" size={20} strokeWidth={2.6} />
               )}
-            </TouchableOpacity>
+            </Pressable>
 
             {/* Option 4: Mục tiêu calo */}
-            <TouchableOpacity
+            <Pressable
               onPress={() => {
                 setTargetType('CALORIES');
                 setShowDropdown(false);
               }}
-              activeOpacity={0.7}
-              className="flex-row items-center justify-between py-3.5 px-3"
+              className="flex-row items-center justify-between py-3.5 px-3 active:bg-slate-50"
             >
               <Text
                 className={`text-base ${
@@ -553,7 +543,7 @@ export default function PreWorkoutScreen() {
               {targetType === 'CALORIES' && (
                 <Check color="#10B981" size={20} strokeWidth={2.6} />
               )}
-            </TouchableOpacity>
+            </Pressable>
           </Pressable>
         </Pressable>
       </Modal>

@@ -18,6 +18,30 @@ import axiosClient, {
 import i18n from '@/i18n';
 
 /**
+ * Chuẩn hóa UserSession từ các payload khác nhau (RegisterResponse, UserResponse)
+ */
+export const normalizeUserSession = (raw: any, fallback?: UserSession | null): UserSession => {
+  if (!raw) return raw;
+  const userId = raw.userId ?? raw.id ?? fallback?.userId ?? fallback?.id ?? 0;
+  const fullName = raw.fullName ?? raw.displayName ?? fallback?.fullName ?? fallback?.displayName ?? '';
+  const accountStatus = raw.accountStatus ?? raw.status ?? fallback?.accountStatus ?? fallback?.status ?? 'ACTIVE';
+
+  return {
+    userId,
+    id: userId,
+    email: raw.email ?? fallback?.email ?? '',
+    fullName,
+    displayName: fullName,
+    role: raw.role ?? fallback?.role ?? 'MEMBER',
+    accountStatus,
+    status: accountStatus,
+    timezone: raw.timezone ?? fallback?.timezone,
+    avatarUrl: raw.avatarUrl ?? fallback?.avatarUrl,
+    phone: raw.phone ?? fallback?.phone,
+  };
+};
+
+/**
  * Lưu toàn bộ Auth Data (Tokens & Session) vào SecureStore
  */
 export const saveAuthData = async (authData: MobileLoginResponse): Promise<void> => {
@@ -33,7 +57,8 @@ export const saveAuthData = async (authData: MobileLoginResponse): Promise<void>
       promises.push(SecureStore.setItemAsync(SESSION_ID_KEY, authData.sessionId));
     }
     if (authData.userSession) {
-      promises.push(SecureStore.setItemAsync(USER_SESSION_KEY, JSON.stringify(authData.userSession)));
+      const normalized = normalizeUserSession(authData.userSession);
+      promises.push(SecureStore.setItemAsync(USER_SESSION_KEY, JSON.stringify(normalized)));
     }
     await Promise.all(promises);
   } catch (error) {
@@ -48,7 +73,8 @@ export const getStoredUser = async (): Promise<UserSession | null> => {
   try {
     const json = await SecureStore.getItemAsync(USER_SESSION_KEY);
     if (!json) return null;
-    return JSON.parse(json) as UserSession;
+    const parsed = JSON.parse(json);
+    return normalizeUserSession(parsed);
   } catch (error) {
     console.error('[authService] Error reading stored user:', error);
     return null;
@@ -86,6 +112,10 @@ export const loginApi = async (data: LoginRequest): Promise<MobileLoginResponse>
     throw new Error(response.data?.message || i18n.t('auth:errors.loginFailed'));
   }
 
+  if (result.userSession) {
+    result.userSession = normalizeUserSession(result.userSession);
+  }
+
   await saveAuthData(result);
   return result;
 };
@@ -104,7 +134,7 @@ export const registerApi = async (data: RegisterRequest): Promise<UserSession> =
     throw new Error(response.data?.message || i18n.t('auth:errors.registerFailed'));
   }
 
-  return result;
+  return normalizeUserSession(result);
 };
 
 /**
@@ -140,6 +170,9 @@ export const mobileRefreshApi = async (
   );
 
   const result = response.data?.data || response.data?.result || (response.data as any);
+  if (result?.userSession) {
+    result.userSession = normalizeUserSession(result.userSession);
+  }
   if (result) {
     await saveAuthData(result);
   }
@@ -147,11 +180,13 @@ export const mobileRefreshApi = async (
 };
 
 /**
- * Lấy thông tin User hiện tại từ API (GET /api/auth/me)
+ * Lấy thông tin User hiện tại từ API (GET /api/users/me)
  */
 export const getProfileApi = async (): Promise<UserSession> => {
-  const response = await axiosClient.get<ApiResponse<UserSession>>('/api/auth/me');
-  const user = response.data?.data || response.data?.result || (response.data as any);
+  const response = await axiosClient.get<ApiResponse<any>>('/api/users/me');
+  const raw = response.data?.data || response.data?.result || (response.data as any);
+  const currentUser = await getStoredUser();
+  const user = normalizeUserSession(raw, currentUser);
 
   if (user) {
     await SecureStore.setItemAsync(USER_SESSION_KEY, JSON.stringify(user));
@@ -160,9 +195,14 @@ export const getProfileApi = async (): Promise<UserSession> => {
   return user;
 };
 
+/**
+ * Cập nhật thông tin User hiện tại (PATCH /api/users/me)
+ */
 export const updateProfileApi = async (data: Partial<UserSession>): Promise<UserSession> => {
-  const response = await axiosClient.patch<ApiResponse<UserSession>>('/api/users/me', data);
-  const user = response.data?.data || response.data?.result || (response.data as any);
+  const response = await axiosClient.patch<ApiResponse<any>>('/api/users/me', data);
+  const raw = response.data?.data || response.data?.result || (response.data as any);
+  const currentUser = await getStoredUser();
+  const user = normalizeUserSession(raw, currentUser);
   if (user) {
     await SecureStore.setItemAsync(USER_SESSION_KEY, JSON.stringify(user));
   }

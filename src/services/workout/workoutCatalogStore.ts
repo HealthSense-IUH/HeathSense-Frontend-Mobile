@@ -47,7 +47,7 @@ interface WorkoutCatalogState {
   deleteRoutine: (routineId: string) => void;
   saveSession: (session: WorkoutSession) => void;
   deleteSession: (sessionId: string) => void;
-  syncSessionsWithBackend: () => Promise<void>;
+  syncSessionsWithBackend: (from?: string, to?: string) => Promise<void>;
 
   // Selectors / Helpers
   getFavoriteExercises: () => Exercise[];
@@ -231,7 +231,21 @@ export const useWorkoutCatalogStore = create<WorkoutCatalogState>((set, get) => 
       // Background sync with Spring Boot backend
       try {
         const { workoutApiService } = require('./workoutApiService');
-        workoutApiService.saveSession(session).catch(() => {});
+        workoutApiService.saveSession(session)
+          .then((savedServerSession: any) => {
+            if (savedServerSession && savedServerSession.id) {
+              const serverId = String(savedServerSession.id);
+              // Reconcile temporary local ID with real server Snowflake ID
+              if (session.id !== serverId) {
+                const refreshed = get().sessions.map((s) =>
+                  s.id === session.id ? { ...s, id: serverId } : s
+                );
+                saveToStorage(STORAGE_KEYS.SESSIONS, refreshed);
+                set({ sessions: refreshed });
+              }
+            }
+          })
+          .catch(() => {});
       } catch {}
     },
 
@@ -241,10 +255,10 @@ export const useWorkoutCatalogStore = create<WorkoutCatalogState>((set, get) => 
       set({ sessions: updatedSessions });
     },
 
-    syncSessionsWithBackend: async () => {
+    syncSessionsWithBackend: async (from?: string, to?: string) => {
       try {
         const { workoutApiService } = require('./workoutApiService');
-        const res = await workoutApiService.getSessions(0, 50);
+        const res = await workoutApiService.getSessions(0, 50, from, to);
         if (res && res.content && Array.isArray(res.content) && res.content.length > 0) {
           const localSessions = get().sessions;
           const sessionMap = new Map<string, WorkoutSession>();
@@ -278,11 +292,38 @@ export const useWorkoutCatalogStore = create<WorkoutCatalogState>((set, get) => 
             sessionMap.set(item.id, item);
           });
 
-          // Merge local sessions so newly completed offline ones aren't lost
-          localSessions.forEach((s) => sessionMap.set(s.id, s));
-          const merged = Array.from(sessionMap.values()).sort((a, b) => b.startedAt - a.startedAt);
-          saveToStorage(STORAGE_KEYS.SESSIONS, merged);
-          set({ sessions: merged });
+          // Merge local sessions that are not yet on backend
+          localSessions.forEach((local) => {
+            // Check if this local session is already represented on backend
+            // (by exact ID, or matching exerciseId + startedAt within 3 seconds)
+            const isAlreadyOnServer = Array.from(sessionMap.values()).some((server) => {
+              if (server.id === local.id) return true;
+              const sameExercise = server.exerciseId === local.exerciseId;
+              const timeDiff = Math.abs(server.startedAt - local.startedAt);
+              return sameExercise && timeDiff <= 3000;
+            });
+
+            if (!isAlreadyOnServer) {
+              sessionMap.set(local.id, local);
+            }
+          });
+
+          // Deduplicate the merged list (cleans up any existing duplicate records from earlier runs)
+          const allMerged = Array.from(sessionMap.values()).sort((a, b) => b.startedAt - a.startedAt);
+          const deduplicated: WorkoutSession[] = [];
+          for (const s of allMerged) {
+            const hasDuplicate = deduplicated.some((existing) => {
+              const sameExercise = existing.exerciseId === s.exerciseId;
+              const timeDiff = Math.abs(existing.startedAt - s.startedAt);
+              return sameExercise && timeDiff <= 3000;
+            });
+            if (!hasDuplicate) {
+              deduplicated.push(s);
+            }
+          }
+
+          saveToStorage(STORAGE_KEYS.SESSIONS, deduplicated);
+          set({ sessions: deduplicated });
         }
       } catch {
         // Silently preserve local sessions when backend unreachable

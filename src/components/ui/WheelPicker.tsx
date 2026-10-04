@@ -5,7 +5,7 @@ import {
   FlatList,
   NativeSyntheticEvent,
   NativeScrollEvent,
-  TouchableOpacity,
+  Pressable,
 } from 'react-native';
 
 export interface WheelPickerItem {
@@ -112,14 +112,14 @@ export const WheelPicker: React.FC<WheelPickerProps> = ({
             index === selectedIndex - 1 || index === selectedIndex + 1;
 
           return (
-            <TouchableOpacity
-              activeOpacity={0.8}
+            <Pressable
               onPress={() => handleItemPress(index)}
-              style={{
+              style={({ pressed }) => ({
                 height: itemHeight,
                 justifyContent: 'center',
                 alignItems: 'center',
-              }}
+                opacity: pressed ? 0.8 : 1,
+              })}
             >
               <View className="flex-row items-baseline justify-center">
                 <Text
@@ -142,7 +142,7 @@ export const WheelPicker: React.FC<WheelPickerProps> = ({
                   </Text>
                 )}
               </View>
-            </TouchableOpacity>
+            </Pressable>
           );
         }}
       />

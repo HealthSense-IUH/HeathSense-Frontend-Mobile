@@ -11,6 +11,11 @@ export const REFRESH_TOKEN_KEY = 'refresh_token';
 export const SESSION_ID_KEY = 'session_id';
 export const USER_SESSION_KEY = 'user_session';
 
+let onAuthFailedCallback: (() => void) | null = null;
+export const setOnAuthFailed = (callback: () => void) => {
+  onAuthFailedCallback = callback;
+};
+
 export function preserveUnsafeIntegers(json: string): string {
   return json.replace(/([:\[,]\s*)(-?\d{16,})(?=\s*[,}\]])/g, '$1"$2"');
 }
@@ -90,8 +95,14 @@ axiosClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    if (!originalRequest) {
+      return Promise.reject(error);
+    }
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    const isAuthEndpoint = originalRequest.url?.includes('/api/auth/mobile/refresh') ||
+                           originalRequest.url?.includes('/api/auth/mobile/login');
+
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -128,10 +139,11 @@ axiosClient.interceptors.response.use(
           }
         );
 
-        const data = refreshResponse.data?.result || (refreshResponse.data as any);
-        const newAccessToken = data.accessToken;
-        const newRefreshToken = data.refreshToken;
-        const newSessionId = data.sessionId || sessionId;
+        const raw = refreshResponse.data;
+        const data = (raw as any)?.data || (raw as any)?.result || raw;
+        const newAccessToken = data?.accessToken;
+        const newRefreshToken = data?.refreshToken;
+        const newSessionId = data?.sessionId || sessionId;
 
         if (!newAccessToken) {
           throw new Error('Refresh response missing access token');
@@ -144,15 +156,23 @@ axiosClient.interceptors.response.use(
         if (newSessionId) {
           await SecureStore.setItemAsync(SESSION_ID_KEY, newSessionId);
         }
+        if (data?.userSession) {
+          await SecureStore.setItemAsync(USER_SESSION_KEY, JSON.stringify(data.userSession));
+        }
 
         axiosClient.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
         originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
 
         processQueue(null, newAccessToken);
         return axiosClient(originalRequest);
-      } catch (err) {
+      } catch (err: any) {
         processQueue(err, null);
-        await clearStoredTokens();
+        const status = err?.response?.status;
+        // Only clear tokens and trigger logout if refresh token was invalid/expired/rejected
+        if (status === 401 || status === 403 || status === 400 || err?.message === 'Missing refresh_token or session_id') {
+          await clearStoredTokens();
+          onAuthFailedCallback?.();
+        }
         return Promise.reject(err);
       } finally {
         isRefreshing = false;

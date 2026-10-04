@@ -3,10 +3,11 @@ import {
   View,
   Text,
   ScrollView,
-  TouchableOpacity,
+  Pressable,
   TextInput,
 } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
+import { safeRouter } from '@/utils/safeNavigation';
 import { ArrowLeft, Search, X, Plus } from 'lucide-react-native';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
 import { ExerciseIcon } from '@/components/features/workout/ExerciseIcon';
@@ -17,8 +18,19 @@ import { getCategoryLabel, getExerciseName } from '@/services/workout/workoutI18
 import { THEME } from '@/constants/theme';
 import { useTranslation } from 'react-i18next';
 
+const CATEGORIES: (ExerciseCategory | 'ALL')[] = [
+  'ALL',
+  'GENERAL',
+  'AEROBIC',
+  'FREE_WEIGHT',
+  'MACHINE_WEIGHT',
+  'WILDERNESS',
+  'WATER',
+  'WINTER',
+  'BALL',
+];
+
 export default function SelectExerciseScreen() {
-  const router = useRouter();
   const { t } = useTranslation('workout');
   const params = useLocalSearchParams<{ mode?: string }>();
   const isRoutinePicker = params.mode === 'routine';
@@ -29,17 +41,7 @@ export default function SelectExerciseScreen() {
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
 
-  const categories: (ExerciseCategory | 'ALL')[] = [
-    'ALL',
-    'GENERAL',
-    'AEROBIC',
-    'FREE_WEIGHT',
-    'MACHINE_WEIGHT',
-    'WILDERNESS',
-    'WATER',
-    'WINTER',
-    'BALL',
-  ];
+  const categories = CATEGORIES;
 
   const filteredExercises = exercises.filter((ex) => {
     const matchesCategory = selectedCategory === 'ALL' || ex.category === selectedCategory;
@@ -54,10 +56,10 @@ export default function SelectExerciseScreen() {
   const handleSelect = (exercise: Exercise) => {
     if (isRoutinePicker) {
       // Return selected exercise to routine builder
-      router.back();
+      safeRouter.back();
       // Store can be updated or handled via callback
     } else {
-      router.push({
+      safeRouter.navigate({
         pathname: '/workout/pre-workout' as any,
         params: { exerciseId: exercise.id },
       });
@@ -68,20 +70,20 @@ export default function SelectExerciseScreen() {
     <ScreenWrapper
       title={t('select.title')}
       headerLeft={
-        <TouchableOpacity
-          onPress={() => router.back()}
+        <Pressable
+          onPress={() => safeRouter.back()}
           className="w-10 h-10 rounded-full items-center justify-center active:opacity-70"
         >
           <ArrowLeft color={THEME.colors.textPrimary} size={22} />
-        </TouchableOpacity>
+        </Pressable>
       }
       headerRight={
-        <TouchableOpacity
+        <Pressable
           onPress={() => setIsSearchVisible(!isSearchVisible)}
           className="w-10 h-10 rounded-full items-center justify-center active:opacity-70"
         >
           <Search color={THEME.colors.textPrimary} size={22} />
-        </TouchableOpacity>
+        </Pressable>
       }
     >
       <View className="flex-1">
@@ -99,9 +101,9 @@ export default function SelectExerciseScreen() {
                 className="flex-1 ml-2.5 text-slate-800 text-base font-medium"
               />
               {searchQuery.length > 0 && (
-                <TouchableOpacity onPress={() => setSearchQuery('')}>
+                <Pressable onPress={() => setSearchQuery('')} className="active:opacity-60">
                   <X color="#94A3B8" size={18} />
-                </TouchableOpacity>
+                </Pressable>
               )}
             </View>
           </View>
@@ -119,24 +121,21 @@ export default function SelectExerciseScreen() {
               const label = cat === 'ALL' ? t('common.all') : getCategoryLabel(cat);
 
               return (
-                <TouchableOpacity
+                <Pressable
                   key={cat}
                   onPress={() => setSelectedCategory(cat)}
-                  activeOpacity={0.75}
-                  className={`px-4 py-2 rounded-full border ${
-                    isSelected
-                      ? 'bg-slate-900 border-slate-900'
-                      : 'bg-white border-slate-200/90'
+                  className={`px-4 py-2 rounded-full items-center justify-center ${
+                    isSelected ? 'bg-[#E5E7EB]' : 'bg-transparent'
                   }`}
                 >
                   <Text
-                    className={`text-xs font-semibold ${
-                      isSelected ? 'text-white' : 'text-slate-600'
+                    className={`text-sm ${
+                      isSelected ? 'font-bold text-slate-900' : 'font-medium text-slate-500'
                     }`}
                   >
                     {label}
                   </Text>
-                </TouchableOpacity>
+                </Pressable>
               );
             })}
           </ScrollView>
@@ -156,11 +155,10 @@ export default function SelectExerciseScreen() {
                 const isLast = index === filteredExercises.length - 1;
 
                 return (
-                  <TouchableOpacity
+                  <Pressable
                     key={exercise.id}
                     onPress={() => handleSelect(exercise)}
-                    activeOpacity={0.7}
-                    className={`flex-row items-center px-4 py-3.5 ${
+                    className={`flex-row items-center px-4 py-3.5 active:bg-slate-50 ${
                       !isLast ? 'border-b border-slate-100' : ''
                     }`}
                   >
@@ -183,7 +181,7 @@ export default function SelectExerciseScreen() {
                     >
                       {getExerciseName(exercise)}
                     </Text>
-                  </TouchableOpacity>
+                  </Pressable>
                 );
               })
             )}
@@ -192,17 +190,16 @@ export default function SelectExerciseScreen() {
 
         {/* STICKY BOTTOM BUTTON: '+ Tạo bài tập thể dục mới' (Exact One UI layout from Image 4) */}
         <View className="absolute bottom-6 left-5 right-5 items-center">
-          <TouchableOpacity
+          <Pressable
             onPress={() => setShowCreateModal(true)}
-            activeOpacity={0.85}
-            className="flex-row items-center justify-center bg-slate-900/95 py-3.5 px-6 rounded-full shadow-lg border border-slate-700/80"
-            style={{ elevation: 5 }}
+            className="flex-row items-center justify-center bg-slate-900/95 py-3.5 px-6 rounded-full shadow-lg border border-slate-700/80 active:opacity-85"
+            style={{ boxShadow: '0 4px 14px rgba(0, 0, 0, 0.25)' }}
           >
             <Plus color="#10B981" size={20} className="mr-2" />
             <Text className="text-white font-bold text-base">
               {t('catalog.createExercise')}
             </Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </View>
 

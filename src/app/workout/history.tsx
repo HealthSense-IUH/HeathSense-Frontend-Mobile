@@ -3,12 +3,13 @@ import {
   View,
   Text,
   ScrollView,
-  TouchableOpacity,
   Pressable,
   Modal,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
+import { safeRouter } from '@/utils/safeNavigation';
 import {
+  ChevronLeft,
   ArrowLeft,
   Calendar,
   MoreVertical,
@@ -18,6 +19,7 @@ import {
   Footprints,
   Zap,
   Check,
+  Dumbbell,
 } from 'lucide-react-native';
 import Svg, {
   Path,
@@ -27,7 +29,7 @@ import Svg, {
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
 import { useWorkoutCatalogStore } from '@/services/workout/workoutCatalogStore';
 import { WorkoutSession } from '@/services/workout/workoutTypes';
-import { getExerciseIconComponent } from '@/components/features/workout/FavoriteWorkoutSection';
+import { getExerciseIconComponent } from '@/components/features/workout/workoutThemeUtils';
 import { WorkoutCalendarModal } from '@/components/features/workout/WorkoutCalendarModal';
 import {
   formatWorkoutDecimal,
@@ -53,28 +55,42 @@ interface ChartColumnItem {
 }
 
 export default function WorkoutHistoryScreen() {
-  const router = useRouter();
   const { t } = useTranslation('workout');
+  const params = useLocalSearchParams<{ tab?: TabView }>();
   const sessions = useWorkoutCatalogStore((state) => state.sessions);
   const syncSessionsWithBackend = useWorkoutCatalogStore(
     (state) => state.syncSessionsWithBackend
   );
 
-  const [activeTab, setActiveTab] = useState<TabView>('WEEKS');
+  const [activeTab, setActiveTab] = useState<TabView>(() => {
+    if (params.tab && ['DAYS', 'WEEKS', 'MONTHS'].includes(params.tab)) {
+      return params.tab as TabView;
+    }
+    return 'DAYS';
+  });
+  const [prevTabParam, setPrevTabParam] = useState(params.tab);
   const [selectedSportFilter, setSelectedSportFilter] = useState<string>('ALL');
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState<boolean>(false);
   const [anchorDate, setAnchorDate] = useState<Date>(new Date());
   const [selectedIndex, setSelectedIndex] = useState<number>(-1); // -1 = latest item
   const [isCalendarVisible, setIsCalendarVisible] = useState<boolean>(false);
 
-  useEffect(() => {
-    void syncSessionsWithBackend();
-  }, [syncSessionsWithBackend]);
+  if (params.tab !== prevTabParam) {
+    setPrevTabParam(params.tab);
+    if (params.tab && ['DAYS', 'WEEKS', 'MONTHS'].includes(params.tab)) {
+      setActiveTab(params.tab as TabView);
+      setSelectedIndex(-1);
+    }
+  }
+
 
   // When tab changes, reset selected index to latest
   const handleTabChange = (tab: TabView) => {
-    setActiveTab(tab);
-    setSelectedIndex(-1);
+    if (tab === activeTab) return;
+    React.startTransition(() => {
+      setActiveTab(tab);
+      setSelectedIndex(-1);
+    });
   };
 
   // Set of dates with workout sessions ('YYYY-MM-DD') for Calendar Modal
@@ -314,6 +330,50 @@ export default function WorkoutHistoryScreen() {
     return `${pad(mins)}:${pad(secs)}`;
   };
 
+  // Format axis duration as G:P (e.g., 01:00 or 00:30)
+  const formatChartAxisDuration = (totalSec: number) => {
+    if (totalSec <= 0) return '00:00';
+    const hrs = Math.floor(totalSec / 3600);
+    const mins = Math.floor((totalSec % 3600) / 60);
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return `${pad(hrs)}:${pad(mins)}`;
+  };
+
+  // Quick navigation through previous / next periods
+  const handleShiftPeriod = (direction: -1 | 1) => {
+    React.startTransition(() => {
+      const next = new Date(anchorDate);
+      if (activeTab === 'DAYS') {
+        next.setDate(anchorDate.getDate() + direction * 7);
+      } else if (activeTab === 'WEEKS') {
+        next.setDate(anchorDate.getDate() + direction * 7 * 8);
+      } else {
+        next.setMonth(anchorDate.getMonth() + direction * 6);
+      }
+      setAnchorDate(next);
+      setSelectedIndex(-1);
+    });
+  };
+
+  // Prevent shifting into future periods
+  const canGoNext = useMemo(() => {
+    const now = new Date();
+    const lastCol = columns[columns.length - 1];
+    if (!lastCol) return false;
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    return lastCol.startDate.getTime() < startOfToday;
+  }, [columns]);
+
+  // Synchronize active date range with backend lazily
+  useEffect(() => {
+    if (columns.length > 0) {
+      const start = columns[0].startDate.toISOString();
+      const end = columns[columns.length - 1].endDate.toISOString();
+      void syncSessionsWithBackend(start, end);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, anchorDate]);
+
   // Group active column's sessions by day for the bottom list (sorted latest first)
   // Tổng hợp thật của các buổi tập trong khoảng đang chọn (cột đang chọn trên biểu đồ)
   const periodStats = useMemo(() => {
@@ -437,27 +497,27 @@ export default function WorkoutHistoryScreen() {
       statusBarStyle="dark"
       className="bg-slate-50"
       headerLeft={
-        <TouchableOpacity
-          onPress={() => router.back()}
+        <Pressable
+          onPress={() => safeRouter.back()}
           className="w-10 h-10 rounded-full items-center justify-center active:opacity-70"
         >
           <ArrowLeft color="#0F172A" size={22} />
-        </TouchableOpacity>
+        </Pressable>
       }
       headerRight={
         <View className="flex-row items-center gap-1.5">
-          <TouchableOpacity
+          <Pressable
             onPress={() => setIsCalendarVisible(true)}
             className="w-9 h-9 rounded-full bg-white border border-slate-200/80 items-center justify-center shadow-xs active:opacity-80"
           >
             <Calendar color="#475569" size={17} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => router.push('/workout/catalog' as any)}
+          </Pressable>
+          <Pressable
+            onPress={() => safeRouter.navigate('/workout/catalog')}
             className="w-9 h-9 rounded-full bg-white border border-slate-200/80 items-center justify-center shadow-xs active:opacity-80"
           >
             <MoreVertical color="#475569" size={17} />
-          </TouchableOpacity>
+          </Pressable>
         </View>
       }
     >
@@ -465,56 +525,50 @@ export default function WorkoutHistoryScreen() {
         {/* TAB SWITCHER: Số ngày | Tuần | Tháng (Images 3 & 4) */}
         <View className="px-6 py-2.5">
           <View className="flex-row items-center justify-between">
-            <TouchableOpacity
+            <Pressable
               onPress={() => handleTabChange('DAYS')}
-              className={`px-5 py-2 rounded-full items-center justify-center ${
-                activeTab === 'DAYS' ? 'bg-[#E5E7EB]' : 'bg-transparent'
-              }`}
+              className={`px-5 py-2 rounded-full items-center justify-center ${activeTab === 'DAYS' ? 'bg-[#E5E7EB]' : 'bg-transparent'
+                }`}
             >
               <Text
-                className={`text-sm ${
-                  activeTab === 'DAYS'
+                className={`text-sm ${activeTab === 'DAYS'
                     ? 'font-bold text-slate-900'
                     : 'font-medium text-slate-500'
-                }`}
+                  }`}
               >
                 {t('history.tabs.days')}
               </Text>
-            </TouchableOpacity>
+            </Pressable>
 
-            <TouchableOpacity
+            <Pressable
               onPress={() => handleTabChange('WEEKS')}
-              className={`px-5 py-2 rounded-full items-center justify-center ${
-                activeTab === 'WEEKS' ? 'bg-[#E5E7EB]' : 'bg-transparent'
-              }`}
+              className={`px-5 py-2 rounded-full items-center justify-center ${activeTab === 'WEEKS' ? 'bg-[#E5E7EB]' : 'bg-transparent'
+                }`}
             >
               <Text
-                className={`text-sm ${
-                  activeTab === 'WEEKS'
+                className={`text-sm ${activeTab === 'WEEKS'
                     ? 'font-bold text-slate-900'
                     : 'font-medium text-slate-500'
-                }`}
+                  }`}
               >
                 {t('history.tabs.weeks')}
               </Text>
-            </TouchableOpacity>
+            </Pressable>
 
-            <TouchableOpacity
+            <Pressable
               onPress={() => handleTabChange('MONTHS')}
-              className={`px-5 py-2 rounded-full items-center justify-center ${
-                activeTab === 'MONTHS' ? 'bg-[#E5E7EB]' : 'bg-transparent'
-              }`}
+              className={`px-5 py-2 rounded-full items-center justify-center ${activeTab === 'MONTHS' ? 'bg-[#E5E7EB]' : 'bg-transparent'
+                }`}
             >
               <Text
-                className={`text-sm ${
-                  activeTab === 'MONTHS'
+                className={`text-sm ${activeTab === 'MONTHS'
                     ? 'font-bold text-slate-900'
                     : 'font-medium text-slate-500'
-                }`}
+                  }`}
               >
                 {t('history.tabs.months')}
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </View>
 
@@ -529,33 +583,50 @@ export default function WorkoutHistoryScreen() {
             elevation: 2,
           }}
         >
-          {/* Top Line: Date Range (Clicking opens Calendar Modal) */}
-          <View className="flex-row items-center mb-2">
-            <TouchableOpacity
-              activeOpacity={0.7}
+          {/* Top Line: Date Range & Quick Period Navigation */}
+          <View className="flex-row items-center justify-between mb-2">
+            <Pressable
               onPress={() => setIsCalendarVisible(true)}
-              className="flex-row items-center gap-1.5 py-0.5"
+              className="flex-row items-center gap-1.5 py-0.5 active:opacity-70"
             >
-              <Text className="text-xs font-bold text-slate-600">
+              <Text className="text-xs font-bold text-slate-700">
                 {rangeLabel}
               </Text>
-              <ChevronRight color="#64748B" size={14} />
-            </TouchableOpacity>
+              <ChevronDown color="#64748B" size={13} />
+            </Pressable>
+
+            <View className="flex-row items-center gap-1">
+              <Pressable
+                onPress={() => handleShiftPeriod(-1)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                className="w-7 h-7 rounded-full bg-slate-100 items-center justify-center active:opacity-70"
+              >
+                <ChevronLeft color="#475569" size={15} strokeWidth={2.2} />
+              </Pressable>
+              <Pressable
+                onPress={() => handleShiftPeriod(1)}
+                disabled={!canGoNext}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                className={`w-7 h-7 rounded-full bg-slate-100 items-center justify-center active:opacity-70 ${!canGoNext ? 'opacity-35' : ''
+                  }`}
+              >
+                <ChevronRight color="#475569" size={15} strokeWidth={2.2} />
+              </Pressable>
+            </View>
           </View>
 
           {/* Row with Sport Filter & Samsung Milestone Graphic */}
           <View className="flex-row items-center justify-between mb-3">
             {/* Filter Pill (Clicking opens Samsung Health Dropdown Popover) */}
-            <TouchableOpacity
-              activeOpacity={0.75}
+            <Pressable
               onPress={() => setIsFilterMenuOpen(true)}
-              className="flex-row items-center bg-slate-100 px-3.5 py-1.5 rounded-full border border-slate-200/60"
+              className="flex-row items-center bg-slate-100 px-3.5 py-1.5 rounded-full border border-slate-200/60 active:opacity-75"
             >
               <Text className="text-xs font-bold text-slate-700 mr-1.5">
                 {currentFilterLabel}
               </Text>
               <ChevronDown color="#64748B" size={13} />
-            </TouchableOpacity>
+            </Pressable>
 
             {/* Samsung Milestone Tent Graphic (Image 3 & 4) */}
             <View className="w-12 h-12 rounded-full overflow-hidden items-center justify-center shadow-xs">
@@ -613,15 +684,15 @@ export default function WorkoutHistoryScreen() {
                 {isDistanceSport
                   ? formatWorkoutDecimal(maxDistanceAcrossColumns, 2)
                   : maxDurationAcrossColumns > 0
-                  ? formatDurationDisplay(maxDurationAcrossColumns)
-                  : '00:00'}
+                    ? formatChartAxisDuration(maxDurationAcrossColumns)
+                    : '00:00'}
               </Text>
               <Text className="text-[10px] text-slate-400 font-medium mt-3.5">
                 {isDistanceSport
                   ? formatWorkoutDecimal(maxDistanceAcrossColumns / 2, 2)
                   : maxDurationAcrossColumns > 0
-                  ? formatDurationDisplay(Math.round(maxDurationAcrossColumns / 2))
-                  : '00:00'}
+                    ? formatChartAxisDuration(Math.round(maxDurationAcrossColumns / 2))
+                    : '00:00'}
               </Text>
             </View>
 
@@ -632,20 +703,24 @@ export default function WorkoutHistoryScreen() {
                 const hasAct = item.durationSeconds > 0;
                 const barHeight = hasAct
                   ? Math.max(
-                      18,
-                      Math.min(
-                        52,
-                        Math.round((item.durationSeconds / Math.max(1, maxDurationAcrossColumns)) * 48) + 10
-                      )
+                    18,
+                    Math.min(
+                      52,
+                      Math.round((item.durationSeconds / Math.max(1, maxDurationAcrossColumns)) * 48) + 10
                     )
+                  )
                   : 0;
 
                 return (
-                  <TouchableOpacity
+                  <Pressable
                     key={item.id}
-                    activeOpacity={0.75}
-                    onPress={() => setSelectedIndex(idx)}
-                    className="items-center flex-1"
+                    onPress={() => {
+                      React.startTransition(() => {
+                        setSelectedIndex(idx);
+                      });
+                    }}
+                    hitSlop={{ top: 12, bottom: 12, left: 6, right: 6 }}
+                    className="items-center flex-1 active:opacity-75"
                   >
                     <View className="h-16 justify-end items-center w-full">
                       {hasAct ? (
@@ -662,17 +737,19 @@ export default function WorkoutHistoryScreen() {
 
                     {/* Column Label / Day or Week Number */}
                     <Text
-                      className={`text-[11px] mt-2 ${
-                        isSelected
+                      className={`text-[11px] mt-2 ${isSelected
                           ? 'text-slate-900 font-extrabold'
                           : item.durationSeconds > 0
-                          ? 'text-slate-700 font-bold'
-                          : 'text-slate-400 font-medium'
-                      }`}
+                            ? 'text-slate-700 font-bold'
+                            : 'text-slate-400 font-medium'
+                        }`}
                     >
                       {item.label}
                     </Text>
-                  </TouchableOpacity>
+                    {isSelected && (
+                      <View className="w-1.5 h-1.5 rounded-full bg-slate-800 mt-1" />
+                    )}
+                  </Pressable>
                 );
               })}
             </View>
@@ -681,8 +758,8 @@ export default function WorkoutHistoryScreen() {
         </View>
 
         {/* WORKOUT SESSIONS LIST FOR SELECTED PERIOD (Images 4 & 5) */}
-        {groupedSessions.length > 0 && (
-          <View className="px-4">
+        {groupedSessions.length > 0 ? (
+          <View key="workout-sessions-list" className="px-4">
             {groupedSessions.map((group) => {
               return (
                 <View key={group.dateKey} className="mb-4">
@@ -719,11 +796,10 @@ export default function WorkoutHistoryScreen() {
                     );
 
                     return (
-                      <TouchableOpacity
+                      <Pressable
                         key={session.id}
-                        activeOpacity={0.85}
                         onPress={() => {
-                          router.push({
+                          safeRouter.navigate({
                             pathname: '/workout/summary',
                             params: {
                               sessionId: session.id,
@@ -739,7 +815,7 @@ export default function WorkoutHistoryScreen() {
                             },
                           } as any);
                         }}
-                        className="bg-white rounded-2xl p-4 mb-2.5 border border-slate-200/70 shadow-xs flex-row items-center justify-between"
+                        className="bg-white rounded-2xl p-4 mb-2.5 border border-slate-200/70 shadow-xs flex-row items-center justify-between active:opacity-80"
                       >
                         {/* Left: Sport Icon */}
                         <View className="w-11 h-11 rounded-2xl bg-slate-100 items-center justify-center mr-3 border border-slate-200/60">
@@ -775,12 +851,32 @@ export default function WorkoutHistoryScreen() {
                         <Text className="text-xs font-semibold text-slate-400">
                           {sessionTimeStr}
                         </Text>
-                      </TouchableOpacity>
+                      </Pressable>
                     );
                   })}
                 </View>
               );
             })}
+          </View>
+        ) : (
+          <View key="workout-sessions-empty" className="mx-4 mb-6 p-6 rounded-3xl bg-white border border-slate-200/80 items-center justify-center shadow-xs">
+            <View className="w-13 h-13 rounded-2xl bg-slate-100 items-center justify-center mb-3">
+              <Dumbbell color="#94A3B8" size={26} />
+            </View>
+            <Text className="text-sm font-bold text-slate-800 mb-1">
+              Không có buổi tập nào
+            </Text>
+            <Text className="text-xs text-slate-500 text-center mb-4 max-w-[260px] leading-relaxed">
+              Chưa có dữ liệu vận động được ghi nhận trong {activeTab === 'DAYS' ? 'ngày này' : 'khoảng thời gian này'}. Hãy bắt đầu buổi tập ngay!
+            </Text>
+            <Pressable
+              onPress={() => safeRouter.navigate('/workout/select')}
+              className="px-5 py-2.5 rounded-full bg-[#00C8FF] active:opacity-85 shadow-xs"
+            >
+              <Text className="text-xs font-bold text-white">
+                Bắt đầu bài tập
+              </Text>
+            </Pressable>
           </View>
         )}
 
@@ -853,29 +949,27 @@ export default function WorkoutHistoryScreen() {
             {filterOptions.map((opt) => {
               const isSelected = selectedSportFilter === opt.id;
               return (
-                <TouchableOpacity
+                <Pressable
                   key={opt.id}
-                  activeOpacity={0.7}
                   onPress={() => {
                     setSelectedSportFilter(opt.id);
                     setIsFilterMenuOpen(false);
                     setSelectedIndex(-1);
                   }}
-                  className="flex-row items-center justify-between px-5 py-3 rounded-2xl active:bg-slate-50"
+                  className="flex-row items-center justify-between px-5 py-3 rounded-2xl active:bg-slate-100"
                 >
                   <Text
-                    className={`text-[15px] ${
-                      isSelected
+                    className={`text-[15px] ${isSelected
                         ? 'font-bold text-[#00C8FF]'
                         : 'font-semibold text-slate-800'
-                    }`}
+                      }`}
                   >
                     {opt.name}
                   </Text>
                   {isSelected && (
                     <Check color="#00C8FF" size={20} strokeWidth={2.5} />
                   )}
-                </TouchableOpacity>
+                </Pressable>
               );
             })}
           </View>

@@ -1,11 +1,12 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
-import { useRouter } from 'expo-router';
+import { View, Text, ScrollView, Pressable } from 'react-native';
+import { safeRouter } from '@/utils/safeNavigation';
 import {
   ArrowLeft,
   User,
   MoreVertical,
   Award,
+  ChevronRight,
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
@@ -17,7 +18,6 @@ import { useTranslation } from 'react-i18next';
 import { currentIntlLocale } from '@/i18n';
 
 export default function WorkoutHubScreen() {
-  const router = useRouter();
   const { t } = useTranslation('workout');
   const getTodayStats = useWorkoutCatalogStore((state) => state.getTodayStats);
   const getWeeklyStats = useWorkoutCatalogStore((state) => state.getWeeklyStats);
@@ -37,27 +37,30 @@ export default function WorkoutHubScreen() {
       statusBarStyle="dark"
       className="bg-slate-50"
       headerLeft={
-        <TouchableOpacity
-          onPress={() => router.back()}
+        <Pressable
+          onPress={() => safeRouter.back()}
           className="w-10 h-10 rounded-full items-center justify-center active:opacity-70"
+          hitSlop={8}
         >
           <ArrowLeft color={THEME.colors.textPrimary} size={22} />
-        </TouchableOpacity>
+        </Pressable>
       }
       headerRight={
         <View className="flex-row items-center gap-2">
-          <TouchableOpacity
+          <Pressable
             onPress={() => {}}
-            className="w-9 h-9 rounded-full bg-white border border-slate-200/80 items-center justify-center shadow-sm active:opacity-80"
+            className="w-9 h-9 rounded-full bg-white border border-slate-200/80 items-center justify-center shadow-sm active:opacity-70"
+            hitSlop={6}
           >
             <User color="#475569" size={18} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => router.push('/workout/catalog' as any)}
-            className="w-9 h-9 rounded-full bg-white border border-slate-200/80 items-center justify-center shadow-sm active:opacity-80"
+          </Pressable>
+          <Pressable
+            onPress={() => safeRouter.navigate('/workout/catalog')}
+            className="w-9 h-9 rounded-full bg-white border border-slate-200/80 items-center justify-center shadow-sm active:opacity-70"
+            hitSlop={6}
           >
             <MoreVertical color="#475569" size={18} />
-          </TouchableOpacity>
+          </Pressable>
         </View>
       }
     >
@@ -75,8 +78,9 @@ export default function WorkoutHubScreen() {
         </LinearGradient>
 
         {/* SECTION 1: BƯỚC (Weekly Step Progress Card - Light Theme) */}
-        <View
-          className="mb-5 rounded-3xl bg-white border border-slate-200/80 p-5 shadow-sm"
+        <Pressable
+          onPress={() => safeRouter.navigate('/workout/steps')}
+          className="mb-5 rounded-3xl bg-white border border-slate-200/80 p-5 shadow-sm active:opacity-90"
           style={{
             shadowColor: 'rgba(15, 23, 42, 0.05)',
             shadowOffset: { width: 0, height: 4 },
@@ -85,7 +89,10 @@ export default function WorkoutHubScreen() {
             elevation: 2,
           }}
         >
-          <Text className="text-sm font-bold text-slate-800 mb-3">{t('hub.steps')}</Text>
+          <View className="flex-row items-center justify-between mb-3">
+            <Text className="text-sm font-bold text-slate-800">{t('hub.steps')}</Text>
+            <ChevronRight size={18} color="#94A3B8" />
+          </View>
 
           <View className="flex-row items-end justify-between">
             {/* Step Count Number */}
@@ -127,16 +134,15 @@ export default function WorkoutHubScreen() {
               })}
             </View>
           </View>
-        </View>
+        </Pressable>
 
         {/* SECTION: BÀI TẬP TUẦN NÀY (Samsung Health This Week's Workouts Card - Image 1 & 2) */}
         <WeeklyWorkoutCard />
 
         {/* SECTION 2: HUẤN LUYỆN CHẠY (Running Coach Beta Card - Light Theme) */}
-        <TouchableOpacity
-          onPress={() => router.push('/workout/catalog' as any)}
-          activeOpacity={0.88}
-          className="mb-5 rounded-3xl bg-white border border-slate-200/80 p-5 shadow-sm"
+        <Pressable
+          onPress={() => safeRouter.navigate('/workout/catalog')}
+          className="mb-5 rounded-3xl bg-white border border-slate-200/80 p-5 shadow-sm active:opacity-85"
           style={{
             shadowColor: 'rgba(15, 23, 42, 0.05)',
             shadowOffset: { width: 0, height: 4 },
@@ -168,7 +174,7 @@ export default function WorkoutHubScreen() {
               </Text>
             </View>
           </View>
-        </TouchableOpacity>
+        </Pressable>
 
         {/* SECTION 3: TẬP THỂ DỤC (Favorite Exercises Card - Light Theme) */}
         <FavoriteWorkoutSection />

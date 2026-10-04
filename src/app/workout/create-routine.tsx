@@ -1,10 +1,11 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useCallback } from 'react';
 import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
+  Pressable,
   ScrollView,
+  FlatList,
   Switch,
   Alert,
 } from 'react-native';
@@ -31,7 +32,7 @@ export default function CreateRoutineScreen() {
   const [showPickerModal, setShowPickerModal] = useState(false);
   const itemIdCounterRef = useRef(0);
 
-  const handleAddExercise = (exercise: Exercise) => {
+  const handleAddExercise = useCallback((exercise: Exercise) => {
     itemIdCounterRef.current += 1;
     const newItem: RoutineExerciseItem = {
       id: `item_${itemIdCounterRef.current}_${exercise.id}`,
@@ -46,7 +47,22 @@ export default function CreateRoutineScreen() {
 
     setRoutineItems((prev) => [...prev, newItem]);
     setShowPickerModal(false);
-  };
+  }, [routineItems.length]);
+
+  const renderExerciseItem = useCallback(
+    ({ item }: { item: Exercise }) => (
+      <Pressable
+        onPress={() => handleAddExercise(item)}
+        className="flex-row items-center py-3 border-b border-slate-100 active:bg-slate-50"
+      >
+        <ExerciseIcon name={item.iconName} size={18} className="mr-3" />
+        <Text className="text-base font-medium text-slate-800 flex-1">
+          {item.name}
+        </Text>
+      </Pressable>
+    ),
+    [handleAddExercise]
+  );
 
   const handleRemoveItem = (id: string) => {
     setRoutineItems(routineItems.filter((item) => item.id !== id));
@@ -76,12 +92,13 @@ export default function CreateRoutineScreen() {
     <ScreenWrapper
       title={t('catalog.createRoutine')}
       headerLeft={
-        <TouchableOpacity
+        <Pressable
           onPress={() => router.back()}
           className="w-10 h-10 rounded-full items-center justify-center active:opacity-70"
+          hitSlop={8}
         >
           <ArrowLeft color={THEME.colors.textPrimary} size={22} />
-        </TouchableOpacity>
+        </Pressable>
       }
     >
       <View className="flex-1">
@@ -157,20 +174,20 @@ export default function CreateRoutineScreen() {
                     </View>
                   </View>
 
-                  <TouchableOpacity
+                  <Pressable
                     onPress={() => handleRemoveItem(item.id)}
-                    className="p-2 -mr-1"
+                    className="p-2 -mr-1 active:opacity-70"
+                    hitSlop={8}
                   >
                     <Trash2 color="#EF4444" size={18} />
-                  </TouchableOpacity>
+                  </Pressable>
                 </View>
               );
             })}
 
             {/* BUTTON: '+ THÊM BÀI TẬP THỂ DỤC' */}
-            <TouchableOpacity
+            <Pressable
               onPress={() => setShowPickerModal(true)}
-              activeOpacity={0.7}
               className="flex-row items-center gap-3 p-4 border-b border-slate-100 active:bg-slate-50"
             >
               <View className="w-8 h-8 rounded-full bg-emerald-50 items-center justify-center">
@@ -179,7 +196,7 @@ export default function CreateRoutineScreen() {
               <Text className="text-base font-semibold text-emerald-600">
                 {t('createRoutine.addExercise')}
               </Text>
-            </TouchableOpacity>
+            </Pressable>
 
             {/* ITEM: HẠ NHIỆT (COOL-DOWN) */}
             <View className="flex-row items-center justify-between p-4">
@@ -205,21 +222,19 @@ export default function CreateRoutineScreen() {
 
         {/* BOTTOM ACTION BAR: 'Thoát' | 'Lưu' (Image 1) */}
         <View className="absolute bottom-6 left-5 right-5 flex-row gap-3">
-          <TouchableOpacity
+          <Pressable
             onPress={() => router.back()}
-            activeOpacity={0.8}
             className="flex-1 py-4 rounded-2xl bg-white border border-slate-200 items-center justify-center shadow-sm active:opacity-75"
           >
             <Text className="text-slate-600 font-semibold text-base">{t('common.exit')}</Text>
-          </TouchableOpacity>
+          </Pressable>
 
-          <TouchableOpacity
+          <Pressable
             onPress={handleSave}
-            activeOpacity={0.8}
             className="flex-1 py-4 rounded-2xl bg-slate-900 items-center justify-center shadow-md active:opacity-75"
           >
             <Text className="text-white font-bold text-base">{t('common:actions.save')}</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </View>
 
@@ -231,14 +246,14 @@ export default function CreateRoutineScreen() {
               <Text className="text-lg font-bold text-slate-900">
                 {t('createRoutine.pickerTitle')}
               </Text>
-              <TouchableOpacity onPress={() => setShowPickerModal(false)}>
+              <Pressable onPress={() => setShowPickerModal(false)}>
                 <Text className="text-slate-500 font-medium">{t('common:actions.close')}</Text>
-              </TouchableOpacity>
+              </Pressable>
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false}>
               {exercises.map((ex) => (
-                <TouchableOpacity
+                <Pressable
                   key={ex.id}
                   onPress={() => handleAddExercise(ex)}
                   className="flex-row items-center py-3 border-b border-slate-100"
@@ -247,7 +262,7 @@ export default function CreateRoutineScreen() {
                   <Text className="text-base font-medium text-slate-800 flex-1">
                     {getExerciseName(ex)}
                   </Text>
-                </TouchableOpacity>
+                </Pressable>
               ))}
             </ScrollView>
           </View>
