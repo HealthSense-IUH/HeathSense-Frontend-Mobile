@@ -38,6 +38,7 @@ export default function RootLayout() {
               <Stack.Screen name="consultation/create-request" dangerouslySingular={true} />
               <Stack.Screen name="consultation/chat/[sessionId]" dangerouslySingular={true} />
               <Stack.Screen name="workout/index" dangerouslySingular={true} />
+              <Stack.Screen name="workout/steps" dangerouslySingular={true} />
               <Stack.Screen name="workout/catalog" dangerouslySingular={true} />
               <Stack.Screen name="workout/history" dangerouslySingular={true} />
               <Stack.Screen name="workout/select" dangerouslySingular={true} />

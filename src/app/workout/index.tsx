@@ -7,6 +7,7 @@ import {
   User,
   MoreVertical,
   Award,
+  ChevronRight,
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
@@ -74,8 +75,9 @@ export default function WorkoutHubScreen() {
         </LinearGradient>
 
         {/* SECTION 1: BƯỚC (Weekly Step Progress Card - Light Theme) */}
-        <View
-          className="mb-5 rounded-3xl bg-white border border-slate-200/80 p-5 shadow-sm"
+        <Pressable
+          onPress={() => safeRouter.navigate('/workout/steps')}
+          className="mb-5 rounded-3xl bg-white border border-slate-200/80 p-5 shadow-sm active:opacity-90"
           style={{
             shadowColor: 'rgba(15, 23, 42, 0.05)',
             shadowOffset: { width: 0, height: 4 },
@@ -84,7 +86,10 @@ export default function WorkoutHubScreen() {
             elevation: 2,
           }}
         >
-          <Text className="text-sm font-bold text-slate-800 mb-3">Bước</Text>
+          <View className="flex-row items-center justify-between mb-3">
+            <Text className="text-sm font-bold text-slate-800">Bước</Text>
+            <ChevronRight size={18} color="#94A3B8" />
+          </View>
 
           <View className="flex-row items-end justify-between">
             {/* Step Count Number */}
@@ -126,7 +131,7 @@ export default function WorkoutHubScreen() {
               })}
             </View>
           </View>
-        </View>
+        </Pressable>
 
         {/* SECTION: BÀI TẬP TUẦN NÀY (Samsung Health This Week's Workouts Card - Image 1 & 2) */}
         <WeeklyWorkoutCard />
