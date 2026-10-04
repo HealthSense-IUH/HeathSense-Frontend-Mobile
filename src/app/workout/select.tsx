@@ -192,7 +192,7 @@ export default function SelectExerciseScreen() {
           <Pressable
             onPress={() => setShowCreateModal(true)}
             className="flex-row items-center justify-center bg-slate-900/95 py-3.5 px-6 rounded-full shadow-lg border border-slate-700/80 active:opacity-85"
-            style={{ elevation: 5 }}
+            style={{ boxShadow: '0 4px 14px rgba(0, 0, 0, 0.25)' }}
           >
             <Plus color="#10B981" size={20} className="mr-2" />
             <Text className="text-white font-bold text-base">

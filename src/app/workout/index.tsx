@@ -110,7 +110,7 @@ export default function WorkoutHubScreen() {
                 const barHeight = isToday ? 42 : Math.max(14, (item.durationSeconds / 60) * 1.5 + (index % 3) * 8 + 12);
 
                 return (
-                  <View key={item.dateStr || index} className="items-center">
+                  <View key={item.dateStr || `dist-${item.dayLabel}`} className="items-center">
                     {/* Vertical Bar */}
                     <View
                       className={`w-3.5 rounded-full ${

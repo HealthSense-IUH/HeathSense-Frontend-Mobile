@@ -16,10 +16,8 @@ import {
   Check,
 } from 'lucide-react-native';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
-import {
-  SportSummaryHeaderGraphic,
-  getSportThemeConfig,
-} from '@/components/features/workout/SportSummaryHeaderGraphic';
+import { SportSummaryHeaderGraphic } from '@/components/features/workout/SportSummaryHeaderGraphic';
+import { getSportThemeConfig } from '@/components/features/workout/sportThemeConfig';
 import { useWorkoutEngineStore } from '@/services/workout/workoutEngineStore';
 import { useWorkoutCatalogStore } from '@/services/workout/workoutCatalogStore';
 

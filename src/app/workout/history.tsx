@@ -30,7 +30,7 @@ import Svg, {
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
 import { useWorkoutCatalogStore } from '@/services/workout/workoutCatalogStore';
 import { WorkoutSession } from '@/services/workout/workoutTypes';
-import { getExerciseIconComponent } from '@/components/features/workout/FavoriteWorkoutSection';
+import { getExerciseIconComponent } from '@/components/features/workout/workoutThemeUtils';
 import { WorkoutCalendarModal } from '@/components/features/workout/WorkoutCalendarModal';
 
 type TabView = 'DAYS' | 'WEEKS' | 'MONTHS';

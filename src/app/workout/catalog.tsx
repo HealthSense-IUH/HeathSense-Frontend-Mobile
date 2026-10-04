@@ -201,7 +201,7 @@ export default function WorkoutCatalogScreen() {
         <View className="absolute bottom-10 left-6 right-6 z-50 items-center pointer-events-none">
           <View
             className="bg-slate-900/95 px-5 py-3.5 rounded-full shadow-2xl border border-slate-800 max-w-[95%]"
-            style={{ elevation: 8 }}
+            style={{ boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)' }}
           >
             <Text className="text-white text-xs font-medium text-center leading-4">
               {toastMessage}

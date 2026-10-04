@@ -54,14 +54,14 @@ export const Step7DaysCard: React.FC<Step7DaysCardProps> = ({
 
         {/* 7 Bars / Dots matching user's screenshot */}
         <View className="flex-row items-end justify-between px-3 h-20">
-          {items.map((item, index) => {
+          {items.map((item) => {
             const isLow = item.steps < 800;
             const barHeight = isLow
               ? 10
               : Math.max(16, (item.steps / maxPastSteps) * 56);
 
             return (
-              <View key={index} className="items-center flex-1">
+              <View key={item.date.toISOString()} className="items-center flex-1">
                 <View className="h-16 justify-end items-center">
                   {isLow ? (
                     // Small circle dot for low activity day

@@ -1,10 +1,11 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useCallback } from 'react';
 import {
   View,
   Text,
   TextInput,
   Pressable,
   ScrollView,
+  FlatList,
   Switch,
   Alert,
 } from 'react-native';
@@ -28,7 +29,7 @@ export default function CreateRoutineScreen() {
   const [showPickerModal, setShowPickerModal] = useState(false);
   const itemIdCounterRef = useRef(0);
 
-  const handleAddExercise = (exercise: Exercise) => {
+  const handleAddExercise = useCallback((exercise: Exercise) => {
     itemIdCounterRef.current += 1;
     const newItem: RoutineExerciseItem = {
       id: `item_${itemIdCounterRef.current}_${exercise.id}`,
@@ -43,7 +44,22 @@ export default function CreateRoutineScreen() {
 
     setRoutineItems((prev) => [...prev, newItem]);
     setShowPickerModal(false);
-  };
+  }, [routineItems.length]);
+
+  const renderExerciseItem = useCallback(
+    ({ item }: { item: Exercise }) => (
+      <Pressable
+        onPress={() => handleAddExercise(item)}
+        className="flex-row items-center py-3 border-b border-slate-100 active:bg-slate-50"
+      >
+        <ExerciseIcon name={item.iconName} size={18} className="mr-3" />
+        <Text className="text-base font-medium text-slate-800 flex-1">
+          {item.name}
+        </Text>
+      </Pressable>
+    ),
+    [handleAddExercise]
+  );
 
   const handleRemoveItem = (id: string) => {
     setRoutineItems(routineItems.filter((item) => item.id !== id));
@@ -230,20 +246,12 @@ export default function CreateRoutineScreen() {
               </Pressable>
             </View>
 
-            <ScrollView showsVerticalScrollIndicator={false}>
-              {exercises.map((ex) => (
-                <Pressable
-                  key={ex.id}
-                  onPress={() => handleAddExercise(ex)}
-                  className="flex-row items-center py-3 border-b border-slate-100 active:bg-slate-50"
-                >
-                  <ExerciseIcon name={ex.iconName} size={18} className="mr-3" />
-                  <Text className="text-base font-medium text-slate-800 flex-1">
-                    {ex.name}
-                  </Text>
-                </Pressable>
-              ))}
-            </ScrollView>
+            <FlatList
+              data={exercises}
+              keyExtractor={(item) => item.id}
+              showsVerticalScrollIndicator={false}
+              renderItem={renderExerciseItem}
+            />
           </View>
         </View>
       )}

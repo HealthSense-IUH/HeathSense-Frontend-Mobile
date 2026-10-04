@@ -124,13 +124,13 @@ export const StepDetailCard: React.FC<StepDetailCardProps> = ({
           ) : (
             /* Days / Weeks / Months Bars */
             <View className="absolute left-4 right-14 bottom-4 h-36 flex-row items-end justify-between">
-              {past7DaysData.items.map((item, index) => {
+              {past7DaysData.items.map((item) => {
                 const barH = Math.min(
                   130,
                   Math.max(20, (item.steps / 3600) * 120)
                 );
                 return (
-                  <View key={index} className="items-center flex-1">
+                  <View key={`bar-${item.date.toISOString()}`} className="items-center flex-1">
                     <View
                       className="w-3 rounded-full bg-[#22C55E]"
                       style={{ height: barH }}
@@ -160,9 +160,9 @@ export const StepDetailCard: React.FC<StepDetailCardProps> = ({
               <Text className="text-[11px] text-slate-400 font-medium">18</Text>
             </>
           ) : (
-            past7DaysData.items.map((item, i) => (
+            past7DaysData.items.map((item) => (
               <Text
-                key={i}
+                key={`lbl-${item.date.toISOString()}`}
                 className={`text-[11px] font-bold ${
                   item.isSunday ? 'text-red-500' : 'text-slate-500'
                 }`}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { View, Text, Pressable } from 'react-native';
 
 type FilterType = 'Ngày' | 'Tuần' | 'Tháng' | 'Năm';
@@ -13,16 +13,8 @@ export const TimeFilterTabs = React.memo(function TimeFilterTabs({
   activeFilter,
   onChange,
 }: TimeFilterTabsProps) {
-  // Local state phản hồi tức thì 0ms khi chạm ngón tay
-  const [selected, setSelected] = useState<FilterType>(activeFilter);
-
-  useEffect(() => {
-    setSelected(activeFilter);
-  }, [activeFilter]);
-
   const handlePress = (filter: FilterType) => {
-    if (filter === selected) return;
-    setSelected(filter);
+    if (filter === activeFilter) return;
     onChange(filter);
   };
 
@@ -30,7 +22,7 @@ export const TimeFilterTabs = React.memo(function TimeFilterTabs({
     <View className="px-6 py-2.5">
       <View className="flex-row items-center justify-between">
         {FILTERS.map((filter) => {
-          const isActive = selected === filter;
+          const isActive = activeFilter === filter;
           return (
             <Pressable
               key={filter}

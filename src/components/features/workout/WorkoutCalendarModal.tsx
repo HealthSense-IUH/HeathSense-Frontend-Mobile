@@ -198,13 +198,13 @@ export function WorkoutCalendarModal({
 
           {/* Days Grid */}
           <View className="flex-row flex-wrap justify-between">
-            {calendarCells.map((cell, idx) => {
+            {calendarCells.map((cell) => {
               const isSelected = cell.dateStr === selectedDateStr;
               const hasWorkout = cell.isCurrentMonth && workoutDates.has(cell.dateStr);
 
               return (
                 <View
-                  key={`${cell.dateStr}_${idx}`}
+                  key={cell.dateStr}
                   className="w-10 h-11 items-center justify-center my-0.5"
                 >
                   <Pressable

@@ -22,6 +22,23 @@ interface CreateExerciseModalProps {
   onCreated?: (exerciseId: string) => void;
 }
 
+const CATEGORIES: ExerciseCategory[] = [
+  'GENERAL',
+  'AEROBIC',
+  'FREE_WEIGHT',
+  'MACHINE_WEIGHT',
+  'WILDERNESS',
+  'WATER',
+  'WINTER',
+  'BALL',
+];
+
+const TRACKING_TYPES: TrackingMetricType[] = [
+  'TIME_CALORIES',
+  'DISTANCE_GPS',
+  'SETS_REST',
+];
+
 export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
   visible,
   onClose,
@@ -62,23 +79,6 @@ export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
       onCreated(created.id);
     }
   };
-
-  const categories: ExerciseCategory[] = [
-    'GENERAL',
-    'AEROBIC',
-    'FREE_WEIGHT',
-    'MACHINE_WEIGHT',
-    'WILDERNESS',
-    'WATER',
-    'WINTER',
-    'BALL',
-  ];
-
-  const trackingTypes: TrackingMetricType[] = [
-    'TIME_CALORIES',
-    'DISTANCE_GPS',
-    'SETS_REST',
-  ];
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
@@ -152,7 +152,7 @@ export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
 
               {showTrackingDropdown && (
                 <View className="mt-2 bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-lg">
-                  {trackingTypes.map((item) => (
+                  {TRACKING_TYPES.map((item) => (
                     <Pressable
                       key={item}
                       onPress={() => {
@@ -195,7 +195,7 @@ export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
 
               {showCategoryDropdown && (
                 <View className="mt-2 bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-lg">
-                  {categories.map((cat) => (
+                  {CATEGORIES.map((cat) => (
                     <Pressable
                       key={cat}
                       onPress={() => {

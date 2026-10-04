@@ -1,112 +1,13 @@
 import React from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { safeRouter } from '@/utils/safeNavigation';
-import {
-  ListOrdered,
-  Footprints,
-  Flame,
-  Bike,
-  Gauge,
-  RotateCw,
-  Zap,
-  Shield,
-  ArrowDownCircle,
-  ChevronDown,
-  Disc,
-  Dumbbell,
-  ArrowUpCircle,
-  Layers,
-  Box,
-  Target,
-  Compass,
-  Mountain,
-  Waves,
-  SunMedium,
-  Snowflake,
-  CloudSnow,
-  Trophy,
-  CircleDot,
-  Globe,
-  Activity,
-  Sparkles,
-  HeartPulse,
-  Music,
-  ChevronRight,
-} from 'lucide-react-native';
+import { ListOrdered, ChevronRight } from 'lucide-react-native';
 import { useWorkoutCatalogStore } from '@/services/workout/workoutCatalogStore';
 import { Exercise } from '@/services/workout/workoutTypes';
-
-// Lucide icon mapping
-const ICON_MAP: Record<string, any> = {
-  Footprints,
-  Flame,
-  Bike,
-  Gauge,
-  RotateCw,
-  Zap,
-  Shield,
-  ArrowDownCircle,
-  ChevronDown,
-  Disc,
-  Dumbbell,
-  ArrowUpCircle,
-  Layers,
-  Box,
-  Target,
-  Compass,
-  Mountain,
-  Waves,
-  SunMedium,
-  Snowflake,
-  CloudSnow,
-  Trophy,
-  CircleDot,
-  Globe,
-  Activity,
-  Sparkles,
-  HeartPulse,
-  Music,
-};
-
-/**
- * Circle color assignment matching Samsung Health aesthetic
- */
-const getExerciseCircleColor = (exerciseId: string, category?: string): string => {
-  switch (exerciseId) {
-    case 'walking':
-      return '#34C759'; // Vibrant Walking Green
-    case 'running':
-    case 'track_running':
-      return '#7CA018'; // Lime Olive Running
-    case 'cycling':
-    case 'stationary_bike':
-      return '#E05A47'; // Coral Red Cycling
-    case 'pool_swimming':
-    case 'open_water_swimming':
-      return '#06B6D4'; // Cyan Swimming
-    case 'badminton':
-    case 'table_tennis':
-      return '#EC4899'; // Pink Racket
-    case 'hiking':
-    case 'trail_running':
-      return '#10B981'; // Emerald Wilderness
-    case 'treadmill':
-    case 'elliptical':
-      return '#8B5CF6'; // Purple Machine
-    case 'yoga':
-    case 'stretching':
-      return '#F59E0B'; // Amber Stretch
-    default:
-      return '#22C55E';
-  }
-};
-
-export const getExerciseIconComponent = (iconNameOrId?: string) => {
-  if (!iconNameOrId) return Activity;
-  return ICON_MAP[iconNameOrId] || Activity;
-};
-
-export { getExerciseCircleColor };
+import {
+  getExerciseCircleColor,
+  getExerciseIconComponent,
+} from './workoutThemeUtils';
 
 export const FavoriteWorkoutSection: React.FC = () => {
   const exercises = useWorkoutCatalogStore((state) => state.exercises);
@@ -156,7 +57,7 @@ export const FavoriteWorkoutSection: React.FC = () => {
         <View className="flex-row items-start justify-around pt-2">
           {/* Render 1, 2, or 3 Favorite Items */}
           {favoriteExercises.map((exercise) => {
-            const IconComp = ICON_MAP[exercise.iconName] || Activity;
+            const IconComp = getExerciseIconComponent(exercise.iconName);
             const circleBg = getExerciseCircleColor(exercise.id, exercise.category);
 
             return (
