@@ -247,5 +247,65 @@
       "title": "Heart recovery period (10 minutes)",
       "message": "You just finished a workout. To let your heart rate settle and avoid false alerts from post-exercise sinus recovery, please rest quietly for another {{time}} before starting AFib screening."
     }
+  },
+  "steps": {
+    "title": "Steps",
+    "activePeriod": "Most active period: {{range}}",
+    "dateNav": "{{weekday}}, {{monthShort}} {{day}}",
+    "tabs": {
+      "hours": "Hours",
+      "days": "Days",
+      "weeks": "Weeks",
+      "months": "Months"
+    },
+    "menu": {
+      "setGoal": "Set goal",
+      "viewDetail": "View detailed chart",
+      "viewOverview": "View overview"
+    },
+    "aria": {
+      "detailChart": "Detailed chart",
+      "overview": "Overview",
+      "options": "Options",
+      "prevDay": "Previous day",
+      "nextDay": "Next day"
+    },
+    "sevenDays": {
+      "title": "Steps in the last 7 days",
+      "avgBadge": "Avg {{value}}"
+    },
+    "comparison": {
+      "title": "Compare your steps",
+      "subtitle": "Avg {{value}} steps/day compared with other members",
+      "activityLevel": "Activity level this week",
+      "note": "Your average step count is higher than {{percent}}% of HealthSense users with the same activity goal."
+    },
+    "detail": {
+      "range": {
+        "hours": "Today 00:00 - 23:59",
+        "days": "Last 7 days",
+        "weeks": "This month",
+        "months": "This year"
+      }
+    },
+    "goal": {
+      "title": "Step goal",
+      "description": "Set a daily step goal to keep up a healthy lifestyle.",
+      "save": "Save goal"
+    },
+    "hourly": {
+      "title": "Steps by time of day",
+      "hourUnit": "(hour)",
+      "updatedAt": "Updated {{time}}"
+    },
+    "related": {
+      "title": "Other data in this period",
+      "exercise": "Exercise",
+      "fitness": "Fitness level",
+      "fitnessValue": "Good (VO2 max)",
+      "heart": "Heart health",
+      "heartValue": "AFib screening",
+      "energy": "Energy burned"
+    }
   }
 }

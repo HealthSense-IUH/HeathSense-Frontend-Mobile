@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { ChevronRight } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
+import { currentIntlLocale } from '@/i18n';
 
 export interface DayStepItem {
   date: Date;
@@ -21,6 +23,7 @@ export const Step7DaysCard: React.FC<Step7DaysCardProps> = ({
   avgSteps,
   onPress,
 }) => {
+  const { t } = useTranslation('workout');
   const maxPastSteps = Math.max(...items.map((p) => p.steps), 3500);
 
   return (
@@ -36,9 +39,7 @@ export const Step7DaysCard: React.FC<Step7DaysCardProps> = ({
       }}
     >
       <View className="flex-row items-center justify-between mb-4">
-        <Text className="text-base font-bold text-slate-900">
-          Số bước trong 7 ngày qua
-        </Text>
+        <Text className="text-base font-bold text-slate-900">{t('steps.sevenDays.title')}</Text>
         <ChevronRight size={18} color="#94A3B8" />
       </View>
 
@@ -48,7 +49,7 @@ export const Step7DaysCard: React.FC<Step7DaysCardProps> = ({
         <View className="absolute left-0 right-14 top-14 border-b border-dashed border-slate-300" />
         <View className="absolute right-0 top-11 bg-white border border-slate-200/90 px-2 py-0.5 rounded-lg">
           <Text className="text-[10px] font-bold text-slate-600">
-            TB {avgSteps.toLocaleString('vi-VN')}
+            {t('steps.sevenDays.avgBadge', { value: avgSteps.toLocaleString(currentIntlLocale()) })}
           </Text>
         </View>
 

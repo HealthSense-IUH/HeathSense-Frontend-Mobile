@@ -247,5 +247,65 @@
       "title": "Thời gian phục hồi tim (10 phút)",
       "message": "Bạn vừa hoàn thành buổi tập thể dục. Để nhịp tim ổn định và tránh cảnh báo sai do nhịp xoang phục hồi sau gắng sức, vui lòng ngồi nghỉ tĩnh thêm {{time}} trước khi bắt đầu đo tầm soát Rung nhĩ (AFib)."
     }
+  },
+  "steps": {
+    "title": "Bước",
+    "activePeriod": "Khoảng thời gian năng động nhất: {{range}}",
+    "dateNav": "{{weekday}}, {{day}} thg {{month}}",
+    "tabs": {
+      "hours": "Giờ",
+      "days": "Số ngày",
+      "weeks": "Tuần",
+      "months": "Tháng"
+    },
+    "menu": {
+      "setGoal": "Đặt mục tiêu",
+      "viewDetail": "Xem biểu đồ chi tiết",
+      "viewOverview": "Xem tổng quan"
+    },
+    "aria": {
+      "detailChart": "Biểu đồ chi tiết",
+      "overview": "Tổng quan",
+      "options": "Tùy chọn",
+      "prevDay": "Ngày trước",
+      "nextDay": "Ngày sau"
+    },
+    "sevenDays": {
+      "title": "Số bước trong 7 ngày qua",
+      "avgBadge": "TB {{value}}"
+    },
+    "comparison": {
+      "title": "So sánh số bước của bạn",
+      "subtitle": "TB {{value}} bước/ngày so với các thành viên khác",
+      "activityLevel": "Mức độ năng động tuần này",
+      "note": "Số bước trung bình của bạn cao hơn {{percent}}% người dùng có cùng mục tiêu vận động trong hệ thống HealthSense."
+    },
+    "detail": {
+      "range": {
+        "hours": "Hôm nay 00:00 - 23:59",
+        "days": "7 ngày qua",
+        "weeks": "Tháng này",
+        "months": "Năm nay"
+      }
+    },
+    "goal": {
+      "title": "Mục tiêu số bước",
+      "description": "Thiết lập mục tiêu bước chân hàng ngày để duy trì lối sống lành mạnh.",
+      "save": "Lưu mục tiêu"
+    },
+    "hourly": {
+      "title": "Số bước theo thời gian trong ngày",
+      "hourUnit": "(giờ)",
+      "updatedAt": "Đã cập nhật {{time}}"
+    },
+    "related": {
+      "title": "Các dữ liệu khác trong khoảng thời gian này",
+      "exercise": "Tập th.dục",
+      "fitness": "Chỉ số thể lực",
+      "fitnessValue": "Mức tốt (VO2 max)",
+      "heart": "Sức khỏe tim mạch",
+      "heartValue": "Đo tầm soát rung nhĩ",
+      "energy": "Mức tiêu hao"
+    }
   }
 }

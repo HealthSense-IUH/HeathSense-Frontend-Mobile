@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, Modal, TextInput, Pressable } from 'react-native';
 import { Target } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 
 interface StepGoalModalProps {
   visible: boolean;
@@ -20,6 +21,7 @@ const StepGoalForm: React.FC<StepGoalFormProps> = ({
   onClose,
   onSave,
 }) => {
+  const { t } = useTranslation('workout');
   const [goalText, setGoalText] = useState(() => currentTargetGoal.toString());
 
   const handleSave = () => {
@@ -37,12 +39,8 @@ const StepGoalForm: React.FC<StepGoalFormProps> = ({
           <Target color="#10B981" size={24} />
         </View>
 
-        <Text className="text-lg font-bold text-slate-900 text-center mb-1">
-          Mục tiêu số bước
-        </Text>
-        <Text className="text-xs text-slate-500 text-center mb-5">
-          Thiết lập mục tiêu bước chân hàng ngày để duy trì lối sống lành mạnh.
-        </Text>
+        <Text className="text-lg font-bold text-slate-900 text-center mb-1">{t('steps.goal.title')}</Text>
+        <Text className="text-xs text-slate-500 text-center mb-5">{t('steps.goal.description')}</Text>
 
         <View className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 mb-5 flex-row items-center justify-center">
           <TextInput
@@ -59,13 +57,13 @@ const StepGoalForm: React.FC<StepGoalFormProps> = ({
             onPress={onClose}
             className="flex-1 py-3 rounded-2xl bg-slate-100 items-center justify-center active:opacity-75"
           >
-            <Text className="text-sm font-semibold text-slate-700">Hủy</Text>
+            <Text className="text-sm font-semibold text-slate-700">{t('common:actions.cancel')}</Text>
           </Pressable>
           <Pressable
             onPress={handleSave}
             className="flex-1 py-3 rounded-2xl bg-[#00C8FF] items-center justify-center active:opacity-85 shadow-sm"
           >
-            <Text className="text-sm font-bold text-white">Lưu mục tiêu</Text>
+            <Text className="text-sm font-bold text-white">{t('steps.goal.save')}</Text>
           </Pressable>
         </View>
       </View>

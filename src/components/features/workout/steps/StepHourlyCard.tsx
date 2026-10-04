@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { ChevronRight } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
+import { currentIntlLocale } from '@/i18n';
 
 interface HourlyDataItem {
   hour: number;
@@ -18,7 +20,10 @@ export const StepHourlyCard: React.FC<StepHourlyCardProps> = ({
   activePeriodStr,
   onPress,
 }) => {
+  const { t } = useTranslation('workout');
   const maxHourlyVal = Math.max(...hourlyData.map((h) => h.steps), 100);
+  // Mốc cập nhật: lúc thẻ được vẽ (dữ liệu đọc từ cảm biến lúc mở màn)
+  const [updatedAt] = useState(() => new Date());
 
   return (
     <Pressable
@@ -33,9 +38,7 @@ export const StepHourlyCard: React.FC<StepHourlyCardProps> = ({
       }}
     >
       <View className="flex-row items-center justify-between mb-1">
-        <Text className="text-base font-bold text-slate-900">
-          Số bước theo thời gian trong ngày
-        </Text>
+        <Text className="text-base font-bold text-slate-900">{t('steps.hourly.title')}</Text>
         <ChevronRight size={18} color="#94A3B8" />
       </View>
 
@@ -75,13 +78,15 @@ export const StepHourlyCard: React.FC<StepHourlyCardProps> = ({
           <Text className="text-[11px] text-slate-400 font-medium">6</Text>
           <Text className="text-[11px] text-slate-400 font-medium">12</Text>
           <Text className="text-[11px] text-slate-400 font-medium">18</Text>
-          <Text className="text-[11px] text-slate-400 font-medium">(giờ)</Text>
+          <Text className="text-[11px] text-slate-400 font-medium">{t('steps.hourly.hourUnit')}</Text>
         </View>
       </View>
 
       {/* Footer updated timestamp */}
       <View className="items-end mt-4">
-        <Text className="text-[11px] text-slate-400">Đã cập nhật 17:39</Text>
+        <Text className="text-[11px] text-slate-400">
+          {t('steps.hourly.updatedAt', { time: updatedAt.toLocaleTimeString(currentIntlLocale(), { hour: '2-digit', minute: '2-digit' }) })}
+        </Text>
       </View>
     </Pressable>
   );

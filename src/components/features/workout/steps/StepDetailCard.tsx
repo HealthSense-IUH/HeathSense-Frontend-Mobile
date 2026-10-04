@@ -3,6 +3,8 @@ import { View, Text, Pressable } from 'react-native';
 import { ChevronRight, Search } from 'lucide-react-native';
 import { RunningShoeIllustration } from './RunningShoeIllustration';
 import { DayStepItem } from './Step7DaysCard';
+import { useTranslation } from 'react-i18next';
+import { currentIntlLocale } from '@/i18n';
 
 interface StepDetailCardProps {
   activeTab: 'HOURS' | 'DAYS' | 'WEEKS' | 'MONTHS';
@@ -21,14 +23,15 @@ export const StepDetailCard: React.FC<StepDetailCardProps> = ({
   hourlyData,
   past7DaysData,
 }) => {
+  const { t } = useTranslation('workout');
   const rangeTitle =
     activeTab === 'HOURS'
-      ? 'Hôm nay 00:00 - 23:59'
+      ? t('steps.detail.range.hours')
       : activeTab === 'DAYS'
-      ? '7 ngày qua'
+      ? t('steps.detail.range.days')
       : activeTab === 'WEEKS'
-      ? 'Tháng này'
-      : 'Năm nay';
+      ? t('steps.detail.range.weeks')
+      : t('steps.detail.range.months');
 
   return (
     <View
@@ -58,9 +61,9 @@ export const StepDetailCard: React.FC<StepDetailCardProps> = ({
       <View className="mt-1 mb-4">
         <View className="flex-row items-baseline gap-2">
           <Text className="text-4xl font-extrabold text-slate-900 tracking-tight">
-            {currentSteps.toLocaleString('vi-VN')}
+            {currentSteps.toLocaleString(currentIntlLocale())}
           </Text>
-          <Text className="text-base font-bold text-slate-700">bước</Text>
+          <Text className="text-base font-bold text-slate-700">{t('common:units.steps')}</Text>
         </View>
 
         <View className="flex-row items-center gap-3 mt-1.5">

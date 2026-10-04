@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { Target } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
+import { currentIntlLocale } from '@/i18n';
 
 interface StepHeroCardProps {
   currentSteps: number;
@@ -17,6 +19,7 @@ export const StepHeroCard: React.FC<StepHeroCardProps> = ({
   targetGoal,
   onOpenGoalModal,
 }) => {
+  const { t } = useTranslation('workout');
   const progressRatio = Math.min(1, currentSteps / targetGoal);
 
   return (
@@ -34,9 +37,9 @@ export const StepHeroCard: React.FC<StepHeroCardProps> = ({
         {/* Step Counter */}
         <View>
           <Text className="text-5xl font-extrabold text-slate-900 tracking-tight">
-            {currentSteps.toLocaleString('vi-VN')}
+            {currentSteps.toLocaleString(currentIntlLocale())}
           </Text>
-          <Text className="text-base font-bold text-slate-700 mt-1">bước</Text>
+          <Text className="text-base font-bold text-slate-700 mt-1">{t('common:units.steps')}</Text>
         </View>
 
         {/* Distance and Calories */}
@@ -68,7 +71,7 @@ export const StepHeroCard: React.FC<StepHeroCardProps> = ({
           >
             <Target size={13} color="#475569" className="mr-1.5" />
             <Text className="text-xs font-bold text-slate-700">
-              {targetGoal.toLocaleString('vi-VN')}
+              {targetGoal.toLocaleString(currentIntlLocale())}
             </Text>
           </Pressable>
         </View>

@@ -20,6 +20,8 @@ import {
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
 import { useWorkoutCatalogStore } from '@/services/workout/workoutCatalogStore';
 import { THEME } from '@/constants/theme';
+import { useTranslation } from 'react-i18next';
+import { formatWorkoutDecimal, getMonthShort, getWeekdayShort } from '@/services/workout/workoutI18n';
 
 // Modular Feature Components
 import { StepHeroCard } from '@/components/features/workout/steps/StepHeroCard';
@@ -39,6 +41,7 @@ type ViewMode = 'OVERVIEW' | 'DETAIL';
 type DetailTab = 'HOURS' | 'DAYS' | 'WEEKS' | 'MONTHS';
 
 export default function StepDetailScreen() {
+  const { t } = useTranslation('workout');
   const params = useLocalSearchParams<{
     view?: 'overview' | 'detail';
     tab?: 'HOURS' | 'DAYS' | 'WEEKS' | 'MONTHS';
@@ -104,7 +107,7 @@ export default function StepDetailScreen() {
 
   // Derived metrics
   const distanceKm = useMemo(
-    () => (currentSteps * 0.00076).toFixed(2).replace('.', ','),
+    () => formatWorkoutDecimal(currentSteps * 0.00076, 2),
     [currentSteps]
   );
   const caloriesBurned = useMemo(
@@ -162,22 +165,23 @@ export default function StepDetailScreen() {
       }
     });
 
-    if (maxSteps === 0 || peakHour === 16 || peakHour === 17) {
-      return 'Khoảng thời gian năng động nhất: 16:30 - 17:00';
-    }
     const pad = (n: number) => n.toString().padStart(2, '0');
-    return `Khoảng thời gian năng động nhất: ${pad(peakHour)}:00 - ${pad(peakHour + 1)}:00`;
-  }, [hourlyData]);
+    const range = maxSteps === 0 || peakHour === 16 || peakHour === 17 ? '16:30 - 17:00' : `${pad(peakHour)}:00 - ${pad(peakHour + 1)}:00`;
+    return t('steps.activePeriod', { range });
+  }, [hourlyData, t]);
 
   // Format date display label
   const dateNavLabel = useMemo(() => {
-    if (dayOffset === 0) return 'Hôm nay';
-    if (dayOffset === -1) return 'Hôm qua';
-    const day = selectedDate.getDate();
+    if (dayOffset === 0) return t('common:date.today');
+    if (dayOffset === -1) return t('common:date.yesterday');
     const month = selectedDate.getMonth() + 1;
-    const dayOfWeek = ['CN', 'Th 2', 'Th 3', 'Th 4', 'Th 5', 'Th 6', 'Th 7'][selectedDate.getDay()];
-    return `${dayOfWeek}, ${day} thg ${month}`;
-  }, [dayOffset, selectedDate]);
+    return t('steps.dateNav', {
+      weekday: getWeekdayShort(selectedDate.getDay()),
+      day: selectedDate.getDate(),
+      month,
+      monthShort: getMonthShort(month),
+    });
+  }, [dayOffset, selectedDate, t]);
 
   // Handler when clicking "Số bước theo thời gian trong ngày" -> opens Tab Giờ
   const handleOpenHoursTab = () => {
@@ -208,7 +212,7 @@ export default function StepDetailScreen() {
 
   return (
     <ScreenWrapper
-      title="Bước"
+      title={t('steps.title')}
       statusBarStyle="dark"
       className="bg-slate-50"
       headerLeft={
@@ -216,6 +220,7 @@ export default function StepDetailScreen() {
           onPress={handleBack}
           className="w-10 h-10 rounded-full items-center justify-center active:opacity-70"
           hitSlop={8}
+          accessibilityLabel={t('common:actions.back')}
         >
           <ArrowLeft color={THEME.colors.textPrimary} size={22} />
         </Pressable>
@@ -227,6 +232,7 @@ export default function StepDetailScreen() {
               onPress={() => setViewMode('DETAIL')}
               className="w-9 h-9 rounded-full items-center justify-center active:opacity-70"
               hitSlop={6}
+              accessibilityLabel={t('steps.aria.detailChart')}
             >
               <BarChart2 color="#334155" size={22} />
             </Pressable>
@@ -235,6 +241,7 @@ export default function StepDetailScreen() {
               onPress={() => setViewMode('OVERVIEW')}
               className="w-9 h-9 rounded-full items-center justify-center active:opacity-70"
               hitSlop={6}
+              accessibilityLabel={t('steps.aria.overview')}
             >
               <Activity color="#00C8FF" size={20} />
             </Pressable>
@@ -244,6 +251,7 @@ export default function StepDetailScreen() {
             onPress={() => setIsOptionsMenuVisible(true)}
             className="w-9 h-9 rounded-full items-center justify-center active:opacity-70"
             hitSlop={6}
+            accessibilityLabel={t('steps.aria.options')}
           >
             <MoreVertical color="#334155" size={22} />
           </Pressable>
@@ -265,6 +273,7 @@ export default function StepDetailScreen() {
               onPress={() => setDayOffset((prev) => prev - 1)}
               className="w-9 h-9 rounded-full items-center justify-center active:opacity-60"
               hitSlop={8}
+              accessibilityLabel={t('steps.aria.prevDay')}
             >
               <ChevronLeft color="#64748B" size={22} />
             </Pressable>
@@ -282,6 +291,7 @@ export default function StepDetailScreen() {
                 dayOffset >= 0 ? 'opacity-30' : 'active:opacity-60'
               }`}
               hitSlop={8}
+              accessibilityLabel={t('steps.aria.nextDay')}
             >
               <ChevronRight color="#64748B" size={22} />
             </Pressable>
@@ -326,10 +336,10 @@ export default function StepDetailScreen() {
           <View className="flex-row items-center justify-between my-2.5 px-1">
             {(
               [
-                { key: 'HOURS', label: 'Giờ' },
-                { key: 'DAYS', label: 'Số ngày' },
-                { key: 'WEEKS', label: 'Tuần' },
-                { key: 'MONTHS', label: 'Tháng' },
+                { key: 'HOURS', label: t('steps.tabs.hours') },
+                { key: 'DAYS', label: t('steps.tabs.days') },
+                { key: 'WEEKS', label: t('steps.tabs.weeks') },
+                { key: 'MONTHS', label: t('steps.tabs.months') },
               ] as const
             ).map((tab) => {
               const isSelected = activeTab === tab.key;
@@ -402,9 +412,7 @@ export default function StepDetailScreen() {
               className="py-2.5 px-3 rounded-xl flex-row items-center active:bg-slate-50"
             >
               <Target size={16} color="#475569" className="mr-2.5" />
-              <Text className="text-xs font-semibold text-slate-800">
-                Đặt mục tiêu
-              </Text>
+              <Text className="text-xs font-semibold text-slate-800">{t('steps.menu.setGoal')}</Text>
             </Pressable>
             <Pressable
               onPress={() => {
@@ -415,9 +423,7 @@ export default function StepDetailScreen() {
             >
               <BarChart2 size={16} color="#475569" className="mr-2.5" />
               <Text className="text-xs font-semibold text-slate-800">
-                {viewMode === 'OVERVIEW'
-                  ? 'Xem biểu đồ chi tiết'
-                  : 'Xem tổng quan'}
+                {viewMode === 'OVERVIEW' ? t('steps.menu.viewDetail') : t('steps.menu.viewOverview')}
               </Text>
             </Pressable>
           </View>
