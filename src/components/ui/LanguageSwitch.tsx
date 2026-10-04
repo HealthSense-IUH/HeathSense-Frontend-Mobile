@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { APP_LANGUAGES, currentLanguage, setAppLanguage, type AppLanguage } from '@/i18n';
 
 const FLAGS: Record<AppLanguage, number> = {
-  vi: require('../../../assets/vn.png'),
-  en: require('../../../assets/uk.png'),
+  vi: require('../../../assets/images/flags/vn.png'),
+  en: require('../../../assets/images/flags/uk.png'),
 };
 
 /** Nút cờ: bấm là đổi sang ngôn ngữ còn lại (giống nút nổi trên landing của web). */
