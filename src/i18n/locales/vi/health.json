@@ -158,7 +158,17 @@
       "notConnected": "Vui lòng kết nối đồng hồ BLE trong mục <link>Cài đặt</link> trước khi đo."
     },
     "processingData": "Đang xử lý dữ liệu...",
-    "uploadError": "Lỗi khi upload."
+    "uploadError": "Lỗi khi upload.",
+    "live": {
+      "title": "Dữ liệu đang đo",
+      "heartRate": "Nhịp tim",
+      "receiving": "Đang nhận",
+      "waiting": "Chờ tín hiệu",
+      "paused": "Tín hiệu tạm ngưng",
+      "disconnected": "Mất kết nối",
+      "waveform": "Sóng mạch PPG trực tiếp",
+      "note": "Chỉ số từ thiết bị đang cập nhật. Kết quả phân tích AFib sẽ có sau khi đo."
+    }
   },
   "afibHistory": {
     "title": "Lịch sử đo",

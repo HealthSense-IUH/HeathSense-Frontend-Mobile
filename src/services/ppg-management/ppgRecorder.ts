@@ -53,6 +53,7 @@ class PpgRecorder {
 
     this.rows = [];
     this.sampleIndex = 0;
+    useBleStore.getState().resetLivePpgData();
 
     useBleStore.getState().setRecordingState({
       isRecordingPpg: true,

@@ -1,5 +1,7 @@
 import { create } from "zustand";
+import { getLiveVitals } from "@/utils/livePpg";
 import type { KnownBleDevice } from "./bleStorage";
+import type { PpgSample } from "../ppg-management/ppgRecorder";
 
 export type BleConnectionStatus =
     | "idle"
@@ -21,6 +23,11 @@ type BleState = {
     currentBPM: number;
     currentSpO2: number;
     batteryLevel: number | null;
+    livePpgSamples: PpgSample[];
+    liveBPM: number | null;
+    liveSpO2: number | null;
+    lastPpgAt: number | null;
+    resetLivePpgData: () => void;
     latestPpgDeviceMillis: number | null;
     latestPpgRed: number | null;
     latestPpgIR: number | null;
@@ -55,6 +62,7 @@ type BleState = {
         red: number;
         ir: number;
         samplesInPacket: number;
+        samples?: PpgSample[];
         receivedAt?: number;
     }) => void;
     setRecordingState: (
@@ -87,6 +95,10 @@ export const useBleStore = create<BleState>((set) => ({
     currentBPM: 0,
     currentSpO2: 0,
     batteryLevel: null,
+    livePpgSamples: [],
+    liveBPM: null,
+    liveSpO2: null,
+    lastPpgAt: null,
     latestPpgDeviceMillis: null,
     latestPpgRed: null,
     latestPpgIR: null,
@@ -126,18 +138,28 @@ export const useBleStore = create<BleState>((set) => ({
         red,
         ir,
         samplesInPacket,
+        samples,
         receivedAt = Date.now(),
     }) =>
         set((state) => ({
+        ...(samples ? {
+            livePpgSamples: samples.slice(-500),
+            ...getLiveVitals(samples.at(-1)),
+        } : {}),
+        lastPpgAt: receivedAt,
         latestPpgDeviceMillis: deviceMillis,
         latestPpgRed: red,
         latestPpgIR: ir,
         ppgPacketCount: state.ppgPacketCount + samplesInPacket,
         lastPacketAt: receivedAt,
         })),
+    resetLivePpgData: () => set({
+        livePpgSamples: [], liveBPM: null, liveSpO2: null, lastPpgAt: null,
+    }),
     setRecordingState: (patch) => set(patch),
     resetHealthData: () =>
         set({
+        livePpgSamples: [], liveBPM: null, liveSpO2: null, lastPpgAt: null,
         currentBPM: 0,
         currentSpO2: 0,
         batteryLevel: null,

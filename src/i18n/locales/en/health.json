@@ -158,7 +158,17 @@
       "notConnected": "Please connect your BLE watch in <link>Settings</link> before measuring."
     },
     "processingData": "Processing data...",
-    "uploadError": "Upload failed."
+    "uploadError": "Upload failed.",
+    "live": {
+      "title": "Live measurement",
+      "heartRate": "Heart rate",
+      "receiving": "Receiving",
+      "waiting": "Waiting for signal",
+      "paused": "Signal paused",
+      "disconnected": "Disconnected",
+      "waveform": "Live PPG waveform",
+      "note": "Device readings update during measurement. AFib analysis follows after recording."
+    }
   },
   "afibHistory": {
     "title": "Measurement history",

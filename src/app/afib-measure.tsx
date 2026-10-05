@@ -22,6 +22,8 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path, Circle } from 'react-native-svg';
 import { Trans, useTranslation } from 'react-i18next';
+import { useShallow } from 'zustand/react/shallow';
+import { LiveMeasurementCard } from '@/components/features/health/LiveMeasurementCard';
 import { useBleStore } from '@/services/ble-management/bleStore';
 import { useBLE } from '@/context/BLEContext';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
@@ -37,7 +39,15 @@ export default function AFibMeasureScreen() {
   const { t } = useTranslation('health');
   const router = useRouter();
   const { sendCommand, stopExportAndUploadPpgRecording } = useBLE();
-  const store = useBleStore();
+  const store = useBleStore(useShallow(state => ({
+    isRecordingPpg: state.isRecordingPpg,
+    isAnalyzing: state.isAnalyzing,
+    aiAnalysisResult: state.aiAnalysisResult,
+    recordingError: state.recordingError,
+    recordingStartedAt: state.recordingStartedAt,
+    connectedDeviceId: state.connectedDeviceId,
+    setRecordingState: state.setRecordingState,
+  })));
 
   const workoutStatus = useWorkoutEngineStore((state) => state.status);
   const lastWorkoutEndedAt = useWorkoutEngineStore((state) => state.lastWorkoutEndedAt);
@@ -467,6 +477,8 @@ export default function AFibMeasureScreen() {
           </View>
         </View>
         {/* END: PulseRadarSensorSection */}
+
+        {isRecording ? <LiveMeasurementCard /> : null}
 
         {/* BEGIN: BottomSection */}
         <View className="w-full">
