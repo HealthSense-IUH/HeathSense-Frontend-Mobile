@@ -8,26 +8,25 @@ import {
   Battery,
   Bluetooth,
   ChevronRight,
+  Droplets,
   Dumbbell,
   Eye,
   Flame,
   Footprints,
-  Heart,
   HeartPulse,
-  Sliders,
-  TrendingUp,
   UtensilsCrossed,
+  Waves,
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BackgroundGradient } from '@/components/ui/BackgroundGradient';
 import { useBleStore } from '@/services/ble-management/bleStore';
-import { MetricCard } from '@/components/ui/MetricCard';
 import { useAuthStore } from '@/services/authentication/authStore';
 import { AFibScreeningCard } from '@/components/features/health/AFibScreeningCard';
 import { PredictionBadge } from '@/components/features/health/PredictionBadge';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
 import { THEME } from '@/constants/theme';
-import { useWorkoutCatalogStore } from '@/services/workout/workoutCatalogStore';
+import { getLocalDateStr, useWorkoutCatalogStore } from '@/services/workout/workoutCatalogStore';
+import { stepTrackingService } from '@/services/workout/stepTrackingService';
 import { useMyRecords } from '@/hooks/useHealthHistory';
 import { useHealthStatistics } from '@/hooks/useHealthStatistics';
 import { getPredictionMeta } from '@/constants/healthRecords';
@@ -42,21 +41,77 @@ function greetingByHour(hour: number, t: TFunction<'health'>): { text: string; s
 
 const cardShadow = { boxShadow: '0 2px 8px rgba(15, 23, 42, 0.05)' };
 
-function StatCard({ label, icon, iconBg, value, unit, children }: { label: string; icon: React.ReactNode; iconBg: string; value: string; unit?: string; children?: React.ReactNode }) {
+/** Thời điểm của số liệu trên thẻ: trực tiếp từ thiết bị / cộng dồn hôm nay / lần đo gần nhất. */
+type StatScope = 'live' | 'today' | 'latest';
+const SCOPE_STYLE: Record<StatScope, { bg: string; text: string }> = {
+  live: { bg: 'rgba(16, 185, 129, 0.12)', text: '#047857' },
+  today: { bg: 'rgba(13, 110, 253, 0.10)', text: '#1D4ED8' },
+  latest: { bg: '#F1F5F9', text: '#475569' },
+};
+
+function StatCard({
+  label,
+  icon,
+  iconBg,
+  scope,
+  value,
+  unit,
+  hint,
+  onPress,
+  children,
+}: {
+  label: string;
+  icon: React.ReactNode;
+  iconBg: string;
+  scope: StatScope;
+  value?: string;
+  unit?: string;
+  hint?: string;
+  onPress?: () => void;
+  children?: React.ReactNode;
+}) {
+  const { t } = useTranslation('health');
+  const chip = SCOPE_STYLE[scope];
   return (
-    <View className="w-[48%] mb-3 rounded-2xl bg-white/95 border border-slate-200/80 p-3.5" style={cardShadow}>
-      <View className="flex-row items-center justify-between mb-2">
-        <Text className="text-[11px] font-semibold text-slate-500 flex-1" numberOfLines={2}>{label}</Text>
+    <Pressable
+      onPress={onPress}
+      disabled={!onPress}
+      className="w-[48%] mb-3 rounded-2xl bg-white/95 border border-slate-200/80 p-3.5 active:opacity-80"
+      style={cardShadow}
+    >
+      <View className="flex-row items-center justify-between mb-2.5">
         <View className="h-8 w-8 rounded-xl items-center justify-center" style={{ backgroundColor: iconBg }}>
           {icon}
         </View>
+        <View className="px-2 py-0.5 rounded-full" style={{ backgroundColor: chip.bg }}>
+          <Text className="text-[10px] font-semibold" style={{ color: chip.text }}>{t(`home.overview.scope.${scope}`)}</Text>
+        </View>
       </View>
-      <Text className="text-2xl font-bold text-slate-900">
-        {value}
-        {unit ? <Text className="text-xs font-normal text-slate-500"> {unit}</Text> : null}
-      </Text>
-      <View className="mt-1">{children}</View>
-    </View>
+      <Text className="text-[11px] font-semibold text-slate-500" numberOfLines={1}>{label}</Text>
+      {children ?? (
+        <Text className="text-2xl font-bold text-slate-900 mt-0.5" numberOfLines={1}>
+          {value}
+          {unit ? <Text className="text-xs font-normal text-slate-500"> {unit}</Text> : null}
+        </Text>
+      )}
+      {hint ? <Text className="text-[11px] text-slate-500 mt-1" numberOfLines={1}>{hint}</Text> : null}
+    </Pressable>
+  );
+}
+
+/** Ô lối tắt nửa chiều rộng (Ăn uống, Luyện tập) cùng ngôn ngữ hình ảnh với StatCard. */
+function ShortcutTile({ title, description, icon, iconClassName, onPress }: { title: string; description: string; icon: React.ReactNode; iconClassName: string; onPress: () => void }) {
+  return (
+    <TouchableOpacity onPress={onPress} activeOpacity={0.8} className="w-[48%] rounded-2xl bg-white/95 border border-slate-200/80 p-3.5" style={cardShadow}>
+      <View className="flex-row items-center justify-between mb-3">
+        <View className={`w-10 h-10 rounded-xl items-center justify-center border ${iconClassName}`}>{icon}</View>
+        <View className="w-7 h-7 rounded-full bg-slate-100 items-center justify-center">
+          <ChevronRight color="#64748B" size={16} strokeWidth={2.4} />
+        </View>
+      </View>
+      <Text className="text-sm font-bold text-slate-900 tracking-tight" numberOfLines={1}>{title}</Text>
+      <Text className="text-[11px] text-slate-500 mt-0.5" numberOfLines={2}>{description}</Text>
+    </TouchableOpacity>
   );
 }
 
@@ -70,12 +125,16 @@ export default function HomeScreen() {
   const knownDevice = useBleStore((state) => state.knownDevice);
   const batteryLevel = useBleStore((state) => state.batteryLevel);
   // Bước / calo hôm nay = tổng các buổi tập hôm nay (đồng hồ chỉ đếm bước khi đang tập); đọc sessions để tự cập nhật
-  useWorkoutCatalogStore((state) => state.sessions);
+  const sessions = useWorkoutCatalogStore((state) => state.sessions);
   const todayStats = useWorkoutCatalogStore.getState().getTodayStats();
+  const stepGoal = stepTrackingService.getStoredStepGoal();
+  const stepPercent = stepGoal > 0 ? Math.min(100, Math.round((todayStats.totalSteps / stepGoal) * 100)) : 0;
 
   // Tổng quan như web: 5 lần đo gần nhất + thống kê tầm soát cả năm
   const { data: recentPage, isLoading: loadingRecent } = useMyRecords(1, 5);
   const [statsDate] = useState(() => new Date());
+  const todayKey = getLocalDateStr(statsDate);
+  const todaySessionCount = sessions.filter((s) => getLocalDateStr(s.startedAt) === todayKey).length;
   const { data: stats } = useHealthStatistics('YEAR', statsDate);
   const recentRecords = recentPage?.content ?? [];
   const latest = recentRecords[0] ?? null;
@@ -88,6 +147,8 @@ export default function HomeScreen() {
   const totalScreenings = totalNormal + totalWarning + (stats?.totalUncertain || 0);
 
   const isConnected = Boolean(connectedDevice);
+  const liveHr = isConnected && currentBPM > 0 ? currentBPM : null;
+  const liveSpo2 = isConnected && currentSpO2 > 0 ? currentSpO2 : null;
   const greeting = greetingByHour(statsDate.getHours(), t);
   const displayName = user?.fullName || user?.email?.split('@')[0] || t('greeting.fallbackName');
   const locale = currentIntlLocale();
@@ -177,31 +238,95 @@ export default function HomeScreen() {
           </View>
         </TouchableOpacity>
 
-        {/* Tổng quan sức khỏe (4 thẻ như Tổng quan trên web) */}
-        <View className="flex-row items-center justify-between mb-3">
-          <View>
-            <Text className="text-lg font-bold text-slate-900 tracking-tight">{t('dashboard.title')}</Text>
-            <Text className="text-xs text-slate-500">{t('dashboard.description')}</Text>
-          </View>
+        {/* Tổng quan sức khỏe: 6 thẻ, mỗi thẻ gắn nhãn thời điểm (trực tiếp / hôm nay / lần đo gần nhất) */}
+        <View className="mb-3">
+          <Text className="text-lg font-bold text-slate-900 tracking-tight">{t('home.overview.title')}</Text>
+          <Text className="text-xs text-slate-500">{t('home.overview.description')}</Text>
         </View>
         <View className="flex-row flex-wrap justify-between">
-          <StatCard label={t('memberDashboard.latestMeasurement')} icon={<HeartPulse size={16} color="#EF4444" />} iconBg="rgba(239, 68, 68, 0.1)" value={latestHr ? String(latestHr) : '--'} unit={t('common:units.bpm')}>
-            <Text className="text-[11px] text-slate-500" numberOfLines={1}>{latest ? formatRecordDate(latest.createdAt) : loadingRecent ? t('common:state.loading') : t('common:state.noData')}</Text>
+          <StatCard
+            label={t('home.overview.heartRate.title')}
+            icon={<HeartPulse size={16} color="#EF4444" />}
+            iconBg="rgba(239, 68, 68, 0.1)"
+            scope={liveHr ? 'live' : 'latest'}
+            value={liveHr ? String(liveHr) : latestHr ? String(latestHr) : '--'}
+            unit={t('common:units.bpm')}
+            hint={
+              liveHr
+                ? t('home.overview.heartRate.latestHint', { value: latestHr ? `${latestHr} ${t('common:units.bpm')}` : '--' })
+                : latest
+                ? formatRecordDate(latest.createdAt)
+                : loadingRecent
+                ? t('common:state.loading')
+                : t('common:state.noData')
+            }
+            onPress={latest ? () => router.push(`/health-record/${latest.id}` as any) : undefined}
+          />
+          <StatCard
+            label={t('home.overview.spo2.title')}
+            icon={<Droplets size={16} color="#0891B2" />}
+            iconBg="rgba(8, 145, 178, 0.1)"
+            scope="live"
+            value={liveSpo2 ? String(liveSpo2) : '--'}
+            unit={t('common:units.percent')}
+            hint={
+              !isConnected
+                ? t('home.overview.noDevice')
+                : liveSpo2
+                ? liveSpo2 >= 95 ? t('home.overview.spo2.normal') : t('home.overview.spo2.low')
+                : t('home.overview.waitingSignal')
+            }
+            onPress={isConnected ? undefined : () => router.push('/(public)/scan' as any)}
+          />
+          <StatCard
+            label={t('home.overview.afib.title')}
+            icon={<Activity size={16} color="#0D6EFD" />}
+            iconBg="rgba(13, 110, 253, 0.1)"
+            scope="latest"
+            hint={totalScreenings > 0 ? t('home.overview.afib.screenings', { total: totalScreenings, normal: totalNormal }) : t('home.overview.afib.noScreenings')}
+            onPress={() => router.push('/(tabs)/history' as any)}
+          >
+            {latestMeta ? (
+              <View className="flex-row items-center mt-1.5" style={{ gap: 6 }}>
+                <PredictionBadge meta={latestMeta} size="sm" />
+                {latest?.confidence !== null && latest?.confidence !== undefined ? (
+                  <Text className="text-sm font-bold text-slate-900">{(latest.confidence * 100).toFixed(1)}%</Text>
+                ) : null}
+              </View>
+            ) : (
+              <Text className="text-sm font-semibold text-slate-400 mt-1.5">{t('home.overview.afib.noAssessment')}</Text>
+            )}
           </StatCard>
           <StatCard
-            label={t('memberDashboard.afibProbability')}
-            icon={<TrendingUp size={16} color="#0D6EFD" />}
-            iconBg="rgba(13, 110, 253, 0.1)"
-            value={latest?.confidence !== null && latest?.confidence !== undefined ? `${(latest.confidence * 100).toFixed(1)}%` : '--'}
-          >
-            {latestMeta ? <PredictionBadge meta={latestMeta} size="sm" /> : <Text className="text-[11px] text-slate-500">{t('memberDashboard.noAssessment')}</Text>}
-          </StatCard>
-          <StatCard label={t('memberDashboard.hrvRmssd')} icon={<Sliders size={16} color="#0D6EFD" />} iconBg="rgba(13, 110, 253, 0.1)" value={latestRmssd ? formatHrvNumber(latestRmssd, 1) : '--'} unit={t('common:units.ms')}>
-            <Text className="text-[11px] text-slate-500">{t('memberDashboard.sdnn', { value: latestSdnn ? `${formatHrvNumber(latestSdnn, 1)} ${t('common:units.ms')}` : '--' })}</Text>
-          </StatCard>
-          <StatCard label={t('memberDashboard.totalScreenings')} icon={<Activity size={16} color="#10B981" />} iconBg="rgba(16, 185, 129, 0.1)" value={String(totalScreenings)} unit={t('common:units.times')}>
-            <Text className="text-[11px] text-slate-500" numberOfLines={1}>{t('memberDashboard.screeningsBreakdown', { normal: totalNormal, warning: totalWarning })}</Text>
-          </StatCard>
+            label={t('home.overview.hrv.title')}
+            icon={<Waves size={16} color="#7C3AED" />}
+            iconBg="rgba(124, 58, 237, 0.1)"
+            scope="latest"
+            value={latestRmssd ? formatHrvNumber(latestRmssd, 1) : '--'}
+            unit={t('home.overview.hrv.unit')}
+            hint={t('home.overview.hrv.sdnn', { value: latestSdnn ? formatHrvNumber(latestSdnn, 1) : '--' })}
+            onPress={latest ? () => router.push(`/health-record/${latest.id}` as any) : undefined}
+          />
+          <StatCard
+            label={t('home.overview.steps.title')}
+            icon={<Footprints size={16} color="#059669" />}
+            iconBg="rgba(5, 150, 105, 0.1)"
+            scope="today"
+            value={todayStats.totalSteps.toLocaleString(locale)}
+            unit={t('common:units.steps')}
+            hint={t('home.overview.steps.goal', { goal: stepGoal.toLocaleString(locale), percent: stepPercent })}
+            onPress={() => router.push('/workout/steps' as any)}
+          />
+          <StatCard
+            label={t('home.overview.calories.title')}
+            icon={<Flame size={16} color="#EA580C" />}
+            iconBg="rgba(234, 88, 12, 0.1)"
+            scope="today"
+            value={todayStats.caloriesBurned.toLocaleString(locale)}
+            unit={t('common:units.kcal')}
+            hint={todaySessionCount > 0 ? t('home.overview.calories.sessions', { count: todaySessionCount }) : t('home.overview.calories.noSessions')}
+            onPress={() => router.push('/workout' as any)}
+          />
         </View>
 
         {/* Tầm soát rung nhĩ */}
@@ -256,96 +381,24 @@ export default function HomeScreen() {
           )}
         </View>
 
-        {/* Chỉ số trực tiếp từ thiết bị + vận động (riêng của app) */}
-        <View className="flex-row items-center justify-between mb-3 mt-6">
-          <Text className="text-lg font-bold text-slate-900 tracking-tight">{t('home.todayMetrics.title')}</Text>
+        {/* Chăm sóc hằng ngày: lối tắt tới Ăn uống & Luyện tập */}
+        <Text className="text-lg font-bold text-slate-900 tracking-tight mb-3 mt-6">{t('home.dailyCare.title')}</Text>
+        <View className="flex-row justify-between mb-5">
+          <ShortcutTile
+            title={t('home.nutrition.title')}
+            description={t('home.nutrition.description')}
+            icon={<UtensilsCrossed color="#D97706" size={20} strokeWidth={2.2} />}
+            iconClassName="bg-amber-50 border-amber-100"
+            onPress={() => router.push('/nutrition' as any)}
+          />
+          <ShortcutTile
+            title={t('home.workout.title')}
+            description={t('home.workout.description')}
+            icon={<Dumbbell color="#059669" size={20} strokeWidth={2.2} />}
+            iconClassName="bg-emerald-50 border-emerald-100"
+            onPress={() => router.push('/workout' as any)}
+          />
         </View>
-        <View className="flex-row flex-wrap justify-between">
-          <View className="w-[48%] mb-3.5">
-            <MetricCard
-              title={t('home.todayMetrics.currentHeartRate')}
-              value={currentBPM > 0 ? currentBPM : '--'}
-              unit={t('common:units.bpm')}
-              icon={<Heart size={18} fill="rgba(255, 255, 255, 0.25)" strokeWidth={2} />}
-              colors={['#F43F5E', '#E11D48']}
-              unitBgColor="rgba(190, 18, 60, 0.45)"
-              subtitleColor="#FFE4E6"
-            />
-          </View>
-          <View className="w-[48%] mb-3.5">
-            <MetricCard
-              title={t('home.todayMetrics.spo2')}
-              value={currentSpO2 > 0 ? currentSpO2 : '--'}
-              unit={t('common:units.percent')}
-              icon={<Activity size={18} strokeWidth={2.4} />}
-              colors={['#0EA5E9', '#2563EB']}
-              unitBgColor="rgba(30, 58, 138, 0.45)"
-              subtitleColor="#E0F2FE"
-            />
-          </View>
-          <View className="w-[48%] mb-3.5">
-            <MetricCard
-              title={t('home.todayMetrics.steps')}
-              value={todayStats.totalSteps.toLocaleString(locale)}
-              unit={t('common:units.steps')}
-              icon={<Footprints size={18} strokeWidth={2.2} />}
-              colors={['#10B981', '#0D9488']}
-              unitBgColor="rgba(15, 118, 110, 0.45)"
-              subtitleColor="#D1FAE5"
-            />
-          </View>
-          <View className="w-[48%] mb-3.5">
-            <MetricCard
-              title={t('home.todayMetrics.calories')}
-              value={todayStats.caloriesBurned.toLocaleString(locale)}
-              unit={t('common:units.kcal')}
-              icon={<Flame size={18} strokeWidth={2.2} />}
-              colors={['#F59E0B', '#EA580C']}
-              unitBgColor="rgba(194, 65, 12, 0.45)"
-              subtitleColor="#FEF3C7"
-            />
-          </View>
-        </View>
-
-        <TouchableOpacity
-          onPress={() => router.push('/nutrition' as any)}
-          activeOpacity={0.8}
-          className="mb-3 rounded-2xl bg-white/95 border border-slate-200/80 p-4 shadow-sm flex-row items-center justify-between"
-          style={cardShadow}
-        >
-          <View className="flex-row items-center gap-3.5 flex-1 min-w-0">
-            <View className="w-12 h-12 rounded-xl bg-amber-50 border border-amber-100 items-center justify-center">
-              <UtensilsCrossed color="#D97706" size={24} strokeWidth={2.2} />
-            </View>
-            <View className="flex-1 min-w-0">
-              <Text className="text-base font-bold text-slate-900 tracking-tight">{t('home.nutrition.title')}</Text>
-              <Text className="text-xs text-slate-500 mt-0.5" numberOfLines={1}>{t('home.nutrition.description')}</Text>
-            </View>
-          </View>
-          <View className="w-8 h-8 rounded-full bg-slate-100 items-center justify-center ml-2">
-            <ChevronRight color="#64748B" size={18} strokeWidth={2.4} />
-          </View>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => router.push('/workout' as any)}
-          activeOpacity={0.8}
-          className="mb-5 rounded-2xl bg-white/95 border border-slate-200/80 p-4 shadow-sm flex-row items-center justify-between"
-          style={cardShadow}
-        >
-          <View className="flex-row items-center gap-3.5 flex-1 min-w-0">
-            <View className="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-100 items-center justify-center">
-              <Dumbbell color="#059669" size={24} strokeWidth={2.2} />
-            </View>
-            <View className="flex-1 min-w-0">
-              <Text className="text-base font-bold text-slate-900 tracking-tight">{t('home.workout.title')}</Text>
-              <Text className="text-xs text-slate-500 mt-0.5" numberOfLines={1}>{t('home.workout.description')}</Text>
-            </View>
-          </View>
-          <View className="w-8 h-8 rounded-full bg-slate-100 items-center justify-center ml-2">
-            <ChevronRight color="#64748B" size={18} strokeWidth={2.4} />
-          </View>
-        </TouchableOpacity>
         <View className="h-6" />
       </View>
     </ScreenWrapper>

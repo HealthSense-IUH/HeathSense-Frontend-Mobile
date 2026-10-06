@@ -46,9 +46,11 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
       </Box>
 
       {/* FAB - Centered and elevated: 56x56px circular as specified in DESIGN.md */}
-      <Box className="absolute w-full items-center justify-center pointer-events-none" style={{ top: -28, zIndex: 10 }}>
-        <Pressable 
-          className="items-center justify-center pointer-events-auto active:opacity-80"
+      {/* box-none: vùng bọc không nhận chạm nhưng nút bên trong vẫn nhận (pointer-events-none sẽ chặn luôn cả nút con) */}
+      <Box className="absolute w-full items-center justify-center" style={{ top: -28, zIndex: 10, elevation: 10, pointerEvents: 'box-none' }}>
+        <Pressable
+          className="items-center justify-center active:opacity-80"
+          hitSlop={8}
           style={{ 
             width: THEME.layout.fabSize, 
             height: THEME.layout.fabSize, 

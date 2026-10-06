@@ -45,18 +45,7 @@
       "subtext": "Relax your mind, take care of your sleep and check how steady your heart rhythm is."
     }
   },
-  "dashboard": {
-    "title": "Health overview",
-    "description": "Your latest cardiovascular metrics and atrial fibrillation screenings"
-  },
   "memberDashboard": {
-    "latestMeasurement": "Latest measurement",
-    "afibProbability": "Atrial fibrillation probability",
-    "noAssessment": "No assessment yet",
-    "hrvRmssd": "Heart rate variability (RMSSD)",
-    "sdnn": "SDNN: {{value}}",
-    "totalScreenings": "Total screenings",
-    "screeningsBreakdown": "{{normal}} normal • {{warning}} alerts",
     "recent": {
       "title": "Recent Measurements",
       "description": "Your 5 most recent measurements in the system",
@@ -78,20 +67,57 @@
       "connect": "Connect"
     },
     "afibSection": "Atrial Fibrillation (AFib) Screening",
-    "todayMetrics": {
-      "title": "Today's metrics",
-      "currentHeartRate": "Current heart rate",
-      "spo2": "Oxygen saturation (SpO2)",
-      "steps": "Steps",
-      "calories": "Calories burned"
-    },
     "nutrition": {
-      "title": "Food & Nutrition",
-      "description": "Heart-healthy food suggestions and meal orders"
+      "title": "Food & nutrition",
+      "description": "Heart-healthy foods and meal orders"
     },
     "workout": {
-      "title": "Workout center",
+      "title": "Workout",
       "description": "Start a workout, track heart rate & calories"
+    },
+    "overview": {
+      "title": "Health overview",
+      "description": "Live from your device, today, and your latest measurement",
+      "scope": {
+        "live": "Live",
+        "today": "Today",
+        "latest": "Latest measurement"
+      },
+      "noDevice": "No device connected",
+      "waitingSignal": "Waiting for signal",
+      "heartRate": {
+        "title": "Heart rate",
+        "latestHint": "Latest measurement: {{value}}"
+      },
+      "spo2": {
+        "title": "Oxygen saturation",
+        "normal": "Within normal range (≥95%)",
+        "low": "Below 95%, measure again"
+      },
+      "afib": {
+        "title": "AFib risk",
+        "noAssessment": "No assessment yet",
+        "screenings": "{{total}} screenings · {{normal}} normal",
+        "noScreenings": "No screenings yet"
+      },
+      "hrv": {
+        "title": "Heart rate variability",
+        "unit": "ms RMSSD",
+        "sdnn": "SDNN {{value}} ms"
+      },
+      "steps": {
+        "title": "Steps",
+        "goal": "Goal {{goal}} · {{percent}}%"
+      },
+      "calories": {
+        "title": "Calories burned",
+        "sessions_one": "{{count}} workout today",
+        "sessions_other": "{{count}} workouts today",
+        "noSessions": "No workouts today"
+      }
+    },
+    "dailyCare": {
+      "title": "Daily care"
     }
   },
   "screening": {

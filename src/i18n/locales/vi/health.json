@@ -45,18 +45,7 @@
       "subtext": "Thư giãn tinh thần, chăm sóc giấc ngủ và kiểm tra sự ổn định của nhịp tim."
     }
   },
-  "dashboard": {
-    "title": "Tổng quan sức khỏe",
-    "description": "Chỉ số tim mạch mới nhất và các lần tầm soát rung nhĩ"
-  },
   "memberDashboard": {
-    "latestMeasurement": "Lần đo gần nhất",
-    "afibProbability": "Khả năng bị rung nhĩ",
-    "noAssessment": "Chưa có đánh giá",
-    "hrvRmssd": "Biến thiên nhịp (RMSSD)",
-    "sdnn": "SDNN: {{value}}",
-    "totalScreenings": "Tổng lượt tầm soát",
-    "screeningsBreakdown": "{{normal}} bình thường • {{warning}} cảnh báo",
     "recent": {
       "title": "Lịch sử Đo Gần Đây",
       "description": "5 lần đo mới nhất của bạn trên hệ thống",
@@ -78,20 +67,57 @@
       "connect": "Kết nối"
     },
     "afibSection": "Tầm soát Rung nhĩ (AFib)",
-    "todayMetrics": {
-      "title": "Chỉ số hôm nay",
-      "currentHeartRate": "Nhịp tim hiện tại",
-      "spo2": "Nồng độ Oxy (SpO2)",
-      "steps": "Số bước chân",
-      "calories": "Calo tiêu thụ"
-    },
     "nutrition": {
-      "title": "Ăn uống & Dinh dưỡng",
-      "description": "Gợi ý thực phẩm tốt cho tim mạch và đơn ăn uống"
+      "title": "Ăn uống & dinh dưỡng",
+      "description": "Thực phẩm tốt cho tim mạch và đơn ăn uống"
     },
     "workout": {
-      "title": "Trung tâm luyện tập",
+      "title": "Luyện tập",
       "description": "Bắt đầu buổi tập, theo dõi nhịp tim & calo"
+    },
+    "overview": {
+      "title": "Tổng quan sức khỏe",
+      "description": "Trực tiếp từ thiết bị, hôm nay và lần đo gần nhất",
+      "scope": {
+        "live": "Trực tiếp",
+        "today": "Hôm nay",
+        "latest": "Lần đo gần nhất"
+      },
+      "noDevice": "Chưa kết nối thiết bị",
+      "waitingSignal": "Đang chờ tín hiệu",
+      "heartRate": {
+        "title": "Nhịp tim",
+        "latestHint": "Lần đo gần nhất: {{value}}"
+      },
+      "spo2": {
+        "title": "Nồng độ oxy",
+        "normal": "Trong ngưỡng bình thường (≥95%)",
+        "low": "Dưới ngưỡng 95%, nên đo lại"
+      },
+      "afib": {
+        "title": "Nguy cơ rung nhĩ",
+        "noAssessment": "Chưa có đánh giá",
+        "screenings": "{{total}} lượt tầm soát · {{normal}} bình thường",
+        "noScreenings": "Chưa có lượt tầm soát nào"
+      },
+      "hrv": {
+        "title": "Biến thiên nhịp tim",
+        "unit": "ms RMSSD",
+        "sdnn": "SDNN {{value}} ms"
+      },
+      "steps": {
+        "title": "Bước chân",
+        "goal": "Mục tiêu {{goal}} · {{percent}}%"
+      },
+      "calories": {
+        "title": "Calo tiêu thụ",
+        "sessions_one": "{{count}} buổi tập hôm nay",
+        "sessions_other": "{{count}} buổi tập hôm nay",
+        "noSessions": "Chưa có buổi tập hôm nay"
+      }
+    },
+    "dailyCare": {
+      "title": "Chăm sóc hằng ngày"
     }
   },
   "screening": {

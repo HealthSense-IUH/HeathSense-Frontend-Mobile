@@ -33,10 +33,7 @@ export function LiveMeasurementCard() {
     <View className="rounded-3xl bg-white border border-blue-100 p-4 mb-4">
       <View className="flex-row justify-between items-center mb-3">
         <Text className="text-sm font-bold text-slate-800">{t('measure.live.title')}</Text>
-        <View className="flex-row items-center gap-1.5">
-          <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: fresh ? '#10B981' : '#94A3B8' }} />
-          <Text className="text-[10px] font-semibold text-slate-500">{status}</Text>
-        </View>
+        <Text className="text-[10px] font-semibold text-slate-500">{status}</Text>
       </View>
       <View className="flex-row gap-3 mb-3">
         <View className="flex-1 rounded-2xl bg-rose-50 px-3 py-2.5">
@@ -52,7 +49,7 @@ export function LiveMeasurementCard() {
         <View className="flex-1 rounded-2xl bg-cyan-50 px-3 py-2.5">
           <View className="flex-row items-center gap-1.5">
             <Droplets size={14} color="#0891B2" />
-            <Text className="text-xs font-medium text-cyan-700">SpO?</Text>
+            <Text className="text-xs font-medium text-cyan-700">SpO2</Text>
           </View>
           <Text accessibilityLiveRegion="polite" className="text-2xl font-bold text-cyan-600 mt-1">
             {fresh && spo2 !== null ? spo2 : '--'}

@@ -241,12 +241,6 @@ export default function AFibMeasureScreen() {
       <View className="px-6 flex-1 justify-between pb-7 pt-2">
         {/* BEGIN: InstructionalGuidanceSection */}
         <View className="items-center mt-1">
-          <View className="flex-row items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100/70 border border-blue-200/70 mb-2.5">
-            <View className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-ping" />
-            <Text className="text-blue-700 text-xs font-semibold">
-              {t('measure.protocolBadge')}
-            </Text>
-          </View>
           <Text className="text-[13.5px] leading-relaxed text-slate-600 font-medium max-w-[310px] text-center">
             <Trans t={t} i18nKey="measure.instruction" components={{ b: <Text className="font-bold text-[#0B1E3F]" /> }} />
           </Text>
@@ -312,12 +306,9 @@ export default function AFibMeasureScreen() {
                 <Text className="text-3xl font-extrabold text-rose-600 tracking-tight">
                   {timeLeft}s
                 </Text>
-                <View className="flex-row items-center mt-1">
-                  <View className="w-2 h-2 rounded-full bg-rose-500 mr-1.5 animate-ping" />
-                  <Text className="text-[11px] font-bold text-rose-500 uppercase tracking-wider">
-                    {t('measure.recording')}
-                  </Text>
-                </View>
+                <Text className="text-[11px] font-bold text-rose-500 uppercase tracking-wider mt-1">
+                  {t('measure.recording')}
+                </Text>
               </View>
             </View>
           ) : isAnalyzing ? (
