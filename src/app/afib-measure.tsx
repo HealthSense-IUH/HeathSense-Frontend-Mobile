@@ -22,6 +22,8 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path, Circle } from 'react-native-svg';
 import { Trans, useTranslation } from 'react-i18next';
+import { useShallow } from 'zustand/react/shallow';
+import { LiveMeasurementCard } from '@/components/features/health/LiveMeasurementCard';
 import { useBleStore } from '@/services/ble-management/bleStore';
 import { useBLE } from '@/context/BLEContext';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
@@ -37,7 +39,15 @@ export default function AFibMeasureScreen() {
   const { t } = useTranslation('health');
   const router = useRouter();
   const { sendCommand, stopExportAndUploadPpgRecording } = useBLE();
-  const store = useBleStore();
+  const store = useBleStore(useShallow(state => ({
+    isRecordingPpg: state.isRecordingPpg,
+    isAnalyzing: state.isAnalyzing,
+    aiAnalysisResult: state.aiAnalysisResult,
+    recordingError: state.recordingError,
+    recordingStartedAt: state.recordingStartedAt,
+    connectedDeviceId: state.connectedDeviceId,
+    setRecordingState: state.setRecordingState,
+  })));
 
   const workoutStatus = useWorkoutEngineStore((state) => state.status);
   const lastWorkoutEndedAt = useWorkoutEngineStore((state) => state.lastWorkoutEndedAt);
@@ -231,12 +241,6 @@ export default function AFibMeasureScreen() {
       <View className="px-6 flex-1 justify-between pb-7 pt-2">
         {/* BEGIN: InstructionalGuidanceSection */}
         <View className="items-center mt-1">
-          <View className="flex-row items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100/70 border border-blue-200/70 mb-2.5">
-            <View className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-ping" />
-            <Text className="text-blue-700 text-xs font-semibold">
-              {t('measure.protocolBadge')}
-            </Text>
-          </View>
           <Text className="text-[13.5px] leading-relaxed text-slate-600 font-medium max-w-[310px] text-center">
             <Trans t={t} i18nKey="measure.instruction" components={{ b: <Text className="font-bold text-[#0B1E3F]" /> }} />
           </Text>
@@ -302,12 +306,9 @@ export default function AFibMeasureScreen() {
                 <Text className="text-3xl font-extrabold text-rose-600 tracking-tight">
                   {timeLeft}s
                 </Text>
-                <View className="flex-row items-center mt-1">
-                  <View className="w-2 h-2 rounded-full bg-rose-500 mr-1.5 animate-ping" />
-                  <Text className="text-[11px] font-bold text-rose-500 uppercase tracking-wider">
-                    {t('measure.recording')}
-                  </Text>
-                </View>
+                <Text className="text-[11px] font-bold text-rose-500 uppercase tracking-wider mt-1">
+                  {t('measure.recording')}
+                </Text>
               </View>
             </View>
           ) : isAnalyzing ? (
@@ -467,6 +468,8 @@ export default function AFibMeasureScreen() {
           </View>
         </View>
         {/* END: PulseRadarSensorSection */}
+
+        {isRecording ? <LiveMeasurementCard /> : null}
 
         {/* BEGIN: BottomSection */}
         <View className="w-full">

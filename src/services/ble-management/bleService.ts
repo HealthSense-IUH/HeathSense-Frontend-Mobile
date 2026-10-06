@@ -94,6 +94,8 @@ class HuyWatchBleService {
   private notificationUpdateAt = 0;
   private storeUpdateAt = 0;
   private ppgLineBuffer = "";
+  private livePpgSamples: PpgSample[] = [];
+  private pendingPpgSampleCount = 0;
   private listeners: EventSubscription[] = [];
   private batteryTimer: TimerHandle | null = null;
 
@@ -115,6 +117,9 @@ class HuyWatchBleService {
       const state = await BleManager.checkState();
 
       if (state !== "on") {
+        store.resetLivePpgData();
+        this.livePpgSamples = [];
+        this.pendingPpgSampleCount = 0;
         store.setStatus("bluetoothOff", `Bluetooth: ${state}`);
         return;
       }
@@ -373,6 +378,9 @@ class HuyWatchBleService {
 
         this.clearReconnectTimer();
         store.setConnectedDevice(null);
+        store.resetLivePpgData();
+        this.livePpgSamples = [];
+        this.pendingPpgSampleCount = 0;
         store.setStatus("bluetoothOff", `Bluetooth: ${state}`);
       }),
     );
@@ -500,10 +508,15 @@ class HuyWatchBleService {
     if (ppgSamples.length > 0) {
       // Tự động khởi tạo phiên ghi PPG cho Pha 1 nếu chưa kích hoạt
       if (!store.isRecordingPpg) {
+        this.livePpgSamples = [];
+        this.pendingPpgSampleCount = 0;
+        this.storeUpdateAt = 0;
         ppgRecorder.start();
       }
 
       ppgRecorder.appendSamples(ppgSamples);
+      this.livePpgSamples = [...this.livePpgSamples, ...ppgSamples].slice(-500);
+      this.pendingPpgSampleCount += ppgSamples.length;
 
       if (now - this.storeUpdateAt >= STORE_HEALTH_UPDATE_INTERVAL_MS) {
         this.storeUpdateAt = now;
@@ -513,9 +526,20 @@ class HuyWatchBleService {
           deviceMillis: latest.deviceMillis,
           red: latest.red,
           ir: latest.ir,
-          samplesInPacket: ppgSamples.length,
+          samplesInPacket: this.pendingPpgSampleCount,
+          samples: this.livePpgSamples,
           receivedAt: now,
         });
+        this.pendingPpgSampleCount = 0;
+        const bpm = latest.bpm;
+        const spo2 = latest.spo2;
+        if (typeof bpm === "number" && bpm > 0) {
+          store.setHealthData({
+            bpm,
+            spo2: typeof spo2 === "number" && spo2 > 0 && spo2 <= 100 ? spo2 : undefined,
+            receivedAt: now,
+          });
+        }
       }
     }
 
@@ -585,6 +609,8 @@ class HuyWatchBleService {
     store.resetHealthData();
     store.setNegotiatedMtu(null);
     this.ppgLineBuffer = "";
+    this.livePpgSamples = [];
+    this.pendingPpgSampleCount = 0;
 
     if (this.manualDisconnect || !knownDevice) {
       store.setStatus(knownDevice ? "disconnected" : "unpaired");
