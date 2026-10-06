@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ActivityIndicator, Pressable, Text, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -28,6 +28,7 @@ import { PredictionBadge } from '@/components/features/health/PredictionBadge';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
 import { THEME } from '@/constants/theme';
 import { useWorkoutCatalogStore } from '@/services/workout/workoutCatalogStore';
+import { stepTrackingService } from '@/services/workout/stepTrackingService';
 import { useMyRecords } from '@/hooks/useHealthHistory';
 import { useHealthStatistics } from '@/hooks/useHealthStatistics';
 import { getPredictionMeta } from '@/constants/healthRecords';
@@ -72,6 +73,30 @@ export default function HomeScreen() {
   // Bước / calo hôm nay = tổng các buổi tập hôm nay (đồng hồ chỉ đếm bước khi đang tập); đọc sessions để tự cập nhật
   useWorkoutCatalogStore((state) => state.sessions);
   const todayStats = useWorkoutCatalogStore.getState().getTodayStats();
+
+  const [dailySteps, setDailySteps] = useState<number>(() =>
+    Math.max(stepTrackingService.getTodayTotalSteps(), todayStats.totalSteps)
+  );
+
+  useEffect(() => {
+    let isMounted = true;
+    stepTrackingService.getHourlySteps(new Date()).then(({ totalSteps }) => {
+      if (isMounted) {
+        setDailySteps(Math.max(totalSteps, stepTrackingService.getTodayTotalSteps(), todayStats.totalSteps));
+      }
+    }).catch(() => {});
+
+    const unsubscribe = stepTrackingService.startLiveTracking((liveTotal) => {
+      if (isMounted) {
+        setDailySteps(Math.max(liveTotal, todayStats.totalSteps));
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
+  }, [todayStats.totalSteps]);
 
   // Tổng quan như web: 5 lần đo gần nhất + thống kê tầm soát cả năm
   const { data: recentPage, isLoading: loadingRecent } = useMyRecords(1, 5);
@@ -283,17 +308,21 @@ export default function HomeScreen() {
               subtitleColor="#E0F2FE"
             />
           </View>
-          <View className="w-[48%] mb-3.5">
+          <Pressable
+            onPress={() => router.push('/workout/steps' as any)}
+            className="w-[48%] mb-3.5 active:opacity-85"
+            accessibilityLabel={t('home.todayMetrics.steps')}
+          >
             <MetricCard
               title={t('home.todayMetrics.steps')}
-              value={todayStats.totalSteps.toLocaleString(locale)}
+              value={dailySteps.toLocaleString(locale)}
               unit={t('common:units.steps')}
               icon={<Footprints size={18} strokeWidth={2.2} />}
               colors={['#10B981', '#0D9488']}
               unitBgColor="rgba(15, 118, 110, 0.45)"
               subtitleColor="#D1FAE5"
             />
-          </View>
+          </Pressable>
           <View className="w-[48%] mb-3.5">
             <MetricCard
               title={t('home.todayMetrics.calories')}

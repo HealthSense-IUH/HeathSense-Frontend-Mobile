@@ -55,7 +55,10 @@
           "neverForLocation": true
         }
       ],
-      "./plugins/withNotifeeConnectedDeviceService"
+      "./plugins/withNotifeeConnectedDeviceService",
+      "expo-image",
+      "expo-secure-store",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true

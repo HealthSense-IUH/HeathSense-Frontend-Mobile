@@ -32,7 +32,7 @@ export default function RootLayout() {
             >
               <Stack.Screen name="(tabs)" />
               <Stack.Screen name="(public)" />
-              <Stack.Screen name="history" dangerouslySingular={true} />
+              <Stack.Screen name="history-dates" dangerouslySingular={true} />
               <Stack.Screen name="history-records" dangerouslySingular={true} />
               <Stack.Screen name="afib-analysis-details" dangerouslySingular={true} />
               <Stack.Screen name="afib-measure" dangerouslySingular={true} />

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, Pressable } from 'react-native';
 import { safeRouter } from '@/utils/safeNavigation';
 import {
@@ -13,6 +13,7 @@ import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
 import { FavoriteWorkoutSection } from '@/components/features/workout/FavoriteWorkoutSection';
 import { WeeklyWorkoutCard } from '@/components/features/workout/WeeklyWorkoutCard';
 import { useWorkoutCatalogStore } from '@/services/workout/workoutCatalogStore';
+import { stepTrackingService } from '@/services/workout/stepTrackingService';
 import { THEME } from '@/constants/theme';
 import { useTranslation } from 'react-i18next';
 import { currentIntlLocale } from '@/i18n';
@@ -25,11 +26,61 @@ export default function WorkoutHubScreen() {
   const todayStats = getTodayStats();
   const weeklyStats = getWeeklyStats();
 
+  const [dailySteps, setDailySteps] = useState<number>(() =>
+    Math.max(stepTrackingService.getTodayTotalSteps(), todayStats.totalSteps)
+  );
+  const [targetGoal, setTargetGoal] = useState<number>(() => stepTrackingService.getStoredStepGoal());
+  const [weekSteps, setWeekSteps] = useState<{ dayNum: number; isToday: boolean; steps: number }[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadSteps() {
+      try {
+        const { totalSteps } = await stepTrackingService.getHourlySteps(new Date());
+        const past7 = await stepTrackingService.getPast7DaysSteps(0);
+        const storedGoal = stepTrackingService.getStoredStepGoal();
+
+        if (isMounted) {
+          const effectiveSteps = Math.max(totalSteps, stepTrackingService.getTodayTotalSteps(), todayStats.totalSteps);
+          setDailySteps(effectiveSteps);
+          setTargetGoal(storedGoal);
+
+          if (past7.items && past7.items.length > 0) {
+            setWeekSteps(
+              past7.items.map((it) => ({
+                dayNum: it.dayNum,
+                isToday: it.isCurrent,
+                steps: it.steps,
+              }))
+            );
+          }
+        }
+      } catch (err) {
+        console.warn('[WorkoutHubScreen] loadSteps error:', err);
+      }
+    }
+
+    loadSteps();
+
+    const unsubscribe = stepTrackingService.startLiveTracking((liveTotal) => {
+      if (isMounted) {
+        setDailySteps(Math.max(liveTotal, todayStats.totalSteps));
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
+  }, [todayStats.totalSteps]);
+
   // Thời lượng tập 7 ngày trong tuần (dữ liệu thật từ store); cột cao theo tỉ lệ với ngày tập nhiều nhất
   const dailyDist = weeklyStats.dailyDistribution || [];
   const now = new Date();
   const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
   const maxDuration = Math.max(0, ...dailyDist.map((item) => item.durationSeconds));
+  const maxWeekSteps = Math.max(1, ...weekSteps.map((w) => w.steps));
 
   return (
     <ScreenWrapper
@@ -98,22 +149,31 @@ export default function WorkoutHubScreen() {
             {/* Step Count Number */}
             <View>
               <Text className="text-4xl font-extrabold text-slate-900 tracking-tight">
-                {todayStats.totalSteps.toLocaleString(currentIntlLocale())}
+                {dailySteps.toLocaleString(currentIntlLocale())}
               </Text>
               <Text className="text-xs text-slate-500 mt-1 font-medium">
-                {t('hub.stepsTarget', { value: todayStats.targetSteps.toLocaleString(currentIntlLocale()) })}
+                {t('hub.stepsTarget', { value: targetGoal.toLocaleString(currentIntlLocale()) })}
               </Text>
             </View>
 
             {/* 7-Day Bar Chart Representation */}
             <View className="flex-row items-end gap-2 pb-1">
-              {dailyDist.map((item) => {
-                const dayNum = Number(item.dateStr.slice(8, 10));
-                const isToday = item.dateStr === todayStr;
-                const barHeight = maxDuration > 0 ? 6 + (item.durationSeconds / maxDuration) * 36 : 6;
+              {(weekSteps.length > 0
+                ? weekSteps
+                : dailyDist.map((d) => ({
+                    dayNum: Number(d.dateStr.slice(8, 10)),
+                    isToday: d.dateStr === todayStr,
+                    steps: 0,
+                  }))
+              ).map((item, idx) => {
+                const isToday = item.isToday;
+                const barHeight =
+                  item.steps > 0
+                    ? Math.max(8, (item.steps / maxWeekSteps) * 36)
+                    : 6;
 
                 return (
-                  <View key={item.dateStr} className="items-center">
+                  <View key={`step-bar-${idx}-${item.dayNum}`} className="items-center">
                     {/* Vertical Bar */}
                     <View
                       className={`w-3.5 rounded-full ${
@@ -127,7 +187,7 @@ export default function WorkoutHubScreen() {
                         isToday ? 'text-red-500' : 'text-slate-400'
                       }`}
                     >
-                      {dayNum}
+                      {item.dayNum}
                     </Text>
                   </View>
                 );

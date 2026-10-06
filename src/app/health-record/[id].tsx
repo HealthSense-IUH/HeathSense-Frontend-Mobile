@@ -189,7 +189,7 @@ export default function HealthRecordDetailScreen() {
         <View className="px-5 pt-3 pb-4 flex-row items-center justify-between">
           <View className="flex-row items-center gap-4 flex-1">
             <Pressable
-              onPress={() => (router.canGoBack() ? router.back() : router.replace('/history' as any))}
+              onPress={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/history' as any))}
               className="w-10 h-10 rounded-full bg-white border border-slate-100 items-center justify-center active:opacity-80"
               style={shadow}
               aria-label={t('common:actions.back')}
