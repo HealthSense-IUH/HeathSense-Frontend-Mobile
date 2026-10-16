@@ -38,7 +38,7 @@ import {
 export default function AFibMeasureScreen() {
   const { t } = useTranslation('health');
   const router = useRouter();
-  const { sendCommand, stopExportAndUploadPpgRecording } = useBLE();
+  const { sendCommand, stopExportAndUploadPpgRecording, startPpgRecording } = useBLE();
   const store = useBleStore(useShallow(state => ({
     isRecordingPpg: state.isRecordingPpg,
     isAnalyzing: state.isAnalyzing,
@@ -127,6 +127,7 @@ export default function AFibMeasureScreen() {
 
   const startMeasurement = async () => {
     try {
+      startPpgRecording();
       await sendCommand("CMD:START_SCREENING");
     } catch (err) {
       console.warn("[AFibMeasure] Failed to send screening command:", err);

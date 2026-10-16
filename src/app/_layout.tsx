@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { View } from 'react-native';
 import { Stack } from 'expo-router';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BLEProvider } from '@/context/BLEContext';
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
 import { useAuthStore } from '@/services/authentication/authStore';
@@ -19,9 +20,10 @@ export default function RootLayout() {
   }, [initializeAuth]);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <GluestackUIProvider mode="system">
-        <BLEProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <QueryClientProvider client={queryClient}>
+        <GluestackUIProvider mode="system">
+          <BLEProvider>
           <View style={{ flex: 1, backgroundColor: THEME.colors.canvas }}>
             <Stack
               screenOptions={{
@@ -52,5 +54,6 @@ export default function RootLayout() {
         </BLEProvider>
       </GluestackUIProvider>
     </QueryClientProvider>
+  </GestureHandlerRootView>
   );
 }

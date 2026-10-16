@@ -137,15 +137,15 @@
         "workout": "Đang tập luyện thể thao",
         "default": "Chẩn đoán lâm sàng 60s"
       },
-      "title": "Đo Rung nhĩ Chủ động",
+      "title": "Tầm soát Rung nhĩ (AFib)",
       "latest": "Lần đo gần nhất: {{label}}",
       "cooldownHint": "Vừa kết thúc bài tập. Để nhịp tim ổn định và tránh cảnh báo sai, vui lòng nghỉ tĩnh thêm {{time}} trước khi đo.",
-      "description": "Chủ động ghi nhận tín hiệu quang học PPG 100Hz và phân tích AI để phát hiện sớm các dấu hiệu rung nhĩ và bất thường nhịp tim.",
+      "description": "Quy trình đo tĩnh 60 giây và phân tích AI để phát hiện sớm các dấu hiệu rung nhĩ và bất thường nhịp tim.",
       "cta": {
         "cooldown": "Hồi phục: {{time}}",
         "workout": "Tạm ngắt khi tập",
-        "measureAgain": "Thực hiện đo lại",
-        "start": "Bắt đầu đo ngay"
+        "measureAgain": "Tầm soát lại",
+        "start": "Bắt đầu tầm soát"
       },
       "hint": {
         "cooldown": "Nghỉ tĩnh 10p",

@@ -506,15 +506,10 @@ class HuyWatchBleService {
     }
 
     if (ppgSamples.length > 0) {
-      // Tự động khởi tạo phiên ghi PPG cho Pha 1 nếu chưa kích hoạt
-      if (!store.isRecordingPpg) {
-        this.livePpgSamples = [];
-        this.pendingPpgSampleCount = 0;
-        this.storeUpdateAt = 0;
-        ppgRecorder.start();
+      // Chỉ gom mẫu vào phiên ghi PPG nếu người dùng đã chủ động bấm đo
+      if (store.isRecordingPpg) {
+        ppgRecorder.appendSamples(ppgSamples);
       }
-
-      ppgRecorder.appendSamples(ppgSamples);
       this.livePpgSamples = [...this.livePpgSamples, ...ppgSamples].slice(-500);
       this.pendingPpgSampleCount += ppgSamples.length;
 
