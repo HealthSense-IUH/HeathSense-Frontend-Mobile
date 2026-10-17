@@ -52,6 +52,7 @@ interface WorkoutEngineState {
   currentDistanceKm: number;
   currentSpeedKmh: number;
   currentSteps: number;
+  currentCadenceSpm: number;
   gpsTrack: GpsCoordinate[];
 
   // Sets & Rest metrics (For gym / calisthenics)
@@ -92,7 +93,12 @@ interface WorkoutEngineState {
   completeSetAndRest: (restDurationSec?: number) => void;
   skipRest: () => void;
   updateGpsLocation: (coord: Omit<GpsCoordinate, 'timestamp'>) => void;
-  addSteps: (steps: number) => void;
+  addSteps: (
+    steps: number,
+    derivedSpeedKmh?: number,
+    cadenceSpm?: number,
+    customStrideKm?: number
+  ) => void;
 }
 
 // Timer handles maintained outside store state to avoid serialization issues
@@ -100,6 +106,7 @@ let workoutIntervalTimer: ReturnType<typeof setInterval> | null = null;
 let countdownIntervalTimer: ReturnType<typeof setInterval> | null = null;
 let restIntervalTimer: ReturnType<typeof setInterval> | null = null;
 let heartRateSamples: number[] = [];
+let lastMovementTimestamp = 0;
 
 export const useWorkoutEngineStore = create<WorkoutEngineState>((set, get) => ({
   status: 'IDLE',
@@ -117,6 +124,7 @@ export const useWorkoutEngineStore = create<WorkoutEngineState>((set, get) => ({
   currentDistanceKm: 0,
   currentSpeedKmh: 0,
   currentSteps: 0,
+  currentCadenceSpm: 0,
   gpsTrack: [],
 
   currentSet: 1,
@@ -195,6 +203,7 @@ export const useWorkoutEngineStore = create<WorkoutEngineState>((set, get) => ({
       currentDistanceKm: 0,
       currentSpeedKmh: 0,
       currentSteps: 0,
+      currentCadenceSpm: 0,
       gpsTrack: [],
       currentSet: 1,
       completedSets: 0,
@@ -305,9 +314,22 @@ export const useWorkoutEngineStore = create<WorkoutEngineState>((set, get) => ({
         maxHeartRate = Math.max(...heartRateSamples);
       }
 
-      // Calculate instantaneous speed (km/h) if distance is available
-      const speedKmh =
-        nextSeconds > 0 ? currentDistanceKm / (nextSeconds / 3600) : 0;
+      // Speed & Cadence decay: If user hasn't moved in > 2.5s, decay speed to 0 and reset cadence
+      const nowMs = Date.now();
+      const existingSpeed = get().currentSpeedKmh;
+      let finalSpeed = existingSpeed;
+      let finalCadence = get().currentCadenceSpm;
+
+      if (lastMovementTimestamp > 0 && nowMs - lastMovementTimestamp > 2500) {
+        // Stopped moving
+        finalSpeed = existingSpeed > 0.8 ? Math.round((existingSpeed * 0.5) * 10) / 10 : 0;
+        finalCadence = 0;
+      } else if (existingSpeed === 0 && currentDistanceKm > 0.01) {
+        const avgSessionSpeed = nextSeconds > 0 ? currentDistanceKm / (nextSeconds / 3600) : 0;
+        if (avgSessionSpeed > 0.5) {
+          finalSpeed = Math.round(avgSessionSpeed * 10) / 10;
+        }
+      }
 
       set({
         elapsedSeconds: nextSeconds,
@@ -316,7 +338,8 @@ export const useWorkoutEngineStore = create<WorkoutEngineState>((set, get) => ({
         currentHeartRate: currentBPM > 0 ? currentBPM : 0,
         avgHeartRate,
         maxHeartRate,
-        currentSpeedKmh: Math.round(speedKmh * 10) / 10,
+        currentSpeedKmh: finalSpeed,
+        currentCadenceSpm: finalCadence,
       });
 
       // Check target goal completion for automatic pause if requested
@@ -385,6 +408,11 @@ export const useWorkoutEngineStore = create<WorkoutEngineState>((set, get) => ({
     const activeCal = Math.max(Math.round(currentCalories), 1);
     const totCal = Math.max(Math.round(totalCalories), activeCal);
 
+    const calculatedAvgSpeed =
+      elapsedSeconds > 0 && currentDistanceKm > 0
+        ? Math.round((currentDistanceKm / (elapsedSeconds / 3600)) * 10) / 10
+        : currentSpeedKmh;
+
     const session: WorkoutSession = {
       id: `session_${Date.now()}`,
       exerciseId: exercise.id,
@@ -397,8 +425,8 @@ export const useWorkoutEngineStore = create<WorkoutEngineState>((set, get) => ({
       durationSeconds: Math.max(elapsedSeconds, 1),
       caloriesBurned: activeCal,
       totalCalories: totCal,
-      distanceKm: currentDistanceKm > 0 ? currentDistanceKm : undefined,
-      avgSpeedKmh: currentSpeedKmh > 0 ? currentSpeedKmh : undefined,
+      distanceKm: currentDistanceKm > 0 ? Math.round(currentDistanceKm * 100) / 100 : undefined,
+      avgSpeedKmh: calculatedAvgSpeed > 0 ? calculatedAvgSpeed : undefined,
       totalSteps: currentSteps > 0 ? currentSteps : undefined,
       completedSets: completedSets > 0 ? completedSets : undefined,
       targetType,
@@ -442,6 +470,7 @@ export const useWorkoutEngineStore = create<WorkoutEngineState>((set, get) => ({
       currentDistanceKm: 0,
       currentSpeedKmh: 0,
       currentSteps: 0,
+      currentCadenceSpm: 0,
       gpsTrack: [],
       currentSet: 1,
       completedSets: 0,
@@ -522,14 +551,37 @@ export const useWorkoutEngineStore = create<WorkoutEngineState>((set, get) => ({
     // Filter out GPS jump noise (> 100 km/h)
     if (deltaKm > 0.001 && deltaKm < 0.1) {
       const nextDistance = currentDistanceKm + deltaKm;
+
+      // 1. Tính tốc độ tức thời từ GPS speed (m/s) hoặc từ deltaKm / deltaHours
+      let speedKmh = 0;
+      if (typeof coord.speed === 'number' && coord.speed >= 0.3) {
+        speedKmh = Math.round(coord.speed * 3.6 * 10) / 10;
+      } else {
+        const deltaHours = Math.max((timestamp - prevCoord.timestamp) / 3600000, 0.0001);
+        speedKmh = Math.round((deltaKm / deltaHours) * 10) / 10;
+      }
+      if (speedKmh > 45) speedKmh = get().currentSpeedKmh;
+
+      lastMovementTimestamp = Date.now();
+
+      // 2. Tự động đồng bộ số bước chân theo quãng đường di chuyển thực tế (phòng trường hợp pedometer của điện thoại chưa nhạy)
+      const { currentSteps, userHeightCm, userGender, elapsedSeconds } = get();
+      const currentCadence = elapsedSeconds > 2 ? Math.round((currentSteps / elapsedSeconds) * 60) : 0;
+      const strideM = getDynamicStrideLengthMeters(userHeightCm, userGender, currentCadence);
+      const estimatedSteps = Math.round((nextDistance * 1000) / Math.max(strideM, 0.45));
+      const nextSteps = Math.max(currentSteps, estimatedSteps);
+
       set({
         gpsTrack: [...gpsTrack, newCoord],
-        currentDistanceKm: Math.round(nextDistance * 100) / 100,
+        // Giữ nguyên độ chính xác thực tế, không round 2 chữ số ở store tránh mất tích lũy quãng đường nhỏ
+        currentDistanceKm: nextDistance,
+        currentSpeedKmh: speedKmh > 0 ? speedKmh : get().currentSpeedKmh,
+        currentSteps: nextSteps,
       });
     }
   },
 
-  addSteps: (steps) => {
+  addSteps: (steps, derivedSpeedKmh, cadenceSpm, customStrideKm) => {
     if (steps <= 0) return;
     const {
       exercise,
@@ -538,33 +590,53 @@ export const useWorkoutEngineStore = create<WorkoutEngineState>((set, get) => ({
       elapsedSeconds,
       currentSteps,
       currentDistanceKm,
-      gpsTrack,
     } = get();
     const nextSteps = currentSteps + steps;
 
     // Tính cadence (spm)
-    const cadenceSpm =
-      elapsedSeconds > 2 ? Math.round((nextSteps / elapsedSeconds) * 60) : 0;
+    const effectiveCadence =
+      cadenceSpm && cadenceSpm > 0
+        ? cadenceSpm
+        : elapsedSeconds > 2
+        ? Math.round((nextSteps / elapsedSeconds) * 60)
+        : 100;
 
-    // Khi bài tập là INDOOR_STEP (hoặc bài tập DISTANCE_GPS mà chưa có tọa độ GPS)
+    const strideKm =
+      customStrideKm && customStrideKm > 0
+        ? customStrideKm
+        : getDynamicStrideLengthKm(userHeightCm, userGender, effectiveCadence);
+
+    const stepDeltaDistanceKm = steps * strideKm;
+    const stepEstimatedDistanceKm = nextSteps * strideKm;
+
     let nextDistanceKm = currentDistanceKm;
     const isIndoor = exercise?.trackingType === 'INDOOR_STEP';
-    const isGpsMissing =
-      exercise?.trackingType === 'DISTANCE_GPS' && gpsTrack.length === 0;
+    const isOutdoor = exercise?.trackingType === 'DISTANCE_GPS';
 
-    if (isIndoor || isGpsMissing) {
-      const strideKm = getDynamicStrideLengthKm(
-        userHeightCm,
-        userGender,
-        cadenceSpm
-      );
-      nextDistanceKm =
-        Math.round((currentDistanceKm + steps * strideKm) * 1000) / 1000;
+    if (isIndoor) {
+      nextDistanceKm = currentDistanceKm + stepDeltaDistanceKm;
+    } else if (isOutdoor) {
+      // Sensor Fusion: Khi mới tập hoặc GPS chưa tích lũy đủ,
+      // dùng max giữa quãng đường GPS và quãng đường ước lượng từ bước chân để không bị đơ 0.00 km
+      nextDistanceKm = Math.max(currentDistanceKm + stepDeltaDistanceKm * 0.95, stepEstimatedDistanceKm);
+    } else {
+      nextDistanceKm = currentDistanceKm + stepDeltaDistanceKm;
     }
+
+    // Tốc độ di chuyển tức thời (km/h)
+    let speedKmh = derivedSpeedKmh && derivedSpeedKmh > 0 ? derivedSpeedKmh : get().currentSpeedKmh;
+    if (speedKmh <= 0 && effectiveCadence > 0) {
+      const speedMs = (strideKm * 1000) * (effectiveCadence / 60);
+      speedKmh = Math.round(speedMs * 3.6 * 10) / 10;
+    }
+
+    lastMovementTimestamp = Date.now();
 
     set({
       currentSteps: nextSteps,
       currentDistanceKm: nextDistanceKm,
+      currentSpeedKmh: speedKmh,
+      currentCadenceSpm: effectiveCadence,
     });
   },
 }));

@@ -54,6 +54,8 @@ export default function WorkoutSummaryScreen() {
   const totalCalories = Number(params.totalCalories) || session?.totalCalories || caloriesBurned;
   const distanceKm = Number(params.distanceKm) || session?.distanceKm;
   const avgHeartRate = Number(params.avgHeartRate) || session?.avgHeartRate;
+  const totalSteps = Number(params.totalSteps) || session?.totalSteps;
+  const avgSpeedKmh = Number(params.avgSpeedKmh) || session?.avgSpeedKmh;
   const [startedAt] = useState(() => Number(params.startedAt) || session?.startedAt || Date.now());
 
   const [note, setNote] = useState<string>(session?.note || (params.note as string) || '');
@@ -82,6 +84,54 @@ export default function WorkoutSummaryScreen() {
     }
     return null;
   }, [session]);
+
+  // Tự động khôi phục quãng đường từ danh sách tọa độ GPS nếu session chưa có distanceKm
+  const calculatedTrackDistanceKm = React.useMemo(() => {
+    if (!effectiveGpsTrack || effectiveGpsTrack.length < 2) return 0;
+    let totalKm = 0;
+    const R = 6371; // Bán kính Trái Đất (km)
+    for (let i = 1; i < effectiveGpsTrack.length; i++) {
+      const p1 = effectiveGpsTrack[i - 1];
+      const p2 = effectiveGpsTrack[i];
+      const dLat = ((p2.latitude - p1.latitude) * Math.PI) / 180;
+      const dLon = ((p2.longitude - p1.longitude) * Math.PI) / 180;
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos((p1.latitude * Math.PI) / 180) *
+          Math.cos((p2.latitude * Math.PI) / 180) *
+          Math.sin(dLon / 2) *
+          Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const d = R * c;
+      if (d > 0.0005 && d < 0.2) {
+        totalKm += d;
+      }
+    }
+    return totalKm;
+  }, [effectiveGpsTrack]);
+
+  const rawDistance = Number(params.distanceKm) || session?.distanceKm || 0;
+  const resolvedDistanceKm = rawDistance > 0 ? rawDistance : calculatedTrackDistanceKm;
+
+  const isDistanceSport =
+    session?.trackingType === 'DISTANCE_GPS' ||
+    session?.trackingType === 'INDOOR_STEP' ||
+    exerciseId.includes('walk') ||
+    exerciseId.includes('run') ||
+    exerciseId.includes('cycl') ||
+    exerciseId.includes('hik') ||
+    Boolean(effectiveGpsTrack && effectiveGpsTrack.length >= 2) ||
+    resolvedDistanceKm > 0;
+
+  // Tự động cập nhật lưu quãng đường đã khôi phục vào storage nếu session cũ bị thiếu
+  React.useEffect(() => {
+    if (session && (!session.distanceKm || session.distanceKm <= 0) && calculatedTrackDistanceKm > 0) {
+      saveSession({
+        ...session,
+        distanceKm: Math.round(calculatedTrackDistanceKm * 100) / 100,
+      });
+    }
+  }, [session, calculatedTrackDistanceKm, saveSession]);
 
   const themeConfig = getSportThemeConfig(exerciseId, exerciseName);
 
@@ -155,12 +205,28 @@ export default function WorkoutSummaryScreen() {
             <Text className="text-white text-base font-medium">
               {displayExerciseName}
             </Text>
-            <Text className="text-white text-5xl font-extrabold mt-1 tracking-tight">
-              {formatDuration(durationSeconds)}
-            </Text>
-            <Text className="text-white/80 text-xs font-normal mt-2">
-              {formatSummaryDate(startedAt)}
-            </Text>
+            {isDistanceSport && resolvedDistanceKm > 0 ? (
+              <>
+                <View className="flex-row items-baseline mt-1">
+                  <Text className="text-white text-5xl font-extrabold tracking-tight">
+                    {formatWorkoutDecimal(resolvedDistanceKm, 2)}
+                  </Text>
+                  <Text className="text-white/90 text-2xl font-bold ml-2">km</Text>
+                </View>
+                <Text className="text-white/80 text-xs font-normal mt-2">
+                  {formatDuration(durationSeconds)} • {formatSummaryDate(startedAt)}
+                </Text>
+              </>
+            ) : (
+              <>
+                <Text className="text-white text-5xl font-extrabold mt-1 tracking-tight">
+                  {formatDuration(durationSeconds)}
+                </Text>
+                <Text className="text-white/80 text-xs font-normal mt-2">
+                  {formatSummaryDate(startedAt)}
+                </Text>
+              </>
+            )}
           </View>
         </View>
 
@@ -196,10 +262,10 @@ export default function WorkoutSummaryScreen() {
                   </View>
                 </View>
 
-                {distanceKm && distanceKm > 0 ? (
+                {isDistanceSport ? (
                   <View className="px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/70">
                     <Text className="text-xs font-bold text-emerald-700">
-                      {formatWorkoutDecimal(distanceKm, 2)} km
+                      {formatWorkoutDecimal(resolvedDistanceKm, 2)} km
                     </Text>
                   </View>
                 ) : null}
@@ -241,9 +307,22 @@ export default function WorkoutSummaryScreen() {
             </View>
           ) : null}
 
-          {/* 3 Metric Cards Grid */}
+          {/* 4 Metric Cards Grid */}
           <View className="flex-row flex-wrap justify-between gap-y-3.5 mb-4">
-            {/* Card 1: Tổng thời gian */}
+            {/* Card Khoảng cách: Luôn hiển thị cho môn vận động có quãng đường / GPS */}
+            {isDistanceSport ? (
+              <View className="w-[48%] bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm">
+                <Text className="text-emerald-500 font-semibold text-xs mb-1.5">
+                  {t('summary.distance')}
+                </Text>
+                <Text className="text-slate-900 font-bold text-2xl tracking-tight">
+                  {formatWorkoutDecimal(resolvedDistanceKm, 2)}{' '}
+                  <Text className="text-base font-normal text-slate-700">km</Text>
+                </Text>
+              </View>
+            ) : null}
+
+            {/* Card: Tổng thời gian */}
             <View className="w-[48%] bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm">
               <Text className="text-cyan-500 font-semibold text-xs mb-1.5">
                 {t('summary.totalTime')}
@@ -252,19 +331,6 @@ export default function WorkoutSummaryScreen() {
                 {formatDuration(durationSeconds)}
               </Text>
             </View>
-
-            {/* Card: Khoảng cách (Nếu là bài tập có quãng đường) */}
-            {distanceKm && distanceKm > 0 ? (
-              <View className="w-[48%] bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm">
-                <Text className="text-emerald-500 font-semibold text-xs mb-1.5">
-                  {t('summary.distance')}
-                </Text>
-                <Text className="text-slate-900 font-bold text-2xl tracking-tight">
-                  {formatWorkoutDecimal(distanceKm, 2)}{' '}
-                  <Text className="text-base font-normal text-slate-700">km</Text>
-                </Text>
-              </View>
-            ) : null}
 
             {/* Card 2: Calo tập luyện */}
             <View className="w-[48%] bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm">
@@ -294,6 +360,32 @@ export default function WorkoutSummaryScreen() {
                 </Text>
                 <Text className="text-slate-900 font-bold text-2xl tracking-tight">
                   {avgHeartRate} <Text className="text-base font-normal text-slate-700">bpm</Text>
+                </Text>
+              </View>
+            ) : null}
+
+            {/* Card 5: Số bước chân */}
+            {totalSteps && totalSteps > 0 ? (
+              <View className="w-[48%] bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm">
+                <Text className="text-amber-500 font-semibold text-xs mb-1.5">
+                  {t('active.steps')}
+                </Text>
+                <Text className="text-slate-900 font-bold text-2xl tracking-tight">
+                  {totalSteps}{' '}
+                  <Text className="text-base font-normal text-slate-700">{t('common:units.steps')}</Text>
+                </Text>
+              </View>
+            ) : null}
+
+            {/* Card 6: Vận tốc trung bình */}
+            {avgSpeedKmh && avgSpeedKmh > 0 ? (
+              <View className="w-[48%] bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm">
+                <Text className="text-indigo-500 font-semibold text-xs mb-1.5">
+                  {t('active.speed')}
+                </Text>
+                <Text className="text-slate-900 font-bold text-2xl tracking-tight">
+                  {formatWorkoutDecimal(avgSpeedKmh, 1)}{' '}
+                  <Text className="text-base font-normal text-slate-700">km/h</Text>
                 </Text>
               </View>
             ) : null}

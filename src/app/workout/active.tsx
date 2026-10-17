@@ -5,6 +5,10 @@ import {
   Pressable,
   Modal,
   Vibration,
+  ScrollView,
+  Dimensions,
+  Animated,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import {
@@ -27,6 +31,7 @@ import {
 } from '@/services/workout/workoutEngineStore';
 import { useBleStore } from '@/services/ble-management/bleStore';
 import { locationTrackingService } from '@/services/workout/locationTrackingService';
+import { stepMotionService } from '@/services/workout/stepMotionService';
 import { formatWorkoutDecimal, getExerciseName } from '@/services/workout/workoutI18n';
 import { useTranslation } from 'react-i18next';
 
@@ -46,6 +51,7 @@ export default function ActiveWorkoutScreen() {
   const currentDistanceKm = useWorkoutEngineStore((state) => state.currentDistanceKm);
   const currentSpeedKmh = useWorkoutEngineStore((state) => state.currentSpeedKmh);
   const currentSteps = useWorkoutEngineStore((state) => state.currentSteps);
+  const currentCadenceSpm = useWorkoutEngineStore((state) => state.currentCadenceSpm);
   const userHeightCm = useWorkoutEngineStore((state) => state.userHeightCm);
   const userGender = useWorkoutEngineStore((state) => state.userGender);
 
@@ -59,6 +65,11 @@ export default function ActiveWorkoutScreen() {
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const hasCelebratedRef = useRef(false);
   const [activeMetricPage, setActiveMetricPage] = useState<number>(0);
+  const metricScrollRef = useRef<ScrollView>(null);
+  const scrollX = useRef(new Animated.Value(0)).current;
+  const [metricContainerWidth, setMetricContainerWidth] = useState<number>(
+    () => Dimensions.get('window').width - 32
+  );
 
   const isGpsSport = exercise?.trackingType === 'DISTANCE_GPS';
   const isIndoorStepSport = exercise?.trackingType === 'INDOOR_STEP';
@@ -105,19 +116,38 @@ export default function ActiveWorkoutScreen() {
 
   // Format running pace: m'ss"
   const formatPace = () => {
-    if (currentDistanceKm <= 0.005 || elapsedSeconds === 0) return '--';
-    const paceSecondsPerKm = elapsedSeconds / currentDistanceKm;
-    if (paceSecondsPerKm > 3600 || paceSecondsPerKm < 60) return '--';
-    const m = Math.floor(paceSecondsPerKm / 60);
-    const s = Math.floor(paceSecondsPerKm % 60);
+    // 1. Ưu tiên tính pace tức thời từ tốc độ di chuyển hiện tại (currentSpeedKmh)
+    let paceSeconds = 0;
+    if (currentSpeedKmh >= 0.4) {
+      paceSeconds = Math.round(3600 / currentSpeedKmh);
+    } else if (currentDistanceKm > 0.002 && elapsedSeconds > 2) {
+      paceSeconds = Math.round(elapsedSeconds / currentDistanceKm);
+    }
+
+    if (paceSeconds <= 0 || paceSeconds > 7200) return '--'; // Hỗ trợ tới 120'/km (đi bộ chậm)
+    const m = Math.floor(paceSeconds / 60);
+    const s = Math.floor(paceSeconds % 60);
     return `${m}'${s.toString().padStart(2, '0')}"`;
   };
 
   // Format running cadence: SPM (steps per minute)
   const formatCadence = () => {
-    if (elapsedSeconds < 3 || currentSteps === 0) return '--';
-    const spm = Math.round((currentSteps / elapsedSeconds) * 60);
-    return `${spm}`;
+    // 1. Ưu tiên nhịp bước thời gian thực đo trực tiếp từ cảm biến gia tốc
+    if (currentCadenceSpm >= 20 && currentCadenceSpm <= 260) {
+      return `${currentCadenceSpm}`;
+    }
+    // 2. Nhịp trung bình buổi tập theo số bước chân tích lũy
+    if (elapsedSeconds >= 2 && currentSteps > 0) {
+      const avgSpm = Math.round((currentSteps / elapsedSeconds) * 60);
+      if (avgSpm >= 20 && avgSpm <= 260) return `${avgSpm}`;
+    }
+    // 3. Ước tính từ tốc độ GPS
+    if (currentSpeedKmh >= 0.8) {
+      const speedMs = currentSpeedKmh / 3.6;
+      const spm = Math.round((speedMs / Math.max(dynamicStrideM, 0.45)) * 60);
+      if (spm >= 20 && spm <= 260) return `${spm}`;
+    }
+    return '--';
   };
 
   // Trigger celebration haptic vibration when goal is reached
@@ -150,48 +180,16 @@ export default function ActiveWorkoutScreen() {
     };
   }, [status, isGpsSport]);
 
-  // Phone Pedometer Sensor Fallback: Khi đang tập và không có thiết bị đeo gửi bước chân
+  // Real-time Motion & Step Tracking: Tự động đếm bước, tính tốc độ & nhịp SPM qua cảm biến điện thoại
   useEffect(() => {
-    if (status !== 'ACTIVE') return;
-
-    let subscription: { remove: () => void } | null = null;
-    let lastSensorSteps: number | null = null;
-
-    try {
-      const Sensors = require('expo-sensors');
-      const Pedometer = Sensors?.Pedometer;
-
-      if (Pedometer && typeof Pedometer.watchStepCount === 'function') {
-        subscription = Pedometer.watchStepCount((result: { steps: number }) => {
-          const raw = result.steps;
-          if (typeof raw !== 'number' || raw < 0) return;
-
-          // Nếu thiết bị đeo đang kết nối, ưu tiên thiết bị đeo (tránh nhân đôi bước chân)
-          const isBleConnected = Boolean(useBleStore.getState().connectedDeviceId);
-          if (isBleConnected) {
-            return;
-          }
-
-          if (lastSensorSteps === null) {
-            lastSensorSteps = raw;
-            return;
-          }
-
-          const delta = raw - lastSensorSteps;
-          lastSensorSteps = raw;
-          if (delta > 0) {
-            useWorkoutEngineStore.getState().addSteps(delta);
-          }
-        });
-      }
-    } catch {
-      // Ignored if expo-sensors pedometer is unavailable on platform
+    if (status === 'ACTIVE') {
+      void stepMotionService.start();
+    } else if (status === 'PAUSED' || status === 'COMPLETED' || status === 'IDLE') {
+      stepMotionService.stop();
     }
 
     return () => {
-      if (subscription) {
-        subscription.remove();
-      }
+      stepMotionService.stop();
     };
   }, [status]);
 
@@ -224,6 +222,8 @@ export default function ActiveWorkoutScreen() {
           caloriesBurned: String(session.caloriesBurned),
           totalCalories: String(session.totalCalories || session.caloriesBurned),
           distanceKm: session.distanceKm ? String(session.distanceKm) : undefined,
+          avgSpeedKmh: session.avgSpeedKmh ? String(session.avgSpeedKmh) : undefined,
+          totalSteps: session.totalSteps ? String(session.totalSteps) : undefined,
           avgHeartRate: session.avgHeartRate ? String(session.avgHeartRate) : undefined,
           startedAt: String(session.startedAt),
         },
@@ -414,15 +414,6 @@ export default function ActiveWorkoutScreen() {
           </View>
         )}
 
-        {/* Live Heart Rate Chip (When BLE Wearable is reading HR) */}
-        {currentHeartRate > 0 && (
-          <View className="flex-row items-center justify-center gap-1.5 self-center bg-rose-50 border border-rose-200/80 px-3.5 py-1 rounded-full mb-1 shadow-xs">
-            <Heart color="#F43F5E" size={14} fill="#F43F5E" />
-            <Text className="text-rose-600 font-bold text-xs">
-              {currentHeartRate} bpm
-            </Text>
-          </View>
-        )}
 
         {/* ========================================================================= */}
         {/* STATE 1: COUNTDOWN (3 -> 2 -> 1)                                          */}
@@ -480,265 +471,328 @@ export default function ActiveWorkoutScreen() {
 
             {/* Bottom Section: 2x2 Metric Cards Grid + Pagination Dots */}
             <View className="flex-1 justify-between">
-              {activeMetricPage === 0 ? (
-                /* Page 0: Thời lượng, Khoảng cách, Nhịp độ, Nhịp (Screenshot 4) */
-                <View className="flex-1 flex-col justify-between py-0.5">
-                  {/* Row 1 */}
-                  <View className="flex-row gap-3 flex-1 mb-2.5">
-                    {/* Card 1: Thời lượng */}
-                    <View
-                      className="flex-1 bg-white rounded-[22px] p-4 border border-slate-100/90 shadow-sm justify-center"
-                      style={{
-                        shadowColor: 'rgba(15, 23, 42, 0.04)',
-                        shadowOffset: { width: 0, height: 2 },
-                        shadowOpacity: 1,
-                        shadowRadius: 6,
-                        elevation: 1,
-                      }}
-                    >
-                      <Text className="text-[#788292] text-xs font-medium mb-1">
-                        {t('active.duration')}
-                      </Text>
-                      <Text
-                        className={`text-[26px] font-extrabold tracking-tight ${
-                          status === 'PAUSED' ? 'text-slate-300' : 'text-[#1E232A]'
-                        }`}
+              <View
+                className="flex-1"
+                onLayout={(e) => {
+                  const w = e.nativeEvent.layout.width;
+                  if (w > 0 && Math.abs(w - metricContainerWidth) > 1) {
+                    setMetricContainerWidth(w);
+                  }
+                }}
+              >
+                <Animated.ScrollView
+                  ref={metricScrollRef}
+                  horizontal
+                  pagingEnabled={Platform.OS === 'ios'}
+                  snapToInterval={metricContainerWidth}
+                  snapToAlignment="start"
+                  decelerationRate="fast"
+                  disableIntervalMomentum={true}
+                  showsHorizontalScrollIndicator={false}
+                  nestedScrollEnabled={true}
+                  bounces={false}
+                  overScrollMode="never"
+                  scrollEventThrottle={16}
+                  onScroll={Animated.event(
+                    [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+                    { useNativeDriver: false }
+                  )}
+                  onMomentumScrollEnd={(e) => {
+                    const x = e.nativeEvent.contentOffset.x;
+                    const page = Math.round(x / Math.max(metricContainerWidth, 1));
+                    setActiveMetricPage(page);
+                  }}
+                  className="flex-1"
+                >
+                  {/* Trang 1 Mới: Calo, Nhịp tim, Tốc độ, Số bước */}
+                  <View style={{ width: metricContainerWidth }} className="flex-1 flex-col justify-between py-0.5">
+                    {/* Row 1 */}
+                    <View className="flex-row gap-3 flex-1 mb-2.5">
+                      {/* Card 1: Calo */}
+                      <View
+                        className="flex-1 bg-white rounded-[22px] p-4 border border-slate-100/90 shadow-sm justify-center"
+                        style={{
+                          shadowColor: 'rgba(15, 23, 42, 0.04)',
+                          shadowOffset: { width: 0, height: 2 },
+                          shadowOpacity: 1,
+                          shadowRadius: 6,
+                          elevation: 1,
+                        }}
                       >
-                        {formatDuration(elapsedSeconds)}
-                      </Text>
+                        <Text className="text-[#788292] text-xs font-medium mb-1">
+                          {t('active.calories')}
+                        </Text>
+                        <View className="flex-row items-baseline">
+                          <Text
+                            className={`text-[26px] font-extrabold tracking-tight ${
+                              status === 'PAUSED' ? 'text-slate-300' : 'text-[#1E232A]'
+                            }`}
+                          >
+                            {Math.round(currentCalories)}
+                          </Text>
+                          <Text className="text-xs font-semibold text-slate-500 ml-1.5">
+                            kcal
+                          </Text>
+                        </View>
+                      </View>
+
+                      {/* Card 2: Nhịp tim (BPM) */}
+                      <View
+                        className="flex-1 bg-white rounded-[22px] p-4 border border-slate-100/90 shadow-sm justify-center"
+                        style={{
+                          shadowColor: 'rgba(15, 23, 42, 0.04)',
+                          shadowOffset: { width: 0, height: 2 },
+                          shadowOpacity: 1,
+                          shadowRadius: 6,
+                          elevation: 1,
+                        }}
+                      >
+                        <Text className="text-[#788292] text-xs font-medium mb-1">
+                          {t('active.heartRate')}
+                        </Text>
+                        <View className="flex-row items-baseline">
+                          <Text
+                            className={`text-[26px] font-extrabold tracking-tight ${
+                              status === 'PAUSED' ? 'text-slate-300' : 'text-[#1E232A]'
+                            }`}
+                          >
+                            {currentHeartRate > 0 ? currentHeartRate : '--'}
+                          </Text>
+                          <Text className="text-xs font-semibold text-slate-500 ml-1.5">
+                            bpm
+                          </Text>
+                        </View>
+                      </View>
                     </View>
 
-                    {/* Card 2: Khoảng cách */}
-                    <View
-                      className="flex-1 bg-white rounded-[22px] p-4 border border-slate-100/90 shadow-sm justify-center"
-                      style={{
-                        shadowColor: 'rgba(15, 23, 42, 0.04)',
-                        shadowOffset: { width: 0, height: 2 },
-                        shadowOpacity: 1,
-                        shadowRadius: 6,
-                        elevation: 1,
-                      }}
-                    >
-                      <Text className="text-[#788292] text-xs font-medium mb-1">
-                        {t('active.distance')}
-                      </Text>
-                      <View className="flex-row items-baseline">
-                        <Text
-                          className={`text-[26px] font-extrabold tracking-tight ${
-                            status === 'PAUSED' ? 'text-slate-300' : 'text-[#1E232A]'
-                          }`}
-                        >
-                          {formatWorkoutDecimal(currentDistanceKm, 2)}
+                    {/* Row 2 */}
+                    <View className="flex-row gap-3 flex-1">
+                      {/* Card 3: Tốc độ */}
+                      <View
+                        className="flex-1 bg-white rounded-[22px] p-4 border border-slate-100/90 shadow-sm justify-center"
+                        style={{
+                          shadowColor: 'rgba(15, 23, 42, 0.04)',
+                          shadowOffset: { width: 0, height: 2 },
+                          shadowOpacity: 1,
+                          shadowRadius: 6,
+                          elevation: 1,
+                        }}
+                      >
+                        <Text className="text-[#788292] text-xs font-medium mb-1">
+                          {t('active.speed')}
                         </Text>
-                        <Text className="text-sm font-semibold text-slate-800 ml-1.5">
-                          km
+                        <View className="flex-row items-baseline">
+                          <Text
+                            className={`text-[26px] font-extrabold tracking-tight ${
+                              status === 'PAUSED' ? 'text-slate-300' : 'text-[#1E232A]'
+                            }`}
+                          >
+                            {formatWorkoutDecimal(currentSpeedKmh, 1)}
+                          </Text>
+                          <Text className="text-xs font-semibold text-slate-500 ml-1.5">
+                            km/h
+                          </Text>
+                        </View>
+                      </View>
+
+                      {/* Card 4: Số bước */}
+                      <View
+                        className="flex-1 bg-white rounded-[22px] p-4 border border-slate-100/90 shadow-sm justify-center"
+                        style={{
+                          shadowColor: 'rgba(15, 23, 42, 0.04)',
+                          shadowOffset: { width: 0, height: 2 },
+                          shadowOpacity: 1,
+                          shadowRadius: 6,
+                          elevation: 1,
+                        }}
+                      >
+                        <Text className="text-[#788292] text-xs font-medium mb-1">
+                          {t('active.steps')}
                         </Text>
+                        <View className="flex-row items-baseline">
+                          <Text
+                            className={`text-[26px] font-extrabold tracking-tight ${
+                              status === 'PAUSED' ? 'text-slate-300' : 'text-[#1E232A]'
+                            }`}
+                          >
+                            {currentSteps}
+                          </Text>
+                          <Text className="text-xs font-semibold text-slate-500 ml-1.5">
+                            {t('common:units.steps')}
+                          </Text>
+                        </View>
                       </View>
                     </View>
                   </View>
 
-                  {/* Row 2 */}
-                  <View className="flex-row gap-3 flex-1">
-                    {/* Card 3: Nhịp độ */}
-                    <View
-                      className="flex-1 bg-white rounded-[22px] p-4 border border-slate-100/90 shadow-sm justify-center"
-                      style={{
-                        shadowColor: 'rgba(15, 23, 42, 0.04)',
-                        shadowOffset: { width: 0, height: 2 },
-                        shadowOpacity: 1,
-                        shadowRadius: 6,
-                        elevation: 1,
-                      }}
-                    >
-                      <Text className="text-[#788292] text-xs font-medium mb-1">
-                        {t('active.pace')}
-                      </Text>
-                      <View className="flex-row items-baseline">
+                  {/* Trang 2 Mới: Thời lượng, Khoảng cách, Nhịp độ, Nhịp SPM */}
+                  <View style={{ width: metricContainerWidth }} className="flex-1 flex-col justify-between py-0.5">
+                    {/* Row 1 */}
+                    <View className="flex-row gap-3 flex-1 mb-2.5">
+                      {/* Card 1: Thời lượng */}
+                      <View
+                        className="flex-1 bg-white rounded-[22px] p-4 border border-slate-100/90 shadow-sm justify-center"
+                        style={{
+                          shadowColor: 'rgba(15, 23, 42, 0.04)',
+                          shadowOffset: { width: 0, height: 2 },
+                          shadowOpacity: 1,
+                          shadowRadius: 6,
+                          elevation: 1,
+                        }}
+                      >
+                        <Text className="text-[#788292] text-xs font-medium mb-1">
+                          {t('active.duration')}
+                        </Text>
                         <Text
                           className={`text-[26px] font-extrabold tracking-tight ${
                             status === 'PAUSED' ? 'text-slate-300' : 'text-[#1E232A]'
                           }`}
                         >
-                          {formatPace()}
+                          {formatDuration(elapsedSeconds)}
                         </Text>
-                        <Text className="text-xs font-semibold text-slate-500 ml-1">
-                          /km
+                      </View>
+
+                      {/* Card 2: Khoảng cách */}
+                      <View
+                        className="flex-1 bg-white rounded-[22px] p-4 border border-slate-100/90 shadow-sm justify-center"
+                        style={{
+                          shadowColor: 'rgba(15, 23, 42, 0.04)',
+                          shadowOffset: { width: 0, height: 2 },
+                          shadowOpacity: 1,
+                          shadowRadius: 6,
+                          elevation: 1,
+                        }}
+                      >
+                        <Text className="text-[#788292] text-xs font-medium mb-1">
+                          {t('active.distance')}
                         </Text>
+                        <View className="flex-row items-baseline">
+                          <Text
+                            className={`text-[26px] font-extrabold tracking-tight ${
+                              status === 'PAUSED' ? 'text-slate-300' : 'text-[#1E232A]'
+                            }`}
+                          >
+                            {formatWorkoutDecimal(currentDistanceKm, 2)}
+                          </Text>
+                          <Text className="text-sm font-semibold text-slate-800 ml-1.5">
+                            km
+                          </Text>
+                        </View>
                       </View>
                     </View>
 
-                    {/* Card 4: Nhịp */}
-                    <View
-                      className="flex-1 bg-white rounded-[22px] p-4 border border-slate-100/90 shadow-sm justify-center"
-                      style={{
-                        shadowColor: 'rgba(15, 23, 42, 0.04)',
-                        shadowOffset: { width: 0, height: 2 },
-                        shadowOpacity: 1,
-                        shadowRadius: 6,
-                        elevation: 1,
-                      }}
-                    >
-                      <Text className="text-[#788292] text-xs font-medium mb-1">
-                        {t('active.cadence')}
-                      </Text>
-                      <View className="flex-row items-baseline">
-                        <Text
-                          className={`text-[26px] font-extrabold tracking-tight ${
-                            status === 'PAUSED' ? 'text-slate-300' : 'text-[#1E232A]'
-                          }`}
-                        >
-                          {formatCadence()}
+                    {/* Row 2 */}
+                    <View className="flex-row gap-3 flex-1">
+                      {/* Card 3: Nhịp độ */}
+                      <View
+                        className="flex-1 bg-white rounded-[22px] p-4 border border-slate-100/90 shadow-sm justify-center"
+                        style={{
+                          shadowColor: 'rgba(15, 23, 42, 0.04)',
+                          shadowOffset: { width: 0, height: 2 },
+                          shadowOpacity: 1,
+                          shadowRadius: 6,
+                          elevation: 1,
+                        }}
+                      >
+                        <Text className="text-[#788292] text-xs font-medium mb-1">
+                          {t('active.pace')}
                         </Text>
-                        <Text className="text-xs font-semibold text-slate-500 ml-1">
-                          spm
+                        <View className="flex-row items-baseline">
+                          <Text
+                            className={`text-[26px] font-extrabold tracking-tight ${
+                              status === 'PAUSED' ? 'text-slate-300' : 'text-[#1E232A]'
+                            }`}
+                          >
+                            {formatPace()}
+                          </Text>
+                          <Text className="text-xs font-semibold text-slate-500 ml-1">
+                            /km
+                          </Text>
+                        </View>
+                      </View>
+
+                      {/* Card 4: Nhịp */}
+                      <View
+                        className="flex-1 bg-white rounded-[22px] p-4 border border-slate-100/90 shadow-sm justify-center"
+                        style={{
+                          shadowColor: 'rgba(15, 23, 42, 0.04)',
+                          shadowOffset: { width: 0, height: 2 },
+                          shadowOpacity: 1,
+                          shadowRadius: 6,
+                          elevation: 1,
+                        }}
+                      >
+                        <Text className="text-[#788292] text-xs font-medium mb-1">
+                          {t('active.cadence')}
                         </Text>
+                        <View className="flex-row items-baseline">
+                          <Text
+                            className={`text-[26px] font-extrabold tracking-tight ${
+                              status === 'PAUSED' ? 'text-slate-300' : 'text-[#1E232A]'
+                            }`}
+                          >
+                            {formatCadence()}
+                          </Text>
+                          <Text className="text-xs font-semibold text-slate-500 ml-1">
+                            spm
+                          </Text>
+                        </View>
                       </View>
                     </View>
                   </View>
-                </View>
-              ) : (
-                /* Page 1: Calo, Nhịp tim, Tốc độ, Bước chân */
-                <View className="flex-1 flex-col justify-between py-0.5">
-                  {/* Row 1 */}
-                  <View className="flex-row gap-3 flex-1 mb-2.5">
-                    {/* Card 1: Calo */}
-                    <View
-                      className="flex-1 bg-white rounded-[22px] p-4 border border-slate-100/90 shadow-sm justify-center"
-                      style={{
-                        shadowColor: 'rgba(15, 23, 42, 0.04)',
-                        shadowOffset: { width: 0, height: 2 },
-                        shadowOpacity: 1,
-                        shadowRadius: 6,
-                        elevation: 1,
-                      }}
-                    >
-                      <Text className="text-[#788292] text-xs font-medium mb-1">
-                        {t('active.calories')}
-                      </Text>
-                      <View className="flex-row items-baseline">
-                        <Text
-                          className={`text-[26px] font-extrabold tracking-tight ${
-                            status === 'PAUSED' ? 'text-slate-300' : 'text-[#1E232A]'
-                          }`}
-                        >
-                          {Math.round(currentCalories)}
-                        </Text>
-                        <Text className="text-xs font-semibold text-slate-500 ml-1.5">
-                          kcal
-                        </Text>
-                      </View>
-                    </View>
+                </Animated.ScrollView>
+              </View>
 
-                    {/* Card 2: Nhịp tim */}
-                    <View
-                      className="flex-1 bg-white rounded-[22px] p-4 border border-slate-100/90 shadow-sm justify-center"
-                      style={{
-                        shadowColor: 'rgba(15, 23, 42, 0.04)',
-                        shadowOffset: { width: 0, height: 2 },
-                        shadowOpacity: 1,
-                        shadowRadius: 6,
-                        elevation: 1,
-                      }}
-                    >
-                      <Text className="text-[#788292] text-xs font-medium mb-1">
-                        {t('active.heartRate')}
-                      </Text>
-                      <View className="flex-row items-baseline">
-                        <Text
-                          className={`text-[26px] font-extrabold tracking-tight ${
-                            status === 'PAUSED' ? 'text-slate-300' : 'text-[#1E232A]'
-                          }`}
-                        >
-                          {currentHeartRate > 0 ? currentHeartRate : '--'}
-                        </Text>
-                        <Text className="text-xs font-semibold text-slate-500 ml-1.5">
-                          bpm
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-
-                  {/* Row 2 */}
-                  <View className="flex-row gap-3 flex-1">
-                    {/* Card 3: Tốc độ */}
-                    <View
-                      className="flex-1 bg-white rounded-[22px] p-4 border border-slate-100/90 shadow-sm justify-center"
-                      style={{
-                        shadowColor: 'rgba(15, 23, 42, 0.04)',
-                        shadowOffset: { width: 0, height: 2 },
-                        shadowOpacity: 1,
-                        shadowRadius: 6,
-                        elevation: 1,
-                      }}
-                    >
-                      <Text className="text-[#788292] text-xs font-medium mb-1">
-                        {t('active.speed')}
-                      </Text>
-                      <View className="flex-row items-baseline">
-                        <Text
-                          className={`text-[26px] font-extrabold tracking-tight ${
-                            status === 'PAUSED' ? 'text-slate-300' : 'text-[#1E232A]'
-                          }`}
-                        >
-                          {formatWorkoutDecimal(currentSpeedKmh, 1)}
-                        </Text>
-                        <Text className="text-xs font-semibold text-slate-500 ml-1.5">
-                          km/h
-                        </Text>
-                      </View>
-                    </View>
-
-                    {/* Card 4: Số bước */}
-                    <View
-                      className="flex-1 bg-white rounded-[22px] p-4 border border-slate-100/90 shadow-sm justify-center"
-                      style={{
-                        shadowColor: 'rgba(15, 23, 42, 0.04)',
-                        shadowOffset: { width: 0, height: 2 },
-                        shadowOpacity: 1,
-                        shadowRadius: 6,
-                        elevation: 1,
-                      }}
-                    >
-                      <Text className="text-[#788292] text-xs font-medium mb-1">
-                        {t('active.steps')}
-                      </Text>
-                      <View className="flex-row items-baseline">
-                        <Text
-                          className={`text-[26px] font-extrabold tracking-tight ${
-                            status === 'PAUSED' ? 'text-slate-300' : 'text-[#1E232A]'
-                          }`}
-                        >
-                          {currentSteps}
-                        </Text>
-                        <Text className="text-xs font-semibold text-slate-500 ml-1.5">
-                          {t('common:units.steps')}
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-                </View>
-              )}
-
-              {/* Pagination Indicator Dots (Screenshot 4) */}
-              <View className="flex-row items-center justify-center gap-2 pt-2 pb-0.5">
+              {/* Animated Liquid Pagination Indicator Dots */}
+              <View className="flex-row items-center justify-center gap-1.5 pt-2 pb-0.5">
                 <Pressable
-                  onPress={() => setActiveMetricPage(0)}
-                  className={`rounded-full ${
-                    activeMetricPage === 0
-                      ? 'w-2.5 h-2.5 bg-slate-700'
-                      : 'w-2 h-2 bg-slate-300'
-                  }`}
+                  onPress={() => {
+                    setActiveMetricPage(0);
+                    metricScrollRef.current?.scrollTo({ x: 0, animated: true });
+                  }}
                   hitSlop={8}
-                />
+                >
+                  <Animated.View
+                    style={{
+                      width: scrollX.interpolate({
+                        inputRange: [0, Math.max(metricContainerWidth, 1)],
+                        outputRange: [20, 7],
+                        extrapolate: 'clamp',
+                      }),
+                      height: 7,
+                      backgroundColor: scrollX.interpolate({
+                        inputRange: [0, Math.max(metricContainerWidth, 1)],
+                        outputRange: ['#334155', '#CBD5E1'],
+                        extrapolate: 'clamp',
+                      }),
+                      borderRadius: 4,
+                    }}
+                  />
+                </Pressable>
                 <Pressable
-                  onPress={() => setActiveMetricPage(1)}
-                  className={`rounded-full ${
-                    activeMetricPage === 1
-                      ? 'w-2.5 h-2.5 bg-slate-700'
-                      : 'w-2 h-2 bg-slate-300'
-                  }`}
+                  onPress={() => {
+                    setActiveMetricPage(1);
+                    metricScrollRef.current?.scrollTo({ x: metricContainerWidth, animated: true });
+                  }}
                   hitSlop={8}
-                />
+                >
+                  <Animated.View
+                    style={{
+                      width: scrollX.interpolate({
+                        inputRange: [0, Math.max(metricContainerWidth, 1)],
+                        outputRange: [7, 20],
+                        extrapolate: 'clamp',
+                      }),
+                      height: 7,
+                      backgroundColor: scrollX.interpolate({
+                        inputRange: [0, Math.max(metricContainerWidth, 1)],
+                        outputRange: ['#CBD5E1', '#334155'],
+                        extrapolate: 'clamp',
+                      }),
+                      borderRadius: 4,
+                    }}
+                  />
+                </Pressable>
               </View>
             </View>
           </View>
