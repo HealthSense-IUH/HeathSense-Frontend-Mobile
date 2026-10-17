@@ -63,7 +63,8 @@ export const locationTrackingService = {
         },
         (loc) => {
           const { coords } = loc;
-          if (coords.accuracy && coords.accuracy > 25) return;
+          // Chấp nhận độ chính xác đến 70m để không loại bỏ tín hiệu GPS khi đi bộ quanh tòa nhà / hiên nhà
+          if (coords.accuracy && coords.accuracy > 70) return;
 
           useWorkoutEngineStore.getState().updateGpsLocation({
             latitude: coords.latitude,
