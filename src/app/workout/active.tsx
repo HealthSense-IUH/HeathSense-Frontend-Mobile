@@ -21,7 +21,11 @@ import Svg, { Text as SvgText, Defs, LinearGradient, Stop } from 'react-native-s
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
 import { SlideToUnlock } from '@/components/features/workout/SlideToUnlock';
 import { SportMapView } from '@/components/features/workout/SportMapView';
-import { useWorkoutEngineStore } from '@/services/workout/workoutEngineStore';
+import {
+  useWorkoutEngineStore,
+  getDynamicStrideLengthMeters,
+} from '@/services/workout/workoutEngineStore';
+import { useBleStore } from '@/services/ble-management/bleStore';
 import { locationTrackingService } from '@/services/workout/locationTrackingService';
 import { formatWorkoutDecimal, getExerciseName } from '@/services/workout/workoutI18n';
 import { useTranslation } from 'react-i18next';
@@ -42,6 +46,8 @@ export default function ActiveWorkoutScreen() {
   const currentDistanceKm = useWorkoutEngineStore((state) => state.currentDistanceKm);
   const currentSpeedKmh = useWorkoutEngineStore((state) => state.currentSpeedKmh);
   const currentSteps = useWorkoutEngineStore((state) => state.currentSteps);
+  const userHeightCm = useWorkoutEngineStore((state) => state.userHeightCm);
+  const userGender = useWorkoutEngineStore((state) => state.userGender);
 
   const startCountdown = useWorkoutEngineStore((state) => state.startCountdown);
   const pauseWorkout = useWorkoutEngineStore((state) => state.pauseWorkout);
@@ -55,7 +61,18 @@ export default function ActiveWorkoutScreen() {
   const [activeMetricPage, setActiveMetricPage] = useState<number>(0);
 
   const isGpsSport = exercise?.trackingType === 'DISTANCE_GPS';
+  const isIndoorStepSport = exercise?.trackingType === 'INDOOR_STEP';
   const exerciseTitle = exercise ? getExerciseName(exercise) : t('common.workout');
+
+  // Stride Length Calculation
+  const cadenceSpm =
+    elapsedSeconds > 2 ? Math.round((currentSteps / elapsedSeconds) * 60) : 0;
+  const dynamicStrideM = getDynamicStrideLengthMeters(
+    userHeightCm,
+    userGender,
+    cadenceSpm
+  );
+  const dynamicStrideCm = Math.round(dynamicStrideM * 100);
 
   // Target Progress & Goal Reached Logic (DISTANCE, TIME, CALORIES)
   const hasTarget =
@@ -132,6 +149,51 @@ export default function ActiveWorkoutScreen() {
       void locationTrackingService.stopTracking();
     };
   }, [status, isGpsSport]);
+
+  // Phone Pedometer Sensor Fallback: Khi đang tập và không có thiết bị đeo gửi bước chân
+  useEffect(() => {
+    if (status !== 'ACTIVE') return;
+
+    let subscription: { remove: () => void } | null = null;
+    let lastSensorSteps: number | null = null;
+
+    try {
+      const Sensors = require('expo-sensors');
+      const Pedometer = Sensors?.Pedometer;
+
+      if (Pedometer && typeof Pedometer.watchStepCount === 'function') {
+        subscription = Pedometer.watchStepCount((result: { steps: number }) => {
+          const raw = result.steps;
+          if (typeof raw !== 'number' || raw < 0) return;
+
+          // Nếu thiết bị đeo đang kết nối, ưu tiên thiết bị đeo (tránh nhân đôi bước chân)
+          const isBleConnected = Boolean(useBleStore.getState().connectedDeviceId);
+          if (isBleConnected) {
+            return;
+          }
+
+          if (lastSensorSteps === null) {
+            lastSensorSteps = raw;
+            return;
+          }
+
+          const delta = raw - lastSensorSteps;
+          lastSensorSteps = raw;
+          if (delta > 0) {
+            useWorkoutEngineStore.getState().addSteps(delta);
+          }
+        });
+      }
+    } catch {
+      // Ignored if expo-sensors pedometer is unavailable on platform
+    }
+
+    return () => {
+      if (subscription) {
+        subscription.remove();
+      }
+    };
+  }, [status]);
 
   // Format seconds to mm:ss or hh:mm:ss
   const formatDuration = (totalSecs: number) => {
@@ -271,10 +333,10 @@ export default function ActiveWorkoutScreen() {
               }}
             >
               <Text className="text-[#8E95A2] text-sm font-medium mb-2.5">
-                {isGpsSport && targetType !== 'CALORIES' ? t('active.distance') : t('active.calories')}
+                {(isGpsSport || isIndoorStepSport) && targetType !== 'CALORIES' ? t('active.distance') : t('active.calories')}
               </Text>
               <Text className="text-[52px] font-extrabold tracking-tight text-white">
-                {isGpsSport && targetType !== 'CALORIES'
+                {(isGpsSport || isIndoorStepSport) && targetType !== 'CALORIES'
                   ? `${formatWorkoutDecimal(currentDistanceKm, 2)} km`
                   : `${Math.round(currentCalories)} kcal`}
               </Text>
@@ -677,6 +739,158 @@ export default function ActiveWorkoutScreen() {
                   }`}
                   hitSlop={8}
                 />
+              </View>
+            </View>
+          </View>
+        ) : isIndoorStepSport ? (
+          /* ========================================================================= */
+          /* INDOOR RUNNING / TREADMILL ACTIVE & PAUSED - Dedicated Dashboard         */
+          /* ========================================================================= */
+          <View className="flex-1 justify-between mb-3 mt-1">
+            {/* Top Highlight Card: Khoảng cách chạy trên máy & Sải chân */}
+            <View
+              className="bg-white rounded-[28px] p-5 border border-slate-100 shadow-sm items-center justify-center mb-2.5"
+              style={{
+                shadowColor: 'rgba(15, 23, 42, 0.05)',
+                shadowOffset: { width: 0, height: 3 },
+                shadowOpacity: 1,
+                shadowRadius: 10,
+                elevation: 2,
+              }}
+            >
+              <Text className="text-[#788292] text-xs font-semibold uppercase tracking-wider mb-1">
+                {t('active.distance')}
+              </Text>
+              <View className="flex-row items-baseline">
+                <Text
+                  className={`text-[48px] font-black tracking-tight ${
+                    status === 'PAUSED' ? 'text-slate-300' : 'text-[#1E232A]'
+                  }`}
+                >
+                  {formatWorkoutDecimal(currentDistanceKm, 2)}
+                </Text>
+                <Text className="text-xl font-bold text-slate-800 ml-2">km</Text>
+              </View>
+              <Text className="text-xs text-slate-500 mt-1">
+                {t('active.strideLength')}: {dynamicStrideCm} cm • {formatWorkoutDecimal(currentSpeedKmh, 1)} km/h • {Math.round(currentCalories)} kcal
+              </Text>
+            </View>
+
+            {/* Bottom 2x2 Grid: Thời lượng, Số bước, Nhịp độ, Nhịp SPM */}
+            <View className="flex-1 justify-between">
+              <View className="flex-1 flex-col justify-between py-0.5">
+                {/* Row 1 */}
+                <View className="flex-row gap-3 flex-1 mb-2.5">
+                  {/* Thời lượng */}
+                  <View
+                    className="flex-1 bg-white rounded-[22px] p-4 border border-slate-100/90 shadow-sm justify-center"
+                    style={{
+                      shadowColor: 'rgba(15, 23, 42, 0.04)',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 1,
+                      shadowRadius: 6,
+                      elevation: 1,
+                    }}
+                  >
+                    <Text className="text-[#788292] text-xs font-medium mb-1">
+                      {t('active.duration')}
+                    </Text>
+                    <Text
+                      className={`text-[26px] font-extrabold tracking-tight ${
+                        status === 'PAUSED' ? 'text-slate-300' : 'text-[#1E232A]'
+                      }`}
+                    >
+                      {formatDuration(elapsedSeconds)}
+                    </Text>
+                  </View>
+
+                  {/* Số bước */}
+                  <View
+                    className="flex-1 bg-white rounded-[22px] p-4 border border-slate-100/90 shadow-sm justify-center"
+                    style={{
+                      shadowColor: 'rgba(15, 23, 42, 0.04)',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 1,
+                      shadowRadius: 6,
+                      elevation: 1,
+                    }}
+                  >
+                    <Text className="text-[#788292] text-xs font-medium mb-1">
+                      {t('active.steps')}
+                    </Text>
+                    <View className="flex-row items-baseline">
+                      <Text
+                        className={`text-[26px] font-extrabold tracking-tight ${
+                          status === 'PAUSED' ? 'text-slate-300' : 'text-[#1E232A]'
+                        }`}
+                      >
+                        {currentSteps}
+                      </Text>
+                      <Text className="text-xs font-semibold text-slate-500 ml-1.5">
+                        {t('common:units.steps')}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Row 2 */}
+                <View className="flex-row gap-3 flex-1">
+                  {/* Nhịp độ */}
+                  <View
+                    className="flex-1 bg-white rounded-[22px] p-4 border border-slate-100/90 shadow-sm justify-center"
+                    style={{
+                      shadowColor: 'rgba(15, 23, 42, 0.04)',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 1,
+                      shadowRadius: 6,
+                      elevation: 1,
+                    }}
+                  >
+                    <Text className="text-[#788292] text-xs font-medium mb-1">
+                      {t('active.pace')}
+                    </Text>
+                    <View className="flex-row items-baseline">
+                      <Text
+                        className={`text-[26px] font-extrabold tracking-tight ${
+                          status === 'PAUSED' ? 'text-slate-300' : 'text-[#1E232A]'
+                        }`}
+                      >
+                        {formatPace()}
+                      </Text>
+                      <Text className="text-xs font-semibold text-slate-500 ml-1">
+                        /km
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Nhịp SPM */}
+                  <View
+                    className="flex-1 bg-white rounded-[22px] p-4 border border-slate-100/90 shadow-sm justify-center"
+                    style={{
+                      shadowColor: 'rgba(15, 23, 42, 0.04)',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 1,
+                      shadowRadius: 6,
+                      elevation: 1,
+                    }}
+                  >
+                    <Text className="text-[#788292] text-xs font-medium mb-1">
+                      {t('active.cadence')}
+                    </Text>
+                    <View className="flex-row items-baseline">
+                      <Text
+                        className={`text-[26px] font-extrabold tracking-tight ${
+                          status === 'PAUSED' ? 'text-slate-300' : 'text-[#1E232A]'
+                        }`}
+                      >
+                        {formatCadence()}
+                      </Text>
+                      <Text className="text-xs font-semibold text-slate-500 ml-1">
+                        spm
+                      </Text>
+                    </View>
+                  </View>
+                </View>
               </View>
             </View>
           </View>

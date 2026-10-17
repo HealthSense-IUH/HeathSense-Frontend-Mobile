@@ -194,6 +194,19 @@
       "disconnected": "Mất kết nối",
       "waveform": "Sóng mạch PPG trực tiếp",
       "note": "Chỉ số từ thiết bị đang cập nhật. Kết quả phân tích AFib sẽ có sau khi đo."
+    },
+    "spotCheck": {
+      "tabTitle": "Đo tức thời (Spot-check)",
+      "screeningTabTitle": "Tầm soát AFib (60s)",
+      "badge": "Đo sinh hiệu trực tiếp",
+      "title": "Kiểm tra nhanh Nhịp tim & SpO2",
+      "description": "Đo tức thời cho phép kiểm tra nhịp tim và SpO2 bất cứ lúc nào, không bị chặn bởi thời gian hồi phục tim sau tập.",
+      "startCta": "Bắt đầu đo tức thời",
+      "stopCta": "Dừng đo tức thời",
+      "measuring": "Đang đo tức thời...",
+      "cooldownAlternative": "Đang trong 10 phút hồi phục tim tĩnh sau tập. Bạn không thể tầm soát AFib nhưng có thể Đo tức thời (Spot-check) BPM & SpO2 ngay bây giờ.",
+      "switchToSpotCheck": "Đo tức thời ngay",
+      "switchToScreening": "Chuyển sang Tầm soát AFib"
     }
   },
   "afibHistory": {

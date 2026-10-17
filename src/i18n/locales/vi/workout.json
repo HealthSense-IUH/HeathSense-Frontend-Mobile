@@ -76,6 +76,7 @@
   "trackingTypes": {
     "TIME_CALORIES": "T.gian và calo tiêu hao (không GPS)",
     "DISTANCE_GPS": "K.cách, tốc độ và lộ trình (có GPS)",
+    "INDOOR_STEP": "Đếm bước & Quãng đường (Trong nhà)",
     "SETS_REST": "Số hiệp và nghỉ ngơi"
   },
   "exercises": {
@@ -195,6 +196,7 @@
     "heartRate": "Nhịp tim",
     "speed": "Tốc độ",
     "steps": "Số bước",
+    "strideLength": "Sải chân",
     "pause": "Tạm dừng",
     "resume": "Tiếp tục",
     "finish": "Hoàn tất",

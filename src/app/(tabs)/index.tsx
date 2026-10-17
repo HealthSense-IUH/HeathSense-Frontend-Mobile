@@ -300,7 +300,11 @@ export default function HomeScreen() {
                 ? liveSpo2 >= 95 ? t('home.overview.spo2.normal') : t('home.overview.spo2.low')
                 : t('home.overview.waitingSignal')
             }
-            onPress={isConnected ? undefined : () => router.push('/(public)/scan' as any)}
+            onPress={
+              isConnected
+                ? () => router.push({ pathname: '/afib-measure', params: { mode: 'spot_check' } } as any)
+                : () => router.push('/(public)/scan' as any)
+            }
           />
           <StatCard
             label={t('home.overview.afib.title')}

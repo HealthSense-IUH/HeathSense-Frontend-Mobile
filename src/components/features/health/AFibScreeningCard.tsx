@@ -52,7 +52,17 @@ export function AFibScreeningCard() {
         Alert.alert(
           t('screening.cooldown.title'),
           t('screening.cooldown.message', { time: current.formattedRemainingTime }),
-          [{ text: t('screening.understood') }]
+          [
+            { text: t('screening.understood'), style: 'cancel' },
+            {
+              text: t('measure.spotCheck.switchToSpotCheck'),
+              onPress: () => {
+                setTimeout(() => {
+                  router.push({ pathname: '/afib-measure', params: { mode: 'spot_check' } } as any);
+                }, 50);
+              },
+            },
+          ]
         );
       }
       return;

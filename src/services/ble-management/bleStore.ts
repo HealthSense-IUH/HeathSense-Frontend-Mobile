@@ -44,7 +44,9 @@ type BleState = {
     lastRecordingFileUri: string | null;
     lastRecordingFileName: string | null;
     recordingError: string | null;
+    isSpotChecking: boolean;
     aiAnalysisResult: import("@/types/response").HealthRecordResponse | null;
+    setIsSpotChecking: (isSpotChecking: boolean) => void;
     setKnownDevice: (device: KnownBleDevice | null) => void;
     setInitialized: (isInitialized: boolean) => void;
     setNegotiatedMtu: (mtu: number | null) => void;
@@ -115,8 +117,10 @@ export const useBleStore = create<BleState>((set) => ({
     lastRecordingFileUri: null,
     lastRecordingFileName: null,
     recordingError: null,
+    isSpotChecking: false,
     aiAnalysisResult: null,
 
+    setIsSpotChecking: (isSpotChecking) => set({ isSpotChecking }),
     setKnownDevice: (knownDevice) => set({ knownDevice }),
     setInitialized: (isInitialized) => set({ isInitialized }),
     setNegotiatedMtu: (negotiatedMtu) => set({ negotiatedMtu }),

@@ -98,6 +98,7 @@ class HuyWatchBleService {
   private pendingPpgSampleCount = 0;
   private listeners: EventSubscription[] = [];
   private batteryTimer: TimerHandle | null = null;
+  private lastBleWorkoutSteps: number | null = null;
 
   async bootstrap() {
     if (this.started) {
@@ -285,10 +286,33 @@ class HuyWatchBleService {
         32 // max byte size per write is usually 20, but react-native-ble-manager handles chunks or we can set it higher
       );
       console.log(`[BLE-TX] Đã gửi lệnh: ${command}`);
+
+      if (command.includes('WORKOUT_START') || command.includes('WORKOUT_STOP')) {
+        this.lastBleWorkoutSteps = null;
+      }
     } catch (error) {
       console.warn("Lỗi khi gửi lệnh BLE:", error);
       throw error;
     }
+  }
+
+  /**
+   * Bắt đầu đo tức thời (Spot-check sinh hiệu BPM, SpO2)
+   * Gửi CMD:START_MEASURE tới ESP32, KHÔNG bị chặn bởi 10 phút hồi phục tim (cooldown) sau tập
+   */
+  async startSpotCheck() {
+    const store = useBleStore.getState();
+    store.setIsSpotChecking(true);
+    await this.sendCommand("CMD:START_MEASURE");
+  }
+
+  /**
+   * Dừng đo tức thời và đưa thiết bị về IDLE
+   */
+  async stopSpotCheck() {
+    const store = useBleStore.getState();
+    store.setIsSpotChecking(false);
+    await this.sendCommand("CMD:IDLE");
   }
 
   private startBatteryPeriodicRead() {
@@ -457,7 +481,15 @@ class HuyWatchBleService {
             if (Number.isFinite(steps) && steps >= 0) {
               const workoutEngine = useWorkoutEngineStore.getState();
               if (workoutEngine.status === 'ACTIVE' || workoutEngine.status === 'PAUSED') {
-                workoutEngine.addSteps(steps);
+                if (this.lastBleWorkoutSteps === null) {
+                  this.lastBleWorkoutSteps = steps;
+                } else {
+                  const delta = steps - this.lastBleWorkoutSteps;
+                  if (delta > 0) {
+                    workoutEngine.addSteps(delta);
+                  }
+                  this.lastBleWorkoutSteps = steps;
+                }
               }
             }
           }
@@ -472,7 +504,15 @@ class HuyWatchBleService {
             }
             if (Number.isFinite(steps) && steps > 0) {
               const workoutEngine = useWorkoutEngineStore.getState();
-              workoutEngine.addSteps(steps);
+              if (this.lastBleWorkoutSteps === null) {
+                this.lastBleWorkoutSteps = steps;
+              } else {
+                const delta = steps - this.lastBleWorkoutSteps;
+                if (delta > 0) {
+                  workoutEngine.addSteps(delta);
+                }
+                this.lastBleWorkoutSteps = steps;
+              }
             }
           }
         }
