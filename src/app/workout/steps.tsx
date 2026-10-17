@@ -68,20 +68,13 @@ export default function StepDetailScreen() {
 
   // State for fetched Pedometer data
   const [currentSteps, setCurrentSteps] = useState<number>(() =>
-    todayStats.totalSteps > 0 ? todayStats.totalSteps : 340
+    Math.max(stepTrackingService.getTodayTotalSteps(), todayStats.totalSteps)
   );
   const [hourlyData, setHourlyData] = useState<HourlyStepData[]>(() =>
-    Array.from({ length: 24 }, (_, hour) => {
-      let stepsInHour = 0;
-      if (hour === 16) stepsInHour = 120;
-      else if (hour === 17) stepsInHour = 180;
-      else if (hour === 18) stepsInHour = 40;
-      return { hour, steps: stepsInHour };
-    })
+    Array.from({ length: 24 }, (_, hour) => ({ hour, steps: 0 }))
   );
   const [past7DaysData, setPast7DaysData] = useState<Past7DaysResult>(() => {
     const today = new Date();
-    const fallbackSteps = [420, 1280, 2150, 2480, 560, 3420, 340];
     return {
       items: Array.from({ length: 7 }, (_, i) => {
         const d = new Date();
@@ -90,11 +83,13 @@ export default function StepDetailScreen() {
           date: d,
           dayNum: d.getDate(),
           isSunday: d.getDay() === 0,
-          steps: fallbackSteps[i] || 1200,
+          steps: 0,
           isCurrent: i === 6,
         };
       }),
-      avgSteps: 1788,
+      avgSteps: 0,
+      comparisonPercentile: 0,
+      activeWeeklyTrendPercent: 0,
     };
   });
 
@@ -111,7 +106,7 @@ export default function StepDetailScreen() {
     [currentSteps]
   );
   const caloriesBurned = useMemo(
-    () => Math.round(currentSteps * 0.033) || 11,
+    () => Math.round(currentSteps * 0.033),
     [currentSteps]
   );
 
@@ -127,9 +122,7 @@ export default function StepDetailScreen() {
 
         if (isMounted) {
           setHourlyData(hData);
-          if (hTotal > 0) {
-            setCurrentSteps(hTotal);
-          }
+          setCurrentSteps((prev) => (dayOffset === 0 ? Math.max(hTotal, prev) : hTotal));
           setPast7DaysData(p7Result);
         }
       } catch (e) {
@@ -140,23 +133,24 @@ export default function StepDetailScreen() {
     loadData();
 
     // Start live tracking if today is selected
+    let unsubscribeLive: (() => void) | undefined;
     if (dayOffset === 0) {
-      stepTrackingService.startLiveTracking((liveDelta: number) => {
-        if (isMounted && liveDelta > 0) {
-          setCurrentSteps((prev) => prev + 1);
+      unsubscribeLive = stepTrackingService.startLiveTracking((totalTodaySteps: number) => {
+        if (isMounted) {
+          setCurrentSteps(totalTodaySteps);
         }
       });
     }
 
     return () => {
       isMounted = false;
-      stepTrackingService.stopLiveTracking();
+      if (unsubscribeLive) unsubscribeLive();
     };
   }, [selectedDate, dayOffset]);
 
   // Calculate active period dynamically
   const activePeriodStr = useMemo(() => {
-    let peakHour = 16;
+    let peakHour = -1;
     let maxSteps = 0;
     hourlyData.forEach((h) => {
       if (h.steps > maxSteps) {
@@ -165,8 +159,12 @@ export default function StepDetailScreen() {
       }
     });
 
+    if (maxSteps === 0 || peakHour === -1) {
+      return t('steps.noActivityYet', { defaultValue: 'Chưa có dữ liệu vận động nổi bật' });
+    }
+
     const pad = (n: number) => n.toString().padStart(2, '0');
-    const range = maxSteps === 0 || peakHour === 16 || peakHour === 17 ? '16:30 - 17:00' : `${pad(peakHour)}:00 - ${pad(peakHour + 1)}:00`;
+    const range = `${pad(peakHour)}:00 - ${pad(peakHour + 1)}:00`;
     return t('steps.activePeriod', { range });
   }, [hourlyData, t]);
 
@@ -321,7 +319,11 @@ export default function StepDetailScreen() {
           />
 
           {/* SECTION 4: SO SÁNH SỐ BƯỚC CỦA BẠN (Image 2) */}
-          <StepComparisonCard avgSteps={past7DaysData.avgSteps} />
+          <StepComparisonCard
+            avgSteps={past7DaysData.avgSteps}
+            comparisonPercentile={past7DaysData.comparisonPercentile}
+            trendPercent={past7DaysData.activeWeeklyTrendPercent}
+          />
         </ScrollView>
       ) : (
         /* ========================================================================= */

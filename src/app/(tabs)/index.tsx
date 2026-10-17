@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ActivityIndicator, Pressable, Text, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -127,8 +127,32 @@ export default function HomeScreen() {
   // Bước / calo hôm nay = tổng các buổi tập hôm nay (đồng hồ chỉ đếm bước khi đang tập); đọc sessions để tự cập nhật
   const sessions = useWorkoutCatalogStore((state) => state.sessions);
   const todayStats = useWorkoutCatalogStore.getState().getTodayStats();
+
+  const [dailySteps, setDailySteps] = useState<number>(() =>
+    Math.max(stepTrackingService.getTodayTotalSteps(), todayStats.totalSteps)
+  );
   const stepGoal = stepTrackingService.getStoredStepGoal();
-  const stepPercent = stepGoal > 0 ? Math.min(100, Math.round((todayStats.totalSteps / stepGoal) * 100)) : 0;
+  const stepPercent = stepGoal > 0 ? Math.min(100, Math.round((dailySteps / stepGoal) * 100)) : 0;
+
+  useEffect(() => {
+    let isMounted = true;
+    stepTrackingService.getHourlySteps(new Date()).then(({ totalSteps }) => {
+      if (isMounted) {
+        setDailySteps(Math.max(totalSteps, stepTrackingService.getTodayTotalSteps(), todayStats.totalSteps));
+      }
+    }).catch(() => {});
+
+    const unsubscribe = stepTrackingService.startLiveTracking((liveTotal) => {
+      if (isMounted) {
+        setDailySteps(Math.max(liveTotal, todayStats.totalSteps));
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
+  }, [todayStats.totalSteps]);
 
   // Tổng quan như web: 5 lần đo gần nhất + thống kê tầm soát cả năm
   const { data: recentPage, isLoading: loadingRecent } = useMyRecords(1, 5);
@@ -276,7 +300,11 @@ export default function HomeScreen() {
                 ? liveSpo2 >= 95 ? t('home.overview.spo2.normal') : t('home.overview.spo2.low')
                 : t('home.overview.waitingSignal')
             }
-            onPress={isConnected ? undefined : () => router.push('/(public)/scan' as any)}
+            onPress={
+              isConnected
+                ? () => router.push({ pathname: '/afib-measure', params: { mode: 'spot_check' } } as any)
+                : () => router.push('/(public)/scan' as any)
+            }
           />
           <StatCard
             label={t('home.overview.afib.title')}
@@ -312,7 +340,7 @@ export default function HomeScreen() {
             icon={<Footprints size={16} color="#059669" />}
             iconBg="rgba(5, 150, 105, 0.1)"
             scope="today"
-            value={todayStats.totalSteps.toLocaleString(locale)}
+            value={dailySteps.toLocaleString(locale)}
             unit={t('common:units.steps')}
             hint={t('home.overview.steps.goal', { goal: stepGoal.toLocaleString(locale), percent: stepPercent })}
             onPress={() => router.push('/workout/steps' as any)}

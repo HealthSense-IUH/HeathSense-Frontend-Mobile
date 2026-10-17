@@ -28,6 +28,7 @@ interface BLEContextType {
   lastRecordingFileUri: string | null;
   lastRecordingFileName: string | null;
   recordingError: string | null;
+  isSpotChecking: boolean;
   isAnalyzing: boolean;
   aiAnalysisResult: HealthRecordResponse | null;
   connectToDevice: (id: string, name?: string | null) => Promise<void>;
@@ -37,6 +38,8 @@ interface BLEContextType {
   startPpgRecording: () => void;
   stopPpgRecording: () => Promise<PpgRecordingResult>;
   stopExportAndUploadPpgRecording: () => Promise<{ recording: PpgRecordingResult; record?: HealthRecordResponse }>;
+  startSpotCheck: () => Promise<void>;
+  stopSpotCheck: () => Promise<void>;
   sendCommand: (cmd: string) => Promise<void>;
 }
 
@@ -75,6 +78,7 @@ export const BLEProvider: React.FC<{ children: React.ReactNode }> = ({
     (state) => state.lastRecordingFileName,
   );
   const recordingError = useBleStore((state) => state.recordingError);
+  const isSpotChecking = useBleStore((state) => state.isSpotChecking);
   const isAnalyzing = useBleStore((state) => state.isAnalyzing);
   const aiAnalysisResult = useBleStore((state) => state.aiAnalysisResult);
 
@@ -104,6 +108,7 @@ export const BLEProvider: React.FC<{ children: React.ReactNode }> = ({
       errorMessage,
       isRecordingPpg,
       isExportingRecording,
+      isSpotChecking,
       recordingStartedAt,
       recordingSampleCount,
       lastRecordingFileUri,
@@ -119,6 +124,8 @@ export const BLEProvider: React.FC<{ children: React.ReactNode }> = ({
       startPpgRecording: () => ppgRecorder.start(),
       stopPpgRecording: () => ppgRecorder.stopAndExport(),
       stopExportAndUploadPpgRecording: () => ppgRecorder.stopExportAndUpload(),
+      startSpotCheck: () => bleService.startSpotCheck(),
+      stopSpotCheck: () => bleService.stopSpotCheck(),
       sendCommand: (cmd: string) => bleService.sendCommand(cmd),
     }),
     [
@@ -137,6 +144,7 @@ export const BLEProvider: React.FC<{ children: React.ReactNode }> = ({
       errorMessage,
       isRecordingPpg,
       isExportingRecording,
+      isSpotChecking,
       recordingStartedAt,
       recordingSampleCount,
       lastRecordingFileUri,

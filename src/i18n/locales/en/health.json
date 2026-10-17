@@ -137,15 +137,15 @@
         "workout": "Workout in progress",
         "default": "60s clinical screening"
       },
-      "title": "On-demand AFib Screening",
+      "title": "AFib Screening",
       "latest": "Latest measurement: {{label}}",
       "cooldownHint": "You just finished a workout. To let your heart rate settle and avoid false alerts, please rest for another {{time}} before measuring.",
-      "description": "Actively record 100Hz optical PPG signals and run AI analysis to detect early signs of atrial fibrillation and heart rhythm abnormalities.",
+      "description": "60s clinical rest protocol and AI analysis to detect early signs of atrial fibrillation and arrhythmias.",
       "cta": {
         "cooldown": "Recovery: {{time}}",
         "workout": "Paused during workout",
-        "measureAgain": "Measure again",
-        "start": "Start measuring"
+        "measureAgain": "Screen again",
+        "start": "Start screening"
       },
       "hint": {
         "cooldown": "Rest 10 min",
@@ -194,6 +194,19 @@
       "disconnected": "Disconnected",
       "waveform": "Live PPG waveform",
       "note": "Device readings update during measurement. AFib analysis follows after recording."
+    },
+    "spotCheck": {
+      "tabTitle": "Spot-check (Vitals)",
+      "screeningTabTitle": "AFib Screening (60s)",
+      "badge": "Live Vital Signs",
+      "title": "Instant Heart Rate & SpO2",
+      "description": "Spot-check lets you check your heart rate and oxygen saturation anytime, without post-workout cardiac cooldown restrictions.",
+      "startCta": "Start Spot-check",
+      "stopCta": "Stop Spot-check",
+      "measuring": "Spot-checking vitals...",
+      "cooldownAlternative": "Currently in 10-minute cardiac recovery. AFib screening is paused, but you can do an instant Spot-check for Heart Rate & SpO2 right now.",
+      "switchToSpotCheck": "Spot-check Now",
+      "switchToScreening": "Switch to AFib Screening"
     }
   },
   "afibHistory": {

@@ -9,7 +9,7 @@ import {
   Easing,
   StyleSheet,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import {
   ArrowLeft,
   Settings,
@@ -18,6 +18,10 @@ import {
   Heart,
   AlertTriangle,
   ChevronRight,
+  Activity,
+  Zap,
+  Square,
+  ArrowRight,
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path, Circle } from 'react-native-svg';
@@ -38,7 +42,19 @@ import {
 export default function AFibMeasureScreen() {
   const { t } = useTranslation('health');
   const router = useRouter();
-  const { sendCommand, stopExportAndUploadPpgRecording } = useBLE();
+  const params = useLocalSearchParams<{ mode?: string }>();
+  const [measureMode, setMeasureMode] = useState<'afib' | 'spot_check'>(
+    params.mode === 'spot_check' ? 'spot_check' : 'afib'
+  );
+
+  const {
+    sendCommand,
+    stopExportAndUploadPpgRecording,
+    startPpgRecording,
+    isSpotChecking,
+    startSpotCheck,
+    stopSpotCheck,
+  } = useBLE();
   const store = useBleStore(useShallow(state => ({
     isRecordingPpg: state.isRecordingPpg,
     isAnalyzing: state.isAnalyzing,
@@ -46,8 +62,15 @@ export default function AFibMeasureScreen() {
     recordingError: state.recordingError,
     recordingStartedAt: state.recordingStartedAt,
     connectedDeviceId: state.connectedDeviceId,
+    currentBPM: state.currentBPM,
+    currentSpO2: state.currentSpO2,
+    liveBPM: state.liveBPM,
+    liveSpO2: state.liveSpO2,
     setRecordingState: state.setRecordingState,
   })));
+
+  const spotBPM = store.liveBPM ?? (store.currentBPM > 0 ? store.currentBPM : null);
+  const spotSpO2 = store.liveSpO2 ?? (store.currentSpO2 > 0 ? store.currentSpO2 : null);
 
   const workoutStatus = useWorkoutEngineStore((state) => state.status);
   const lastWorkoutEndedAt = useWorkoutEngineStore((state) => state.lastWorkoutEndedAt);
@@ -116,17 +139,34 @@ export default function AFibMeasureScreen() {
     return () => clearInterval(interval);
   }, [isRecording, startedAt]);
 
-  // Clean up countdown on unmount
+  // Clean up countdown and stop spot-check on unmount
   useEffect(() => {
     return () => {
       if (countdownIntervalRef.current) {
         clearInterval(countdownIntervalRef.current);
       }
+      if (useBleStore.getState().isSpotChecking) {
+        void stopSpotCheck().catch(() => {});
+      }
     };
-  }, []);
+  }, [stopSpotCheck]);
+
+  const handleSpotCheckToggle = async () => {
+    if (!isConnected) return;
+    try {
+      if (isSpotChecking) {
+        await stopSpotCheck();
+      } else {
+        await startSpotCheck();
+      }
+    } catch (err) {
+      console.warn('[SpotCheck] Failed to toggle spot check:', err);
+    }
+  };
 
   const startMeasurement = async () => {
     try {
+      startPpgRecording();
       await sendCommand("CMD:START_SCREENING");
     } catch (err) {
       console.warn("[AFibMeasure] Failed to send screening command:", err);
@@ -197,7 +237,7 @@ export default function AFibMeasureScreen() {
 
   return (
     <ScreenWrapper
-      title={t('measure.title')}
+      title={measureMode === 'spot_check' ? t('measure.spotCheck.tabTitle') : t('measure.title')}
       statusBarStyle="dark"
       backgroundComponent={
         <View style={[StyleSheet.absoluteFill, { backgroundColor: '#F4F8FC', overflow: 'hidden' }]}>
@@ -238,18 +278,188 @@ export default function AFibMeasureScreen() {
         </Pressable>
       }
     >
-      <View className="px-6 flex-1 justify-between pb-7 pt-2">
-        {/* BEGIN: InstructionalGuidanceSection */}
-        <View className="items-center mt-1">
-          <Text className="text-[13.5px] leading-relaxed text-slate-600 font-medium max-w-[310px] text-center">
-            <Trans t={t} i18nKey="measure.instruction" components={{ b: <Text className="font-bold text-[#0B1E3F]" /> }} />
+      <View className="px-6 flex-1 justify-between pb-7 pt-1">
+        {/* Mode Selector Tabs (AFib 60s vs Spot-check) */}
+        <View className="flex-row bg-slate-200/80 p-1 rounded-2xl mb-2.5 self-center">
+          <Pressable
+            onPress={() => {
+              if (!isRecording && !isSpotChecking) setMeasureMode('afib');
+            }}
+            className={`px-4 py-2 rounded-xl flex-row items-center gap-1.5 ${
+              measureMode === 'afib' ? 'bg-white shadow-xs' : 'opacity-75'
+            }`}
+          >
+            <Activity size={14} color={measureMode === 'afib' ? '#0D6EFD' : '#64748B'} strokeWidth={2.4} />
+            <Text
+              className={`text-xs font-bold ${
+                measureMode === 'afib' ? 'text-slate-900' : 'text-slate-600'
+              }`}
+            >
+              {t('measure.spotCheck.screeningTabTitle')}
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => {
+              if (!isRecording && !isSpotChecking) setMeasureMode('spot_check');
+            }}
+            className={`px-4 py-2 rounded-xl flex-row items-center gap-1.5 ${
+              measureMode === 'spot_check' ? 'bg-white shadow-xs' : 'opacity-75'
+            }`}
+          >
+            <Zap size={14} color={measureMode === 'spot_check' ? '#059669' : '#64748B'} strokeWidth={2.4} />
+            <Text
+              className={`text-xs font-bold ${
+                measureMode === 'spot_check' ? 'text-slate-900' : 'text-slate-600'
+              }`}
+            >
+              {t('measure.spotCheck.tabTitle')}
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* Instructional Guidance */}
+        <View className="items-center mt-0.5">
+          <Text className="text-[13px] leading-relaxed text-slate-600 font-medium max-w-[320px] text-center">
+            {measureMode === 'spot_check' ? (
+              t('measure.spotCheck.description')
+            ) : (
+              <Trans t={t} i18nKey="measure.instruction" components={{ b: <Text className="font-bold text-[#0B1E3F]" /> }} />
+            )}
           </Text>
         </View>
-        {/* END: InstructionalGuidanceSection */}
 
         {/* BEGIN: PulseRadarSensorSection */}
         <View className="flex-1 items-center justify-center my-4">
-          {countdown !== null ? (
+          {measureMode === 'spot_check' ? (
+            isSpotChecking ? (
+              <View className="relative items-center justify-center w-64 h-64 sm:w-72 sm:h-72">
+                {/* Animated Ripples Emerald */}
+                <View
+                  className="absolute w-72 h-72 rounded-full border border-emerald-300/40"
+                  style={{ opacity: 0.7 }}
+                />
+                <View
+                  className="absolute w-60 h-60 rounded-full border border-emerald-400/25"
+                  style={{ opacity: 0.5 }}
+                />
+
+                {/* Central Active Spot-checking Pod */}
+                <View
+                  style={{
+                    width: 176,
+                    height: 176,
+                    borderRadius: 88,
+                    backgroundColor: '#FFFFFF',
+                    borderWidth: 2,
+                    borderColor: '#10B981',
+                    shadowColor: 'rgba(16, 185, 129, 0.25)',
+                    shadowOffset: { width: 0, height: 12 },
+                    shadowOpacity: 1,
+                    shadowRadius: 28,
+                    elevation: 6,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: 12,
+                  }}
+                >
+                  <View className="flex-row items-center gap-1.5 mb-1">
+                    <HeartPulse color="#E11D48" size={24} strokeWidth={2.4} />
+                    <Text className="text-3xl font-extrabold text-slate-900 tracking-tight">
+                      {spotBPM !== null && spotBPM > 0 ? spotBPM : '--'}
+                    </Text>
+                    <Text className="text-xs font-bold text-slate-500">BPM</Text>
+                  </View>
+                  <View className="flex-row items-center bg-cyan-50 px-2.5 py-0.5 rounded-full border border-cyan-200/60 mt-0.5">
+                    <Text className="text-xs font-semibold text-cyan-800">
+                      SpO2: <Text className="font-extrabold text-cyan-700">{spotSpO2 !== null && spotSpO2 > 0 ? `${spotSpO2}%` : '--'}</Text>
+                    </Text>
+                  </View>
+                  <Text className="text-[11px] font-bold text-emerald-600 uppercase tracking-wider mt-2">
+                    {t('measure.spotCheck.measuring')}
+                  </Text>
+                </View>
+              </View>
+            ) : (
+              /* Ready / Idle State for Spot-check */
+              <View className="relative w-64 h-64 sm:w-72 sm:h-72 items-center justify-center">
+                {/* Outer Rotating Dashed Ring Emerald */}
+                <Animated.View
+                  style={{
+                    position: 'absolute',
+                    width: 270,
+                    height: 270,
+                    transform: [{ rotate: spin }],
+                  }}
+                >
+                  <Svg width={270} height={270} viewBox="0 0 280 280">
+                    <Circle
+                      cx="140"
+                      cy="140"
+                      r="126"
+                      fill="none"
+                      stroke="#6EE7B7"
+                      strokeWidth={4.5}
+                      strokeDasharray="10 12"
+                      strokeLinecap="round"
+                      opacity={0.9}
+                    />
+                  </Svg>
+                </Animated.View>
+
+                {/* Secondary Static Guide Ring */}
+                <LinearGradient
+                  colors={[
+                    'rgba(255, 255, 255, 0.95)',
+                    'rgba(255, 255, 255, 0.5)',
+                    'rgba(236, 253, 245, 0.4)',
+                  ]}
+                  start={{ x: 0.5, y: 0 }}
+                  end={{ x: 0.5, y: 1 }}
+                  style={{
+                    position: 'absolute',
+                    width: 210,
+                    height: 210,
+                    borderRadius: 105,
+                    borderWidth: 2,
+                    borderColor: 'rgba(167, 243, 208, 0.8)',
+                  }}
+                />
+
+                {/* Central Interactive Sensor Pod */}
+                <View
+                  style={{
+                    width: 168,
+                    height: 168,
+                    borderRadius: 84,
+                    backgroundColor: '#FFFFFF',
+                    borderWidth: 1,
+                    borderColor: '#ECFDF5',
+                    shadowColor: 'rgba(5, 150, 105, 0.16)',
+                    shadowOffset: { width: 0, height: 12 },
+                    shadowOpacity: 1,
+                    shadowRadius: 28,
+                    elevation: 6,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: 16,
+                  }}
+                >
+                  <View className="w-16 h-16 items-center justify-center mb-1">
+                    <View className="absolute inset-0 bg-emerald-50/80 rounded-full" />
+                    <Zap size={36} color="#059669" strokeWidth={2.4} />
+                  </View>
+
+                  <Text className="text-[14px] font-bold text-slate-800 tracking-tight text-center">
+                    {t('measure.ready')}
+                  </Text>
+                  <Text className="text-[11px] font-medium text-slate-400 mt-0.5 text-center">
+                    {t('measure.readySub')}
+                  </Text>
+                </View>
+              </View>
+            )
+          ) : countdown !== null ? (
             <View
               style={{
                 width: 176,
@@ -469,12 +679,12 @@ export default function AFibMeasureScreen() {
         </View>
         {/* END: PulseRadarSensorSection */}
 
-        {isRecording ? <LiveMeasurementCard /> : null}
+        {(isRecording || isSpotChecking) ? <LiveMeasurementCard /> : null}
 
         {/* BEGIN: BottomSection */}
         <View className="w-full">
           {/* Clinical Guidelines Card (Stitch Specs) */}
-          {!isRecording && countdown === null && !isAnalyzing && !result && (
+          {!isRecording && !isSpotChecking && countdown === null && !isAnalyzing && !result && (
             <View
               className="rounded-2xl p-3.5 border border-white flex-row items-center justify-between mb-4"
               style={{
@@ -514,7 +724,45 @@ export default function AFibMeasureScreen() {
 
           {/* Primary Action Buttons */}
           <View className="w-full">
-            {isRecording ? (
+            {measureMode === 'spot_check' ? (
+              isSpotChecking ? (
+                <Pressable
+                  onPress={handleSpotCheckToggle}
+                  className="w-full bg-rose-500 py-4 rounded-2xl flex-row items-center justify-center shadow-lg shadow-rose-500/30 active:opacity-80 mb-2 gap-2"
+                >
+                  <Square size={18} color="#FFFFFF" fill="#FFFFFF" />
+                  <Text className="text-base font-bold text-white">
+                    {t('measure.spotCheck.stopCta')}
+                  </Text>
+                </Pressable>
+              ) : (
+                <LinearGradient
+                  colors={['#10B981', '#059669', '#047857']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={{
+                    borderRadius: 16,
+                    shadowColor: '#059669',
+                    shadowOffset: { width: 0, height: 8 },
+                    shadowOpacity: 0.35,
+                    shadowRadius: 18,
+                    elevation: 5,
+                    opacity: !isConnected ? 0.75 : 1,
+                  }}
+                >
+                  <Pressable
+                    onPress={handleSpotCheckToggle}
+                    disabled={!isConnected}
+                    className="w-full py-4 rounded-2xl flex-row items-center justify-center gap-2.5 active:opacity-90"
+                  >
+                    <Zap size={20} color="#FFFFFF" strokeWidth={2.4} />
+                    <Text className="text-white font-bold text-base tracking-wide">
+                      {t('measure.spotCheck.startCta')}
+                    </Text>
+                  </Pressable>
+                </LinearGradient>
+              )
+            ) : isRecording ? (
               <Pressable
                 onPress={handleManualUpload}
                 className="w-full bg-rose-500 py-4 rounded-2xl flex-row items-center justify-center shadow-lg shadow-rose-500/30 active:opacity-80 mb-2"
@@ -564,15 +812,37 @@ export default function AFibMeasureScreen() {
               </LinearGradient>
             )}
 
-            {/* Workout / Cooldown Warning Banner */}
-            {!availability.canScreen ? (
-              <View className="flex-row items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-amber-50/90 border border-amber-200/80 shadow-xs mt-3">
-                <AlertTriangle color="#D97706" size={15} />
-                <Text className="text-xs font-semibold text-amber-700 tracking-tight text-center">
-                  {availability.reason === 'COOLDOWN_ACTIVE'
-                    ? t('measure.banner.cooldown', { time: availability.formattedRemainingTime })
-                    : t('measure.banner.workout')}
-                </Text>
+            {/* Workout / Cooldown Warning Banner & Alternative Spot Check CTA */}
+            {measureMode === 'afib' && !availability.canScreen ? (
+              <View className="mt-3">
+                <View className="flex-row items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-amber-50/90 border border-amber-200/80 shadow-xs">
+                  <AlertTriangle color="#D97706" size={15} />
+                  <Text className="text-xs font-semibold text-amber-700 tracking-tight text-center">
+                    {availability.reason === 'COOLDOWN_ACTIVE'
+                      ? t('measure.banner.cooldown', { time: availability.formattedRemainingTime })
+                      : t('measure.banner.workout')}
+                  </Text>
+                </View>
+
+                {availability.reason === 'COOLDOWN_ACTIVE' && (
+                  <View className="mt-2.5 p-3 rounded-2xl bg-blue-50/90 border border-blue-200/80">
+                    <View className="flex-row items-center gap-1.5 mb-1.5">
+                      <Zap size={14} color="#0D6EFD" />
+                      <Text className="text-xs font-medium text-blue-900 flex-1">
+                        {t('measure.spotCheck.cooldownAlternative')}
+                      </Text>
+                    </View>
+                    <Pressable
+                      onPress={() => setMeasureMode('spot_check')}
+                      className="bg-blue-600 py-2.5 px-3 rounded-xl flex-row items-center justify-center gap-1.5 active:opacity-85 mt-1"
+                    >
+                      <Text className="text-xs font-bold text-white">
+                        {t('measure.spotCheck.switchToSpotCheck')}
+                      </Text>
+                      <ArrowRight size={14} color="#FFFFFF" strokeWidth={2.4} />
+                    </Pressable>
+                  </View>
+                )}
               </View>
             ) : !isConnected ? (
               <View className="flex-row items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-rose-50/90 border border-rose-200/80 shadow-xs mt-3">

@@ -27,11 +27,13 @@ export const EXERCISE_CATEGORY_LABELS: Record<ExerciseCategory, string> = {
 export type TrackingMetricType =
   | 'TIME_CALORIES' // Thời gian và calo tiêu hao (không GPS)
   | 'DISTANCE_GPS'  // Khoảng cách, tốc độ và lộ trình (có GPS)
+  | 'INDOOR_STEP'   // Bước chân và quãng đường ước tính (Trong nhà / Máy chạy bộ)
   | 'SETS_REST';    // Số hiệp và nghỉ ngơi
 
 export const TRACKING_TYPE_LABELS: Record<TrackingMetricType, string> = {
   TIME_CALORIES: 'T.gian và calo tiêu hao (không GPS)',
   DISTANCE_GPS: 'K.cách, tốc độ và lộ trình (có GPS)',
+  INDOOR_STEP: 'Đếm bước & Quãng đường (Trong nhà)',
   SETS_REST: 'Số hiệp và nghỉ ngơi',
 };
 
@@ -127,12 +129,12 @@ export interface WeeklyStatsSummary {
   totalDurationSeconds: number;
   totalCalories: number;
   totalSessions: number;
-  dailyDistribution: Array<{
+  dailyDistribution: {
     dayNumber: number; // 2 -> 7, 8 (CN)
     dayLabel: string;  // '2', '3', '4', '5', '6', '7', 'CN'
     dateStr: string;
     durationSeconds: number;
     calories: number;
     hasWorkout: boolean;
-  }>;
+  }[];
 }

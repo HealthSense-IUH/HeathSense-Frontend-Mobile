@@ -137,15 +137,15 @@
         "workout": "Đang tập luyện thể thao",
         "default": "Chẩn đoán lâm sàng 60s"
       },
-      "title": "Đo Rung nhĩ Chủ động",
+      "title": "Tầm soát Rung nhĩ (AFib)",
       "latest": "Lần đo gần nhất: {{label}}",
       "cooldownHint": "Vừa kết thúc bài tập. Để nhịp tim ổn định và tránh cảnh báo sai, vui lòng nghỉ tĩnh thêm {{time}} trước khi đo.",
-      "description": "Chủ động ghi nhận tín hiệu quang học PPG 100Hz và phân tích AI để phát hiện sớm các dấu hiệu rung nhĩ và bất thường nhịp tim.",
+      "description": "Quy trình đo tĩnh 60 giây và phân tích AI để phát hiện sớm các dấu hiệu rung nhĩ và bất thường nhịp tim.",
       "cta": {
         "cooldown": "Hồi phục: {{time}}",
         "workout": "Tạm ngắt khi tập",
-        "measureAgain": "Thực hiện đo lại",
-        "start": "Bắt đầu đo ngay"
+        "measureAgain": "Tầm soát lại",
+        "start": "Bắt đầu tầm soát"
       },
       "hint": {
         "cooldown": "Nghỉ tĩnh 10p",
@@ -194,6 +194,19 @@
       "disconnected": "Mất kết nối",
       "waveform": "Sóng mạch PPG trực tiếp",
       "note": "Chỉ số từ thiết bị đang cập nhật. Kết quả phân tích AFib sẽ có sau khi đo."
+    },
+    "spotCheck": {
+      "tabTitle": "Đo tức thời (Spot-check)",
+      "screeningTabTitle": "Tầm soát AFib (60s)",
+      "badge": "Đo sinh hiệu trực tiếp",
+      "title": "Kiểm tra nhanh Nhịp tim & SpO2",
+      "description": "Đo tức thời cho phép kiểm tra nhịp tim và SpO2 bất cứ lúc nào, không bị chặn bởi thời gian hồi phục tim sau tập.",
+      "startCta": "Bắt đầu đo tức thời",
+      "stopCta": "Dừng đo tức thời",
+      "measuring": "Đang đo tức thời...",
+      "cooldownAlternative": "Đang trong 10 phút hồi phục tim tĩnh sau tập. Bạn không thể tầm soát AFib nhưng có thể Đo tức thời (Spot-check) BPM & SpO2 ngay bây giờ.",
+      "switchToSpotCheck": "Đo tức thời ngay",
+      "switchToScreening": "Chuyển sang Tầm soát AFib"
     }
   },
   "afibHistory": {

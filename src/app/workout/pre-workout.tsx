@@ -368,6 +368,35 @@ export default function PreWorkoutScreen() {
                 </View>
               )}
 
+              {targetType === 'DISTANCE' && (
+                <View className="items-center justify-center w-full py-1 my-auto">
+                  <View className="flex-row items-center justify-center">
+                    <WheelPicker
+                      data={wholeKmData}
+                      selectedValue={wholeKm}
+                      onValueChange={setWholeKm}
+                      itemHeight={46}
+                      width={64}
+                      fontSize={34}
+                    />
+                    <Text className="text-3xl font-extrabold text-slate-900 mx-2 -mt-1">
+                      {t('common.decimalSeparator')}
+                    </Text>
+                    <WheelPicker
+                      data={decimalKmData}
+                      selectedValue={decimalKm}
+                      onValueChange={setDecimalKm}
+                      itemHeight={46}
+                      width={64}
+                      fontSize={34}
+                    />
+                    <Text className="text-sm font-semibold text-slate-700 ml-2">
+                      km
+                    </Text>
+                  </View>
+                </View>
+              )}
+
               {targetType === 'TIME' && (
                 <View className="flex-row items-center justify-center w-full my-auto">
                   <WheelPicker
@@ -477,8 +506,8 @@ export default function PreWorkoutScreen() {
               )}
             </Pressable>
 
-            {/* Option 2: Mục tiêu quãng đường (GPS Sports Only) */}
-            {isGpsSport && (
+            {/* Option 2: Mục tiêu quãng đường (GPS Sports & Indoor Running) */}
+            {(isGpsSport || exercise?.trackingType === 'INDOOR_STEP') && (
               <Pressable
                 onPress={() => {
                   setTargetType('DISTANCE');

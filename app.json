@@ -55,7 +55,11 @@
           "neverForLocation": true
         }
       ],
-      "./plugins/withNotifeeConnectedDeviceService"
+      "./plugins/withNotifeeConnectedDeviceService",
+      "expo-image",
+      "expo-secure-store",
+      "expo-web-browser",
+      "@maplibre/maplibre-react-native"
     ],
     "experiments": {
       "typedRoutes": true

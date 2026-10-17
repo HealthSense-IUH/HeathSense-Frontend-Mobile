@@ -76,6 +76,7 @@
   "trackingTypes": {
     "TIME_CALORIES": "Time & calories (no GPS)",
     "DISTANCE_GPS": "Distance, speed & route (GPS)",
+    "INDOOR_STEP": "Steps & distance (Indoor)",
     "SETS_REST": "Sets & rest"
   },
   "exercises": {
@@ -195,6 +196,7 @@
     "heartRate": "Heart rate",
     "speed": "Speed",
     "steps": "Steps",
+    "strideLength": "Stride",
     "pause": "Pause",
     "resume": "Resume",
     "finish": "Finish",
@@ -307,5 +309,15 @@
       "heartValue": "AFib screening",
       "energy": "Energy burned"
     }
+  },
+  "map": {
+    "gpsDetected": "GPS connected",
+    "gpsSearching": "Searching GPS...",
+    "routeMap": "Route Map",
+    "gpsRoute": "GPS Route",
+    "gpsBadge": "Route",
+    "routePointsCount": "{{count}} GPS points",
+    "startPoint": "Start",
+    "finishPoint": "Finish"
   }
 }

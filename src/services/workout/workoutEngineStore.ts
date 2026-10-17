@@ -530,9 +530,91 @@ export const useWorkoutEngineStore = create<WorkoutEngineState>((set, get) => ({
   },
 
   addSteps: (steps) => {
-    set((state) => ({ currentSteps: state.currentSteps + steps }));
+    if (steps <= 0) return;
+    const {
+      exercise,
+      userHeightCm,
+      userGender,
+      elapsedSeconds,
+      currentSteps,
+      currentDistanceKm,
+      gpsTrack,
+    } = get();
+    const nextSteps = currentSteps + steps;
+
+    // Tính cadence (spm)
+    const cadenceSpm =
+      elapsedSeconds > 2 ? Math.round((nextSteps / elapsedSeconds) * 60) : 0;
+
+    // Khi bài tập là INDOOR_STEP (hoặc bài tập DISTANCE_GPS mà chưa có tọa độ GPS)
+    let nextDistanceKm = currentDistanceKm;
+    const isIndoor = exercise?.trackingType === 'INDOOR_STEP';
+    const isGpsMissing =
+      exercise?.trackingType === 'DISTANCE_GPS' && gpsTrack.length === 0;
+
+    if (isIndoor || isGpsMissing) {
+      const strideKm = getDynamicStrideLengthKm(
+        userHeightCm,
+        userGender,
+        cadenceSpm
+      );
+      nextDistanceKm =
+        Math.round((currentDistanceKm + steps * strideKm) * 1000) / 1000;
+    }
+
+    set({
+      currentSteps: nextSteps,
+      currentDistanceKm: nextDistanceKm,
+    });
   },
 }));
+
+/**
+ * Tính chiều dài sải chân động (Dynamic Stride Length) dựa trên chiều cao, giới tính
+ * và nhịp bước chân (Cadence - SPM).
+ * Sải chân kéo dài tự nhiên khi tốc độ và nhịp bước tăng (từ đi bộ đến chạy nước rút).
+ */
+export function getDynamicStrideLengthMeters(
+  heightCm: number = 170,
+  gender: 'MALE' | 'FEMALE' = 'MALE',
+  cadenceSpm: number = 0
+): number {
+  const baseRatio = gender === 'FEMALE' ? 0.413 : 0.415;
+  const baseStrideM = (heightCm * baseRatio) / 100;
+
+  if (cadenceSpm <= 0) {
+    return Math.round(baseStrideM * 100) / 100;
+  }
+
+  // Điều chỉnh hệ số sải chân theo nhịp bước
+  let cadenceFactor = 1.0;
+  if (cadenceSpm < 120) {
+    // Đi bộ chậm / bình thường
+    cadenceFactor = 0.95;
+  } else if (cadenceSpm < 145) {
+    // Đi bộ nhanh
+    cadenceFactor = 1.02;
+  } else if (cadenceSpm < 165) {
+    // Chạy chậm / Jogging nhẹ
+    cadenceFactor = 1.15;
+  } else if (cadenceSpm < 180) {
+    // Chạy bền (Pace thông thường trên máy)
+    cadenceFactor = 1.25;
+  } else {
+    // Chạy nước rút (Sprint)
+    cadenceFactor = 1.35;
+  }
+
+  return Math.round(baseStrideM * cadenceFactor * 100) / 100;
+}
+
+export function getDynamicStrideLengthKm(
+  heightCm: number = 170,
+  gender: 'MALE' | 'FEMALE' = 'MALE',
+  cadenceSpm: number = 0
+): number {
+  return getDynamicStrideLengthMeters(heightCm, gender, cadenceSpm) / 1000;
+}
 
 /**
  * 10-minute cardiac stabilization window post-exercise (600,000 ms).
