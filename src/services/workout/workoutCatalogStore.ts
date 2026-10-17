@@ -266,6 +266,15 @@ export const useWorkoutCatalogStore = create<WorkoutCatalogState>((set, get) => 
           res.content.forEach((s: any) => {
             const parsedStarted = typeof s.startedAt === 'string' ? new Date(s.startedAt).getTime() : s.startedAt;
             const parsedEnded = typeof s.endedAt === 'string' ? new Date(s.endedAt).getTime() : s.endedAt;
+            let parsedGpsTrack = undefined;
+            if (s.gpsTrack && Array.isArray(s.gpsTrack) && s.gpsTrack.length > 0) {
+              parsedGpsTrack = s.gpsTrack;
+            } else if (typeof s.gpxTrackJson === 'string' && s.gpxTrackJson.trim().length > 0) {
+              try {
+                parsedGpsTrack = JSON.parse(s.gpxTrackJson);
+              } catch {}
+            }
+
             const item: WorkoutSession = {
               id: s.id ? String(s.id) : `session_${parsedStarted}`,
               exerciseId: s.exerciseCode || s.exerciseId || 'other',
@@ -284,6 +293,8 @@ export const useWorkoutCatalogStore = create<WorkoutCatalogState>((set, get) => 
               completedSets: s.completedSets,
               targetType: s.targetType || 'NONE',
               targetValue: s.targetValue,
+              gpsTrack: parsedGpsTrack,
+              encodedPolyline: s.encodedPolyline,
               isHeartRateMonitored: Boolean(s.isHeartRateMonitored),
               avgHeartRate: s.avgHeartRate,
               maxHeartRate: s.maxHeartRate,

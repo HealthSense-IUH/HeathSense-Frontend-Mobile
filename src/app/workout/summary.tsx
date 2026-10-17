@@ -14,9 +14,12 @@ import {
   MoreVertical,
   FileText,
   Check,
+  MapPin,
 } from 'lucide-react-native';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
 import { SportSummaryHeaderGraphic } from '@/components/features/workout/SportSummaryHeaderGraphic';
+import { SportMapView } from '@/components/features/workout/SportMapView';
+import { decodePolyline } from '@/utils/polylineEncoder';
 import { getSportThemeConfig } from '@/components/features/workout/sportThemeConfig';
 import { useWorkoutEngineStore } from '@/services/workout/workoutEngineStore';
 import { useWorkoutCatalogStore } from '@/services/workout/workoutCatalogStore';
@@ -63,6 +66,22 @@ export default function WorkoutSummaryScreen() {
     saveSession({ ...session, note });
     setIsSaved(true);
   };
+
+  const effectiveGpsTrack = React.useMemo(() => {
+    if (session?.gpsTrack && session.gpsTrack.length >= 2) {
+      return session.gpsTrack;
+    }
+    if (session?.encodedPolyline && session.encodedPolyline.trim().length > 0) {
+      const decoded = decodePolyline(session.encodedPolyline);
+      if (decoded.length >= 2) {
+        return decoded.map((coord, idx) => ({
+          ...coord,
+          timestamp: (session.startedAt || 0) + idx * 1000,
+        }));
+      }
+    }
+    return null;
+  }, [session]);
 
   const themeConfig = getSportThemeConfig(exerciseId, exerciseName);
 
@@ -155,6 +174,72 @@ export default function WorkoutSummaryScreen() {
           <Text className="text-slate-900 text-lg font-bold mb-4">
             {t('summary.details')}
           </Text>
+
+          {/* ========================================================================= */}
+          {/* WORKOUT ROUTE MAP CARD (If GPS Track Exists)                              */}
+          {/* ========================================================================= */}
+          {effectiveGpsTrack && effectiveGpsTrack.length >= 2 ? (
+            <View className="mb-5 bg-white border border-slate-200/90 rounded-3xl overflow-hidden shadow-sm">
+              {/* Header bar của Card Bản đồ */}
+              <View className="px-4 py-3 flex-row items-center justify-between bg-slate-50 border-b border-slate-100">
+                <View className="flex-row items-center gap-2">
+                  <View className="w-7 h-7 rounded-lg bg-emerald-100 items-center justify-center">
+                    <MapPin color="#059669" size={16} />
+                  </View>
+                  <View>
+                    <Text className="text-xs font-bold text-slate-800">
+                      {t('map.routeMap')}
+                    </Text>
+                    <Text className="text-[10px] text-slate-500 font-medium">
+                      {t('map.routePointsCount', { count: effectiveGpsTrack.length })}
+                    </Text>
+                  </View>
+                </View>
+
+                {distanceKm && distanceKm > 0 ? (
+                  <View className="px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/70">
+                    <Text className="text-xs font-bold text-emerald-700">
+                      {formatWorkoutDecimal(distanceKm, 2)} km
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
+
+              {/* Khung bản đồ Native MapLibre / MapTiler */}
+              <SportMapView
+                gpsTrack={effectiveGpsTrack}
+                height={260}
+                showPolyline={true}
+                showUserLocation={false}
+                showStartFinishMarkers={true}
+                fitBoundsOnMount={true}
+              />
+
+              {/* Footer chú giải: Điểm xuất phát (Start) và Điểm kết thúc (Finish) + Pace / Vận tốc */}
+              <View className="p-3.5 bg-white flex-row items-center justify-between border-t border-slate-100">
+                <View className="flex-row items-center gap-4">
+                  <View className="flex-row items-center gap-1.5">
+                    <View className="w-2.5 h-2.5 rounded-full bg-[#10B981] border border-white shadow-xs" />
+                    <Text className="text-[11px] font-semibold text-slate-600">
+                      {t('map.startPoint')}
+                    </Text>
+                  </View>
+                  <View className="flex-row items-center gap-1.5">
+                    <View className="w-2.5 h-2.5 rounded-full bg-[#EF4444] border border-white shadow-xs" />
+                    <Text className="text-[11px] font-semibold text-slate-600">
+                      {t('map.finishPoint')}
+                    </Text>
+                  </View>
+                </View>
+
+                {session?.avgSpeedKmh && session.avgSpeedKmh > 0 ? (
+                  <Text className="text-[11px] font-bold text-slate-700">
+                    {formatWorkoutDecimal(session.avgSpeedKmh, 1)} km/h
+                  </Text>
+                ) : null}
+              </View>
+            </View>
+          ) : null}
 
           {/* 3 Metric Cards Grid */}
           <View className="flex-row flex-wrap justify-between gap-y-3.5 mb-4">

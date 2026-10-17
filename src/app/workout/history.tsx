@@ -20,6 +20,7 @@ import {
   Zap,
   Check,
   Dumbbell,
+  MapPin,
 } from 'lucide-react-native';
 import Svg, {
   Path,
@@ -31,6 +32,7 @@ import { useWorkoutCatalogStore } from '@/services/workout/workoutCatalogStore';
 import { WorkoutSession } from '@/services/workout/workoutTypes';
 import { getExerciseIconComponent } from '@/components/features/workout/workoutThemeUtils';
 import { WorkoutCalendarModal } from '@/components/features/workout/WorkoutCalendarModal';
+import { MiniRoutePreview } from '@/components/features/workout/MiniRoutePreview';
 import {
   formatWorkoutDecimal,
   getExerciseName,
@@ -842,15 +844,37 @@ export default function WorkoutHistoryScreen() {
                             )}
                           </View>
 
-                          <Text className="text-xs font-semibold text-slate-500 mt-1">
-                            {getExerciseName({ id: session.exerciseId, name: session.exerciseName })}
-                          </Text>
+                          <View className="flex-row items-center gap-1.5 mt-1">
+                            <Text className="text-xs font-semibold text-slate-500">
+                              {getExerciseName({ id: session.exerciseId, name: session.exerciseName })}
+                            </Text>
+                            {((session.gpsTrack && session.gpsTrack.length >= 2) ||
+                              (session.encodedPolyline && session.encodedPolyline.trim().length > 0)) && (
+                              <View className="flex-row items-center bg-emerald-50 px-1.5 py-0.5 rounded-md border border-emerald-200/60">
+                                <MapPin color="#059669" size={10} className="mr-0.5" />
+                                <Text className="text-[10px] font-bold text-emerald-700">
+                                  {t('map.gpsBadge')}
+                                </Text>
+                              </View>
+                            )}
+                          </View>
                         </View>
 
-                        {/* Right: Timestamp */}
-                        <Text className="text-xs font-semibold text-slate-400">
-                          {sessionTimeStr}
-                        </Text>
+                        {/* Right: Timestamp & Mini Route Preview */}
+                        <View className="items-end gap-1">
+                          <Text className="text-xs font-semibold text-slate-400">
+                            {sessionTimeStr}
+                          </Text>
+                          {((session.gpsTrack && session.gpsTrack.length >= 2) ||
+                            (session.encodedPolyline && session.encodedPolyline.trim().length > 0)) && (
+                            <MiniRoutePreview
+                              gpsTrack={session.gpsTrack}
+                              encodedPolyline={session.encodedPolyline}
+                              size={36}
+                              strokeWidth={2.2}
+                            />
+                          )}
+                        </View>
                       </Pressable>
                     );
                   })}

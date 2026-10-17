@@ -309,5 +309,15 @@
       "heartValue": "AFib screening",
       "energy": "Energy burned"
     }
+  },
+  "map": {
+    "gpsDetected": "GPS connected",
+    "gpsSearching": "Searching GPS...",
+    "routeMap": "Route Map",
+    "gpsRoute": "GPS Route",
+    "gpsBadge": "Route",
+    "routePointsCount": "{{count}} GPS points",
+    "startPoint": "Start",
+    "finishPoint": "Finish"
   }
 }

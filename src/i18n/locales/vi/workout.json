@@ -309,5 +309,15 @@
       "heartValue": "Đo tầm soát rung nhĩ",
       "energy": "Mức tiêu hao"
     }
+  },
+  "map": {
+    "gpsDetected": "Đã phát hiện GPS",
+    "gpsSearching": "Đang tìm GPS...",
+    "routeMap": "Bản đồ lộ trình",
+    "gpsRoute": "Lộ trình GPS",
+    "gpsBadge": "Lộ trình",
+    "routePointsCount": "{{count}} điểm tọa độ",
+    "startPoint": "Bắt đầu",
+    "finishPoint": "Kết thúc"
   }
 }

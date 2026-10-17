@@ -12,10 +12,16 @@ import { Layers, Crosshair, MapPin } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { useWorkoutEngineStore } from '@/services/workout/workoutEngineStore';
 
-interface SportMapViewProps {
+import type { GpsCoordinate } from '@/services/workout/workoutTypes';
+
+export interface SportMapViewProps {
+  gpsTrack?: GpsCoordinate[];
   status?: 'searching' | 'detected';
   height?: number | string;
   showPolyline?: boolean;
+  showUserLocation?: boolean;
+  showStartFinishMarkers?: boolean;
+  fitBoundsOnMount?: boolean;
   onRecenter?: () => void;
   onToggleLayer?: () => void;
 }
@@ -31,9 +37,13 @@ const MAP_STYLES = {
 const DEFAULT_CENTER: [number, number] = [106.6823, 10.8223];
 
 export const SportMapView: React.FC<SportMapViewProps> = ({
+  gpsTrack: propsGpsTrack,
   status = 'detected',
   height = 320,
   showPolyline = false,
+  showUserLocation = true,
+  showStartFinishMarkers = true,
+  fitBoundsOnMount = false,
   onRecenter,
   onToggleLayer,
 }) => {
@@ -44,8 +54,35 @@ export const SportMapView: React.FC<SportMapViewProps> = ({
   const [layerType, setLayerType] = useState<'standard' | 'satellite'>('standard');
   const [hasFollowedInitialGps, setHasFollowedInitialGps] = useState(false);
 
-  // Lấy dữ liệu tọa độ thật từ WorkoutEngineStore
-  const gpsTrack = useWorkoutEngineStore((state) => state.gpsTrack);
+  // Lấy dữ liệu tọa độ thật: ưu tiên prop gpsTrack, nếu không có đọc từ WorkoutEngineStore
+  const storeTrack = useWorkoutEngineStore((state) => state.gpsTrack);
+  const gpsTrack = propsGpsTrack !== undefined ? propsGpsTrack : storeTrack;
+
+  // Tính bounding box [west, south, east, north] và center của toàn bộ lộ trình
+  const { bounds, centerCoord } = useMemo(() => {
+    if (!gpsTrack || gpsTrack.length === 0) {
+      return { bounds: undefined, centerCoord: DEFAULT_CENTER };
+    }
+    let minLng = gpsTrack[0].longitude;
+    let maxLng = gpsTrack[0].longitude;
+    let minLat = gpsTrack[0].latitude;
+    let maxLat = gpsTrack[0].latitude;
+
+    for (let i = 1; i < gpsTrack.length; i++) {
+      const pt = gpsTrack[i];
+      if (pt.longitude < minLng) minLng = pt.longitude;
+      if (pt.longitude > maxLng) maxLng = pt.longitude;
+      if (pt.latitude < minLat) minLat = pt.latitude;
+      if (pt.latitude > maxLat) maxLat = pt.latitude;
+    }
+
+    const center: [number, number] = [(minLng + maxLng) / 2, (minLat + maxLat) / 2];
+    const lngLatBounds: [number, number, number, number] = [minLng, minLat, maxLng, maxLat];
+    return {
+      bounds: lngLatBounds,
+      centerCoord: center,
+    };
+  }, [gpsTrack]);
 
   // Điểm tọa độ mới nhất của người dùng
   const latestCoord = useMemo<[number, number] | null>(() => {
@@ -54,26 +91,49 @@ export const SportMapView: React.FC<SportMapViewProps> = ({
     return [lastPoint.longitude, lastPoint.latitude];
   }, [gpsTrack]);
 
-  // Tạo GeoJSON LineString thật từ danh sách tọa độ GPS
+  // Tạo GeoJSON FeatureCollection cho đường chạy và các điểm mốc xuất phát / kết thúc
   const routeGeoJson = useMemo<GeoJSON.FeatureCollection | null>(() => {
     if (!showPolyline || !gpsTrack || gpsTrack.length < 2) return null;
 
     const coordinates = gpsTrack.map((pt) => [pt.longitude, pt.latitude]);
+    const features: GeoJSON.Feature[] = [
+      {
+        type: 'Feature',
+        properties: { role: 'route' },
+        geometry: {
+          type: 'LineString',
+          coordinates,
+        },
+      },
+    ];
+
+    if (showStartFinishMarkers) {
+      // Start Marker (Điểm xuất phát)
+      features.push({
+        type: 'Feature',
+        properties: { role: 'start' },
+        geometry: {
+          type: 'Point',
+          coordinates: coordinates[0],
+        },
+      });
+
+      // Finish Marker (Điểm kết thúc)
+      features.push({
+        type: 'Feature',
+        properties: { role: 'finish' },
+        geometry: {
+          type: 'Point',
+          coordinates: coordinates[coordinates.length - 1],
+        },
+      });
+    }
 
     return {
       type: 'FeatureCollection',
-      features: [
-        {
-          type: 'Feature',
-          properties: {},
-          geometry: {
-            type: 'LineString',
-            coordinates,
-          },
-        },
-      ],
+      features,
     };
-  }, [gpsTrack, showPolyline]);
+  }, [gpsTrack, showPolyline, showStartFinishMarkers]);
 
   // Cập nhật trạng thái GPS khi có tọa độ thật đổ về
   useEffect(() => {
@@ -84,9 +144,16 @@ export const SportMapView: React.FC<SportMapViewProps> = ({
     }
   }, [gpsTrack, status]);
 
-  // Tự động di chuyển Camera đến vị trí người dùng khi bắt được GPS đầu tiên
+  // Tự động căn bao quát toàn bộ lộ trình nếu fitBoundsOnMount được bật
   useEffect(() => {
-    if (latestCoord && !hasFollowedInitialGps && cameraRef.current) {
+    if (fitBoundsOnMount && bounds && cameraRef.current) {
+      cameraRef.current.fitBounds(bounds, { duration: 800 });
+    }
+  }, [fitBoundsOnMount, bounds]);
+
+  // Tự động di chuyển Camera đến vị trí người dùng khi bắt được GPS đầu tiên (khi đang tập)
+  useEffect(() => {
+    if (!fitBoundsOnMount && latestCoord && !hasFollowedInitialGps && cameraRef.current) {
       cameraRef.current.flyTo({
         center: latestCoord,
         zoom: 16.5,
@@ -94,18 +161,22 @@ export const SportMapView: React.FC<SportMapViewProps> = ({
       });
       setHasFollowedInitialGps(true);
     }
-  }, [latestCoord, hasFollowedInitialGps]);
+  }, [latestCoord, hasFollowedInitialGps, fitBoundsOnMount]);
 
   // Xử lý nút Định vị lại vị trí (Recenter)
   const handleRecenter = () => {
     if (onRecenter) onRecenter();
 
-    if (latestCoord && cameraRef.current) {
-      cameraRef.current.flyTo({
-        center: latestCoord,
-        zoom: 16.5,
-        duration: 800,
-      });
+    if (cameraRef.current) {
+      if (bounds && fitBoundsOnMount) {
+        cameraRef.current.fitBounds(bounds, { duration: 800 });
+      } else if (latestCoord) {
+        cameraRef.current.flyTo({
+          center: latestCoord,
+          zoom: 16.5,
+          duration: 800,
+        });
+      }
     }
   };
 
@@ -130,18 +201,21 @@ export const SportMapView: React.FC<SportMapViewProps> = ({
         <Camera
           ref={cameraRef}
           initialViewState={{
-            center: latestCoord || DEFAULT_CENTER,
-            zoom: 15.5,
+            center: latestCoord || centerCoord || DEFAULT_CENTER,
+            zoom: fitBoundsOnMount ? 14 : 15.5,
+            bounds: fitBoundsOnMount && bounds ? bounds : undefined,
           }}
-          trackUserLocation="course"
+          trackUserLocation={showUserLocation ? "course" : undefined}
         />
 
-        {/* Hiển thị vị trí người dùng thời gian thực với độ chính xác và la bàn */}
-        <UserLocation
-          animated
-          heading
-          accuracy
-        />
+        {/* Hiển thị vị trí người dùng thời gian thực với độ chính xác và la bàn nếu đang tập */}
+        {showUserLocation && (
+          <UserLocation
+            animated
+            heading
+            accuracy
+          />
+        )}
 
         {/* Lớp vẽ Polyline đường chạy thực tế theo dữ liệu GPS */}
         {routeGeoJson && (
@@ -150,6 +224,7 @@ export const SportMapView: React.FC<SportMapViewProps> = ({
             <Layer
               id="workoutRouteOutline"
               type="line"
+              filter={['==', ['get', 'role'], 'route']}
               style={{
                 lineColor: '#064E3B',
                 lineWidth: 7,
@@ -162,6 +237,7 @@ export const SportMapView: React.FC<SportMapViewProps> = ({
             <Layer
               id="workoutRouteLine"
               type="line"
+              filter={['==', ['get', 'role'], 'route']}
               style={{
                 lineColor: '#10B981',
                 lineWidth: 5,
@@ -170,11 +246,35 @@ export const SportMapView: React.FC<SportMapViewProps> = ({
                 lineOpacity: 1,
               }}
             />
+            {/* Điểm xuất phát (Start Marker) - Xanh lá với viền trắng */}
+            <Layer
+              id="workoutStartPoint"
+              type="circle"
+              filter={['==', ['get', 'role'], 'start']}
+              style={{
+                circleRadius: 8,
+                circleColor: '#10B981',
+                circleStrokeColor: '#FFFFFF',
+                circleStrokeWidth: 3,
+              }}
+            />
+            {/* Điểm kết thúc (Finish Marker) - Đỏ với viền trắng */}
+            <Layer
+              id="workoutFinishPoint"
+              type="circle"
+              filter={['==', ['get', 'role'], 'finish']}
+              style={{
+                circleRadius: 8,
+                circleColor: '#EF4444',
+                circleStrokeColor: '#FFFFFF',
+                circleStrokeWidth: 3,
+              }}
+            />
           </GeoJSONSource>
         )}
       </Map>
 
-      {/* Floating Status Pill: "Đã phát hiện GPS" (Top-Left) */}
+      {/* Floating Status Pill (Top-Left) */}
       <View className="absolute top-4 left-4 z-10">
         <View className="flex-row items-center bg-white/95 px-3.5 py-1.5 rounded-full border border-slate-200/90 shadow-sm backdrop-blur-md">
           <MapPin
@@ -184,7 +284,11 @@ export const SportMapView: React.FC<SportMapViewProps> = ({
             className="mr-1.5"
           />
           <Text className="text-slate-800 text-xs font-semibold">
-            {gpsStatus === 'detected' ? t('map.gpsDetected') : t('map.gpsSearching')}
+            {fitBoundsOnMount
+              ? t('map.routeMap')
+              : gpsStatus === 'detected'
+              ? t('map.gpsDetected')
+              : t('map.gpsSearching')}
           </Text>
         </View>
       </View>
