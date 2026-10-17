@@ -29,7 +29,6 @@ import {
   useWorkoutEngineStore,
   getDynamicStrideLengthMeters,
 } from '@/services/workout/workoutEngineStore';
-import { useBleStore } from '@/services/ble-management/bleStore';
 import { locationTrackingService } from '@/services/workout/locationTrackingService';
 import { stepMotionService } from '@/services/workout/stepMotionService';
 import { formatWorkoutDecimal, getExerciseName } from '@/services/workout/workoutI18n';
@@ -64,9 +63,9 @@ export default function ActiveWorkoutScreen() {
 
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const hasCelebratedRef = useRef(false);
-  const [activeMetricPage, setActiveMetricPage] = useState<number>(0);
+  const [, setActiveMetricPage] = useState<number>(0);
   const metricScrollRef = useRef<ScrollView>(null);
-  const scrollX = useRef(new Animated.Value(0)).current;
+  const [scrollX] = useState(() => new Animated.Value(0));
   const [metricContainerWidth, setMetricContainerWidth] = useState<number>(
     () => Dimensions.get('window').width - 32
   );

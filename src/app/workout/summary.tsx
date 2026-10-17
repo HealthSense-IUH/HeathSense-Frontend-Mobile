@@ -52,7 +52,6 @@ export default function WorkoutSummaryScreen() {
   const durationSeconds = Number(params.durationSeconds) || session?.durationSeconds || 0;
   const caloriesBurned = Number(params.caloriesBurned) || session?.caloriesBurned || 0;
   const totalCalories = Number(params.totalCalories) || session?.totalCalories || caloriesBurned;
-  const distanceKm = Number(params.distanceKm) || session?.distanceKm;
   const avgHeartRate = Number(params.avgHeartRate) || session?.avgHeartRate;
   const totalSteps = Number(params.totalSteps) || session?.totalSteps;
   const avgSpeedKmh = Number(params.avgSpeedKmh) || session?.avgSpeedKmh;
