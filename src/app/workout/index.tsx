@@ -79,7 +79,6 @@ export default function WorkoutHubScreen() {
   const dailyDist = weeklyStats.dailyDistribution || [];
   const now = new Date();
   const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-  const maxDuration = Math.max(0, ...dailyDist.map((item) => item.durationSeconds));
   const maxWeekSteps = Math.max(1, ...weekSteps.map((w) => w.steps));
 
   return (

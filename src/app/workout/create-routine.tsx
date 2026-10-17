@@ -5,7 +5,6 @@ import {
   TextInput,
   Pressable,
   ScrollView,
-  FlatList,
   Switch,
   Alert,
 } from 'react-native';
@@ -48,21 +47,6 @@ export default function CreateRoutineScreen() {
     setRoutineItems((prev) => [...prev, newItem]);
     setShowPickerModal(false);
   }, [routineItems.length]);
-
-  const renderExerciseItem = useCallback(
-    ({ item }: { item: Exercise }) => (
-      <Pressable
-        onPress={() => handleAddExercise(item)}
-        className="flex-row items-center py-3 border-b border-slate-100 active:bg-slate-50"
-      >
-        <ExerciseIcon name={item.iconName} size={18} className="mr-3" />
-        <Text className="text-base font-medium text-slate-800 flex-1">
-          {item.name}
-        </Text>
-      </Pressable>
-    ),
-    [handleAddExercise]
-  );
 
   const handleRemoveItem = (id: string) => {
     setRoutineItems(routineItems.filter((item) => item.id !== id));

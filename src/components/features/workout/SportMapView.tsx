@@ -50,13 +50,15 @@ export const SportMapView: React.FC<SportMapViewProps> = ({
   const { t } = useTranslation('workout');
   const cameraRef = useRef<CameraRef>(null);
 
-  const [gpsStatus, setGpsStatus] = useState<'searching' | 'detected'>(status);
   const [layerType, setLayerType] = useState<'standard' | 'satellite'>('standard');
   const [hasFollowedInitialGps, setHasFollowedInitialGps] = useState(false);
 
   // Lấy dữ liệu tọa độ thật: ưu tiên prop gpsTrack, nếu không có đọc từ WorkoutEngineStore
   const storeTrack = useWorkoutEngineStore((state) => state.gpsTrack);
   const gpsTrack = propsGpsTrack !== undefined ? propsGpsTrack : storeTrack;
+
+  // Trạng thái GPS: tự động nhận diện dựa trên dữ liệu tọa độ thực tế và prop status
+  const gpsStatus: 'searching' | 'detected' = (gpsTrack && gpsTrack.length > 0) ? 'detected' : status;
 
   // Tính bounding box [west, south, east, north] và center của toàn bộ lộ trình
   const { bounds, centerCoord } = useMemo(() => {
@@ -135,14 +137,6 @@ export const SportMapView: React.FC<SportMapViewProps> = ({
     };
   }, [gpsTrack, showPolyline, showStartFinishMarkers]);
 
-  // Cập nhật trạng thái GPS khi có tọa độ thật đổ về
-  useEffect(() => {
-    if (gpsTrack && gpsTrack.length > 0) {
-      setGpsStatus('detected');
-    } else if (status === 'searching') {
-      setGpsStatus('searching');
-    }
-  }, [gpsTrack, status]);
 
   // Tự động căn bao quát toàn bộ lộ trình nếu fitBoundsOnMount được bật
   useEffect(() => {

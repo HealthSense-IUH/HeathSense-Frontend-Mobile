@@ -129,12 +129,12 @@ export interface WeeklyStatsSummary {
   totalDurationSeconds: number;
   totalCalories: number;
   totalSessions: number;
-  dailyDistribution: Array<{
+  dailyDistribution: {
     dayNumber: number; // 2 -> 7, 8 (CN)
     dayLabel: string;  // '2', '3', '4', '5', '6', '7', 'CN'
     dateStr: string;
     durationSeconds: number;
     calories: number;
     hasWorkout: boolean;
-  }>;
+  }[];
 }
