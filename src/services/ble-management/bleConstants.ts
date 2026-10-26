@@ -5,12 +5,19 @@ export const HUY_WATCH_CHARACTERISTIC_UUID =
 export const HUY_WATCH_REPORT_CHARACTERISTIC_UUID =
   "beb5483e-36e1-4688-b7f5-ea07361b26aa";
 
+export const BLE_SOS_COMMAND_CANCEL = "CMD:CANCEL_SOS";
+export const BLE_SOS_COMMAND_TEST = "CMD:TEST_SOS";
+export const BLE_SOS_PREFIX = "SOS:";
+
 export const BATTERY_SERVICE_UUID = "180f";
 export const BATTERY_LEVEL_CHARACTERISTIC_UUID = "2a19";
 export const BATTERY_READ_INTERVAL_MS = 5 * 60 * 1000;
 
 export const HUY_WATCH_NOTIFICATION_ID = "huywatch_service";
 export const HUY_WATCH_CHANNEL_ID = "huywatch-health-channel";
+export const HUY_WATCH_SOS_NOTIFICATION_ID = "huywatch_sos_alert";
+export const HUY_WATCH_SOS_CHANNEL_ID = "huywatch-sos-channel";
+export const HUY_WATCH_SOS_INFO_NOTIFICATION_ID = "huywatch_sos_info";
 
 export const NOTIFICATION_UPDATE_INTERVAL_MS = 5000;
 export const STORE_HEALTH_UPDATE_INTERVAL_MS = 250;
@@ -19,3 +26,4 @@ export const DIRECT_RECONNECT_DELAY_MS = 5000;
 export const RECONNECT_SCAN_INTERVAL_MS = 60000;
 export const RECONNECT_SCAN_WINDOW_SECONDS = 30;
 export const DIRECT_CONNECT_TIMEOUT_MS = 12000;
+

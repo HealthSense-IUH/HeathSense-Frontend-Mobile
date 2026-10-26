@@ -12,7 +12,10 @@ export type BleConnectionStatus =
     | "connected"
     | "reconnecting"
     | "disconnected"
-    | "error";
+    | "error"
+    | "emergency";
+
+export type BleEmergencyType = "FALL" | "SYNCOPE" | "CARDIAC" | "EMERGENCY";
 
 type BleState = {
     knownDevice: KnownBleDevice | null;
@@ -46,6 +49,11 @@ type BleState = {
     recordingError: string | null;
     isSpotChecking: boolean;
     aiAnalysisResult: import("@/types/response").HealthRecordResponse | null;
+    emergencyActive: boolean;
+    emergencyType: BleEmergencyType | null;
+    emergencyCountdownSeconds: number | null;
+    emergencyPayload: string | null;
+    emergencyUpdatedAt: number | null;
     setIsSpotChecking: (isSpotChecking: boolean) => void;
     setKnownDevice: (device: KnownBleDevice | null) => void;
     setInitialized: (isInitialized: boolean) => void;
@@ -86,6 +94,13 @@ type BleState = {
     resetHealthData: () => void;
     bumpReconnectAttempt: () => void;
     resetReconnectAttempt: () => void;
+    setEmergencyState: (payload: {
+        active: boolean;
+        type?: BleEmergencyType | null;
+        countdownSeconds?: number | null;
+        emergencyPayload?: string | null;
+    }) => void;
+    resetEmergencyState: () => void;
 };
 
 export const useBleStore = create<BleState>((set) => ({
@@ -119,6 +134,11 @@ export const useBleStore = create<BleState>((set) => ({
     recordingError: null,
     isSpotChecking: false,
     aiAnalysisResult: null,
+    emergencyActive: false,
+    emergencyType: null,
+    emergencyCountdownSeconds: null,
+    emergencyPayload: null,
+    emergencyUpdatedAt: null,
 
     setIsSpotChecking: (isSpotChecking) => set({ isSpotChecking }),
     setKnownDevice: (knownDevice) => set({ knownDevice }),
@@ -161,6 +181,27 @@ export const useBleStore = create<BleState>((set) => ({
         livePpgSamples: [], liveBPM: null, liveSpO2: null, lastPpgAt: null,
     }),
     setRecordingState: (patch) => set(patch),
+    setEmergencyState: ({
+        active,
+        type,
+        countdownSeconds,
+        emergencyPayload,
+    }) =>
+        set((state) => ({
+            emergencyActive: active,
+            emergencyType: type !== undefined ? type : state.emergencyType,
+            emergencyCountdownSeconds: countdownSeconds !== undefined ? countdownSeconds : state.emergencyCountdownSeconds,
+            emergencyPayload: emergencyPayload !== undefined ? emergencyPayload : state.emergencyPayload,
+            emergencyUpdatedAt: Date.now(),
+        })),
+    resetEmergencyState: () =>
+        set({
+            emergencyActive: false,
+            emergencyType: null,
+            emergencyCountdownSeconds: null,
+            emergencyPayload: null,
+            emergencyUpdatedAt: null,
+        }),
     resetHealthData: () =>
         set({
         livePpgSamples: [], liveBPM: null, liveSpO2: null, lastPpgAt: null,

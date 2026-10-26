@@ -1,4 +1,5 @@
 import notifee, {
+  AndroidCategory,
   AndroidForegroundServiceType,
   AndroidImportance,
 } from "@notifee/react-native";
@@ -16,6 +17,9 @@ import {
   BATTERY_SERVICE_UUID,
   BATTERY_LEVEL_CHARACTERISTIC_UUID,
   BATTERY_READ_INTERVAL_MS,
+  BLE_SOS_COMMAND_CANCEL,
+  BLE_SOS_COMMAND_TEST,
+  BLE_SOS_PREFIX,
   DIRECT_CONNECT_TIMEOUT_MS,
   DIRECT_RECONNECT_DELAY_MS,
   HUY_WATCH_CHANNEL_ID,
@@ -24,6 +28,9 @@ import {
   HUY_WATCH_DEVICE_NAME,
   HUY_WATCH_NOTIFICATION_ID,
   HUY_WATCH_SERVICE_UUID,
+  HUY_WATCH_SOS_CHANNEL_ID,
+  HUY_WATCH_SOS_INFO_NOTIFICATION_ID,
+  HUY_WATCH_SOS_NOTIFICATION_ID,
   NOTIFICATION_UPDATE_INTERVAL_MS,
   RECONNECT_SCAN_INTERVAL_MS,
   RECONNECT_SCAN_WINDOW_SECONDS,
@@ -31,7 +38,7 @@ import {
   STORE_HEALTH_UPDATE_INTERVAL_MS,
 } from "./bleConstants";
 import { bleStorage, KnownBleDevice } from "./bleStorage";
-import { useBleStore } from "./bleStore";
+import { useBleStore, BleEmergencyType } from "./bleStore";
 import { useWorkoutEngineStore } from "@/services/workout/workoutEngineStore";
 
 type TimerHandle = ReturnType<typeof setTimeout>;
@@ -99,6 +106,9 @@ class HuyWatchBleService {
   private listeners: EventSubscription[] = [];
   private batteryTimer: TimerHandle | null = null;
   private lastBleWorkoutSteps: number | null = null;
+  private emergencyStateTimer: TimerHandle | null = null;
+  private lastEmergencyLine: string | null = null;
+  private lastEmergencyLineAt: number = 0;
 
   async bootstrap() {
     if (this.started) {
@@ -290,6 +300,9 @@ class HuyWatchBleService {
       if (command.includes('WORKOUT_START') || command.includes('WORKOUT_STOP')) {
         this.lastBleWorkoutSteps = null;
       }
+      if (command === BLE_SOS_COMMAND_CANCEL) {
+        void this.clearEmergency();
+      }
     } catch (error) {
       console.warn("Lỗi khi gửi lệnh BLE:", error);
       throw error;
@@ -313,6 +326,26 @@ class HuyWatchBleService {
     const store = useBleStore.getState();
     store.setIsSpotChecking(false);
     await this.sendCommand("CMD:IDLE");
+  }
+
+  async cancelEmergency() {
+    await this.sendCommand(BLE_SOS_COMMAND_CANCEL);
+    await this.clearEmergency();
+  }
+
+  async sendTestSos() {
+    await this.sendCommand(BLE_SOS_COMMAND_TEST);
+  }
+
+  async clearEmergency() {
+    useBleStore.getState().resetEmergencyState();
+    if (Platform.OS === "android") {
+      try {
+        await notifee.cancelNotification(HUY_WATCH_SOS_NOTIFICATION_ID);
+      } catch (err) {
+        console.warn("Failed to cancel SOS notification:", err);
+      }
+    }
   }
 
   private startBatteryPeriodicRead() {
@@ -348,6 +381,7 @@ class HuyWatchBleService {
     store.setConnectedDevice(null);
     store.setStatus(store.knownDevice ? "disconnected" : "unpaired");
     store.resetHealthData();
+    void this.clearEmergency();
     await this.stopForegroundService();
   }
 
@@ -403,6 +437,7 @@ class HuyWatchBleService {
         this.clearReconnectTimer();
         store.setConnectedDevice(null);
         store.resetLivePpgData();
+        void this.clearEmergency();
         this.livePpgSamples = [];
         this.pendingPpgSampleCount = 0;
         store.setStatus("bluetoothOff", `Bluetooth: ${state}`);
@@ -436,6 +471,10 @@ class HuyWatchBleService {
     if (isReportChar) {
       const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
       for (const line of lines) {
+        if (line.startsWith(BLE_SOS_PREFIX)) {
+          this.handleEmergencyLine(line);
+          continue;
+        }
         if (line.startsWith("R1:") || line.startsWith("R:")) {
           // Báo cáo hoàn tất Pha 1 (1 phút đo PPG)
           const parts = line.slice(line.indexOf(":") + 1).split(",");
@@ -528,6 +567,10 @@ class HuyWatchBleService {
     const ppgSamples: PpgSample[] = [];
 
     for (const line of lines) {
+      if (line.startsWith(BLE_SOS_PREFIX)) {
+        this.handleEmergencyLine(line);
+        continue;
+      }
       if (line.startsWith("CMD:")) {
         console.log("[BLE-CMD]", line);
         if (line.includes("MOTION") || line.includes("NOT_WEARING")) {
@@ -642,6 +685,7 @@ class HuyWatchBleService {
 
     store.setConnectedDevice(null);
     store.resetHealthData();
+    void this.clearEmergency();
     store.setNegotiatedMtu(null);
     this.ppgLineBuffer = "";
     this.livePpgSamples = [];
@@ -865,6 +909,173 @@ class HuyWatchBleService {
     }
 
     await notifee.stopForegroundService();
+  }
+
+  private parseEmergencyType(raw?: string): BleEmergencyType {
+    if (!raw) return "EMERGENCY";
+    const upper = raw.trim().toUpperCase();
+    if (upper === "FALL" || upper === "SYNCOPE" || upper === "CARDIAC") {
+      return upper;
+    }
+    return "EMERGENCY";
+  }
+
+  private async createEmergencyChannel() {
+    return notifee.createChannel({
+      id: HUY_WATCH_SOS_CHANNEL_ID,
+      name: i18n.t("settings:ble.emergency.channelName", { defaultValue: "HuyWatch SOS Alert" }),
+      importance: AndroidImportance.HIGH,
+      vibration: true,
+      vibrationPattern: [300, 500, 300, 500],
+      sound: "default",
+    });
+  }
+
+  private handleEmergencyLine(line: string) {
+    const now = Date.now();
+    if (this.lastEmergencyLine === line && now - this.lastEmergencyLineAt < 400) {
+      // Deduplicate identical SOS line sent across both report and raw characteristics
+      return;
+    }
+    this.lastEmergencyLine = line;
+    this.lastEmergencyLineAt = now;
+
+    console.log("[BLE-SOS]", line);
+    const store = useBleStore.getState();
+
+    if (line.startsWith("SOS:COUNTDOWN,")) {
+      const seconds = parseInt(line.slice("SOS:COUNTDOWN,".length), 10);
+      if (Number.isFinite(seconds)) {
+        const type = store.emergencyType ?? "EMERGENCY";
+        store.setEmergencyState({
+          active: true,
+          type,
+          countdownSeconds: seconds,
+          emergencyPayload: line,
+        });
+        void this.displayEmergencyNotification(line, seconds, type);
+      }
+      return;
+    }
+
+    if (line.startsWith("SOS:ALERT")) {
+      const parts = line.split(",");
+      const type = this.parseEmergencyType(parts[1]);
+      store.setEmergencyState({
+        active: true,
+        type,
+        emergencyPayload: line,
+      });
+      void this.displayEmergencyNotification(line, store.emergencyCountdownSeconds, type);
+      return;
+    }
+
+    if (line.startsWith("SOS:CANCELLED")) {
+      const parts = line.split(",");
+      const reason = parts[1]?.trim();
+      void this.clearEmergency();
+
+      if (reason === "NO_WEAR") {
+        void this.displayEmergencyInfoNotification(
+          i18n.t("settings:ble.emergency.cancelledNoWear.title", { defaultValue: "Fall Alert Cancelled" }),
+          i18n.t("settings:ble.emergency.cancelledNoWear.body", {
+            defaultValue: "Watch was not worn snugly. Fall alert automatically cancelled.",
+          }),
+        );
+      }
+      return;
+    }
+
+    if (line.startsWith("SOS:CONFIRMED")) {
+      const parts = line.split(",");
+      const type = parts[1] ? this.parseEmergencyType(parts[1]) : (store.emergencyType ?? "EMERGENCY");
+      store.setEmergencyState({
+        active: true,
+        type,
+        emergencyPayload: line,
+      });
+      void this.displayEmergencyNotification(line, null, type, true);
+      return;
+    }
+  }
+
+  private async displayEmergencyNotification(
+    message: string,
+    countdown: number | null,
+    type: BleEmergencyType,
+    confirmed = false,
+  ) {
+    if (Platform.OS !== "android") return;
+
+    try {
+      await notifee.requestPermission();
+      const channelId = await this.createEmergencyChannel();
+
+      const typeLabel = i18n.t(`settings:ble.emergency.types.${type}`, { defaultValue: type });
+      const title = i18n.t("settings:ble.emergency.title", {
+        type: typeLabel,
+        defaultValue: `ALERT: ${typeLabel}`,
+      });
+
+      let body: string;
+      if (confirmed) {
+        body = i18n.t("settings:ble.emergency.bodyConfirmed", { defaultValue: "EMERGENCY CONFIRMED!" });
+      } else if (typeof countdown === "number") {
+        body = i18n.t("settings:ble.emergency.bodyCountdown", {
+          seconds: countdown,
+          defaultValue: `Countdown: ${countdown}s remaining!`,
+        });
+      } else {
+        body = message;
+      }
+
+      await notifee.displayNotification({
+        id: HUY_WATCH_SOS_NOTIFICATION_ID,
+        title,
+        body,
+        android: {
+          channelId,
+          color: "#DC2626",
+          category: AndroidCategory.ALARM,
+          importance: AndroidImportance.HIGH,
+          ongoing: !confirmed,
+          onlyAlertOnce: typeof countdown === "number" && countdown < 15,
+          pressAction: {
+            id: "default",
+            launchActivity: "default",
+          },
+        },
+      });
+    } catch (err) {
+      console.warn("Failed to display emergency notification:", err);
+    }
+  }
+
+  private async displayEmergencyInfoNotification(title: string, body: string) {
+    if (Platform.OS !== "android") return;
+
+    try {
+      await notifee.requestPermission();
+      const channelId = await this.createEmergencyChannel();
+
+      await notifee.displayNotification({
+        id: HUY_WATCH_SOS_INFO_NOTIFICATION_ID,
+        title,
+        body,
+        android: {
+          channelId,
+          color: "#F59E0B",
+          importance: AndroidImportance.HIGH,
+          onlyAlertOnce: false,
+          pressAction: {
+            id: "default",
+            launchActivity: "default",
+          },
+        },
+      });
+    } catch (err) {
+      console.warn("Failed to display emergency info notification:", err);
+    }
   }
 }
 

@@ -7,7 +7,7 @@ import { useAuthStore } from '@/services/authentication/authStore';
 import { useLogoutMutation } from '@/hooks/mutations/useAuthMutations';
 import { useBLE } from '@/context/BLEContext';
 import { LogoutButton } from '@/components/features/auth/LogoutButton';
-import { Battery, ChevronRight, Info, Radio, Trash2, User as UserIcon, Watch } from 'lucide-react-native';
+import { AlertTriangle, Battery, ChevronRight, Info, Radio, Trash2, User as UserIcon, Watch } from 'lucide-react-native';
 import { THEME } from '@/constants/theme';
 import { LanguageSegment } from '@/components/ui/LanguageSwitch';
 import { useTranslation } from 'react-i18next';
@@ -17,7 +17,7 @@ export default function SettingsScreen() {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
   const logoutMutation = useLogoutMutation();
-  const { knownDevice, connectedDevice, forgetDevice, batteryLevel } = useBLE();
+  const { knownDevice, connectedDevice, forgetDevice, batteryLevel, sendTestSos } = useBLE();
 
   const handleLogout = async () => {
     await logoutMutation.mutateAsync();
@@ -70,16 +70,28 @@ export default function SettingsScreen() {
               </Text>
             </TouchableOpacity>
 
-            {knownDevice && (
+              {knownDevice && (
+                <TouchableOpacity
+                  onPress={() => void forgetDevice()}
+                  className="bg-destructive/10 border border-destructive/20 py-3 px-4 rounded-2xl flex-row items-center justify-center active:opacity-80"
+                >
+                  <Trash2 color={THEME.colors.error} size={16} className="mr-1.5" />
+                  <Text className="text-xs font-bold text-destructive">{t('device.unpair')}</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {connectedDevice && (
               <TouchableOpacity
-                onPress={() => void forgetDevice()}
-                className="bg-destructive/10 border border-destructive/20 py-3 px-4 rounded-2xl flex-row items-center justify-center active:opacity-80"
+                onPress={() => void sendTestSos()}
+                className="mt-3 bg-red-50 border border-red-200 py-3 px-4 rounded-2xl flex-row items-center justify-center active:opacity-80"
               >
-                <Trash2 color={THEME.colors.error} size={16} className="mr-1.5" />
-                <Text className="text-xs font-bold text-destructive">{t('device.unpair')}</Text>
+                <AlertTriangle color="#DC2626" size={16} className="mr-1.5" />
+                <Text className="text-xs font-bold text-red-600">
+                  {t('device.testSos', { defaultValue: 'Kiểm tra SOS (Giả lập té ngã)' })}
+                </Text>
               </TouchableOpacity>
             )}
-          </View>
         </View>
 
         {/* Tài khoản: hồ sơ cá nhân (giống mục Hồ sơ trên web) */}
