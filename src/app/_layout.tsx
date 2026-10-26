@@ -8,6 +8,7 @@ import { useAuthStore } from '@/services/authentication/authStore';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/utils/queryClient';
 import { THEME } from '@/constants/theme';
+import { EmergencyAlertOverlay } from '@/components/features/emergency/EmergencyAlertOverlay';
 import '@/services/notifee-management/notifeeForegroundService';
 import '@/global.css';
 import '@/i18n';
@@ -50,6 +51,7 @@ export default function RootLayout() {
               <Stack.Screen name="workout/active" dangerouslySingular={true} />
               <Stack.Screen name="workout/summary" dangerouslySingular={true} />
             </Stack>
+            <EmergencyAlertOverlay />
           </View>
         </BLEProvider>
       </GluestackUIProvider>

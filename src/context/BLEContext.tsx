@@ -31,6 +31,10 @@ interface BLEContextType {
   isSpotChecking: boolean;
   isAnalyzing: boolean;
   aiAnalysisResult: HealthRecordResponse | null;
+  emergencyActive: boolean;
+  emergencyType: string | null;
+  emergencyCountdownSeconds: number | null;
+  emergencyPayload: string | null;
   connectToDevice: (id: string, name?: string | null) => Promise<void>;
   disconnectDevice: () => Promise<void>;
   forgetDevice: () => Promise<void>;
@@ -41,6 +45,8 @@ interface BLEContextType {
   startSpotCheck: () => Promise<void>;
   stopSpotCheck: () => Promise<void>;
   sendCommand: (cmd: string) => Promise<void>;
+  cancelEmergency: () => Promise<void>;
+  sendTestSos: () => Promise<void>;
 }
 
 const BLEContext = createContext<BLEContextType | undefined>(undefined);
@@ -81,6 +87,10 @@ export const BLEProvider: React.FC<{ children: React.ReactNode }> = ({
   const isSpotChecking = useBleStore((state) => state.isSpotChecking);
   const isAnalyzing = useBleStore((state) => state.isAnalyzing);
   const aiAnalysisResult = useBleStore((state) => state.aiAnalysisResult);
+  const emergencyActive = useBleStore((state) => state.emergencyActive);
+  const emergencyType = useBleStore((state) => state.emergencyType);
+  const emergencyCountdownSeconds = useBleStore((state) => state.emergencyCountdownSeconds);
+  const emergencyPayload = useBleStore((state) => state.emergencyPayload);
 
   useEffect(() => {
     void bleService.bootstrap();
@@ -116,6 +126,10 @@ export const BLEProvider: React.FC<{ children: React.ReactNode }> = ({
       recordingError,
       isAnalyzing,
       aiAnalysisResult,
+      emergencyActive,
+      emergencyType,
+      emergencyCountdownSeconds,
+      emergencyPayload,
       connectToDevice: (id, name) =>
         bleService.connectToDevice(id, { deviceName: name }),
       disconnectDevice: () => bleService.disconnectDevice(),
@@ -127,6 +141,8 @@ export const BLEProvider: React.FC<{ children: React.ReactNode }> = ({
       startSpotCheck: () => bleService.startSpotCheck(),
       stopSpotCheck: () => bleService.stopSpotCheck(),
       sendCommand: (cmd: string) => bleService.sendCommand(cmd),
+      cancelEmergency: () => bleService.cancelEmergency(),
+      sendTestSos: () => bleService.sendTestSos(),
     }),
     [
       knownDevice,
@@ -152,6 +168,10 @@ export const BLEProvider: React.FC<{ children: React.ReactNode }> = ({
       recordingError,
       isAnalyzing,
       aiAnalysisResult,
+      emergencyActive,
+      emergencyType,
+      emergencyCountdownSeconds,
+      emergencyPayload,
     ],
   );
 

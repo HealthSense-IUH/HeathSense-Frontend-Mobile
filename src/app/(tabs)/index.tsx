@@ -21,6 +21,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BackgroundGradient } from '@/components/ui/BackgroundGradient';
 import { useBleStore } from '@/services/ble-management/bleStore';
 import { useAuthStore } from '@/services/authentication/authStore';
+import { useBLE } from '@/context/BLEContext';
 import { AFibScreeningCard } from '@/components/features/health/AFibScreeningCard';
 import { PredictionBadge } from '@/components/features/health/PredictionBadge';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
@@ -118,12 +119,16 @@ function ShortcutTile({ title, description, icon, iconClassName, onPress }: { ti
 export default function HomeScreen() {
   const { t } = useTranslation('health');
   const router = useRouter();
+  const { cancelEmergency } = useBLE();
   const user = useAuthStore((state) => state.user);
   const currentBPM = useBleStore((state) => state.currentBPM);
   const currentSpO2 = useBleStore((state) => state.currentSpO2);
   const connectedDevice = useBleStore((state) => state.connectedDeviceId);
   const knownDevice = useBleStore((state) => state.knownDevice);
   const batteryLevel = useBleStore((state) => state.batteryLevel);
+  const emergencyActive = useBleStore((state) => state.emergencyActive);
+  const emergencyType = useBleStore((state) => state.emergencyType);
+  const emergencyCountdownSeconds = useBleStore((state) => state.emergencyCountdownSeconds);
   // Bước / calo hôm nay = tổng các buổi tập hôm nay (đồng hồ chỉ đếm bước khi đang tập); đọc sessions để tự cập nhật
   const sessions = useWorkoutCatalogStore((state) => state.sessions);
   const todayStats = useWorkoutCatalogStore.getState().getTodayStats();
@@ -203,6 +208,34 @@ export default function HomeScreen() {
       }
     >
       <View className="px-5 mt-3">
+        {emergencyActive && (
+          <View className="mb-5 rounded-2xl border border-red-200 bg-red-50 p-4">
+            <Text className="text-base font-bold text-red-700">Emergency detected</Text>
+            <Text className="text-sm text-red-700 mt-1">
+              {emergencyType ?? 'EMERGENCY'}
+              {typeof emergencyCountdownSeconds === 'number' ? ` • ${emergencyCountdownSeconds}s left` : ''}
+            </Text>
+            <View className="flex-row gap-3 mt-3">
+              <TouchableOpacity
+                onPress={() => {
+                  void cancelEmergency().catch(() => {});
+                }}
+                className="flex-1 rounded-xl bg-red-600 px-4 py-3 items-center"
+                activeOpacity={0.85}
+              >
+                <Text className="text-white font-bold">Cancel SOS</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => router.push('/(public)/scan' as any)}
+                className="rounded-xl bg-white border border-red-200 px-4 py-3 items-center"
+                activeOpacity={0.85}
+              >
+                <Text className="text-red-700 font-bold">Device</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
         {/* Thẻ kết nối thiết bị đeo */}
         <TouchableOpacity
           onPress={() => {

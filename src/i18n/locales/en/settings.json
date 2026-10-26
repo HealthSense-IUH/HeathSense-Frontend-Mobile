@@ -11,7 +11,8 @@
     "tapToScan": "Tap the button below to scan",
     "rescan": "Scan & change device",
     "findAndConnect": "Find & connect a device",
-    "unpair": "Unpair"
+    "unpair": "Unpair",
+    "testSos": "Test SOS (Simulate Fall)"
   },
   "account": {
     "sectionTitle": "Account",
@@ -44,6 +45,29 @@
       "notEnoughSamples": "Not enough samples for the 1-minute Phase 1. Recording cancelled.",
       "interruptedMotion": "The AFib measurement was interrupted by hand movement.",
       "interruptedRemoved": "The measurement was interrupted because the device was removed."
+    },
+    "emergency": {
+      "channelName": "HuyWatch SOS Emergency Alert",
+      "title": "ALERT: {{type}}",
+      "types": {
+        "FALL": "Fall Detected",
+        "SYNCOPE": "Syncope / Immobility",
+        "CARDIAC": "Cardiac Emergency",
+        "EMERGENCY": "SOS Emergency"
+      },
+      "bodyCountdown": "Countdown: {{seconds}}s remaining before emergency confirmed!",
+      "bodyConfirmed": "EMERGENCY CONFIRMED!",
+      "cancelledNoWear": {
+        "title": "Fall Alert Cancelled",
+        "body": "Watch is not worn snugly (no finger/wrist detected). Fall alert automatically cancelled."
+      },
+      "overlay": {
+        "title": "EMERGENCY INCIDENT DETECTED",
+        "description": "The watch sent an emergency alert. If you are okay, press cancel below.",
+        "cancel": "CANCEL SOS (I'M OK)",
+        "dismiss": "Dismiss for now",
+        "secondsLeft": "seconds left"
+      }
     }
   }
 }
