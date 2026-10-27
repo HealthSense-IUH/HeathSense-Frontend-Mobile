@@ -167,7 +167,7 @@ export const useBleStore = create<BleState>((set) => ({
     }) =>
         set((state) => ({
         ...(samples ? {
-            livePpgSamples: samples.slice(-500),
+            livePpgSamples: samples.slice(-150),
             ...getLiveVitals(samples.at(-1)),
         } : {}),
         lastPpgAt: receivedAt,

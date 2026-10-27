@@ -59,6 +59,8 @@ export const safeBack = (): boolean => {
   try {
     if (expoRouter.canGoBack()) {
       expoRouter.back();
+    } else {
+      expoRouter.replace('/(tabs)' as any);
     }
   } catch (error) {
     console.warn('[SafeNavigation] Back error:', error);

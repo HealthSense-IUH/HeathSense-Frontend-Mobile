@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useCallback } from "react";
 import { bleService } from "@/services/ble-management/bleService";
 import type { KnownBleDevice } from "@/services/ble-management/bleStorage";
 import { BleConnectionStatus, useBleStore } from "@/services/ble-management/bleStore";
@@ -41,7 +41,7 @@ interface BLEContextType {
   refreshBatteryLevel: () => Promise<number | null>;
   startPpgRecording: () => void;
   stopPpgRecording: () => Promise<PpgRecordingResult>;
-  stopExportAndUploadPpgRecording: () => Promise<{ recording: PpgRecordingResult; record?: HealthRecordResponse }>;
+  stopExportAndUploadPpgRecording: () => Promise<{ recording?: PpgRecordingResult; record?: HealthRecordResponse }>;
   startSpotCheck: () => Promise<void>;
   stopSpotCheck: () => Promise<void>;
   sendCommand: (cmd: string) => Promise<void>;
@@ -59,11 +59,10 @@ export const BLEProvider: React.FC<{ children: React.ReactNode }> = ({
   const currentBPM = useBleStore((state) => state.currentBPM);
   const currentSpO2 = useBleStore((state) => state.currentSpO2);
   const batteryLevel = useBleStore((state) => state.batteryLevel);
-  const latestPpgDeviceMillis = useBleStore(
-    (state) => state.latestPpgDeviceMillis,
-  );
-  const latestPpgRed = useBleStore((state) => state.latestPpgRed);
-  const latestPpgIR = useBleStore((state) => state.latestPpgIR);
+  // Read latest raw PPG properties on demand without causing full React context re-renders 4x per second
+  const latestPpgDeviceMillis = useBleStore.getState().latestPpgDeviceMillis;
+  const latestPpgRed = useBleStore.getState().latestPpgRed;
+  const latestPpgIR = useBleStore.getState().latestPpgIR;
   const negotiatedMtu = useBleStore((state) => state.negotiatedMtu);
   const status = useBleStore((state) => state.status);
   const isInitialized = useBleStore((state) => state.isInitialized);
@@ -95,6 +94,32 @@ export const BLEProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     void bleService.bootstrap();
   }, []);
+
+  const connectToDevice = useCallback(
+    (id: string, name?: string | null) =>
+      bleService.connectToDevice(id, { deviceName: name }),
+    [],
+  );
+  const disconnectDevice = useCallback(() => bleService.disconnectDevice(), []);
+  const forgetDevice = useCallback(() => bleService.forgetDevice(), []);
+  const refreshBatteryLevel = useCallback(
+    () => bleService.readBatteryLevel(),
+    [],
+  );
+  const startPpgRecording = useCallback(() => ppgRecorder.start(), []);
+  const stopPpgRecording = useCallback(() => ppgRecorder.stopAndExport(), []);
+  const stopExportAndUploadPpgRecording = useCallback(
+    () => ppgRecorder.stopExportAndUpload(),
+    [],
+  );
+  const startSpotCheck = useCallback(() => bleService.startSpotCheck(), []);
+  const stopSpotCheck = useCallback(() => bleService.stopSpotCheck(), []);
+  const sendCommand = useCallback(
+    (cmd: string) => bleService.sendCommand(cmd),
+    [],
+  );
+  const cancelEmergency = useCallback(() => bleService.cancelEmergency(), []);
+  const sendTestSos = useCallback(() => bleService.sendTestSos(), []);
 
   const value = useMemo<BLEContextType>(
     () => ({
@@ -130,19 +155,18 @@ export const BLEProvider: React.FC<{ children: React.ReactNode }> = ({
       emergencyType,
       emergencyCountdownSeconds,
       emergencyPayload,
-      connectToDevice: (id, name) =>
-        bleService.connectToDevice(id, { deviceName: name }),
-      disconnectDevice: () => bleService.disconnectDevice(),
-      forgetDevice: () => bleService.forgetDevice(),
-      refreshBatteryLevel: () => bleService.readBatteryLevel(),
-      startPpgRecording: () => ppgRecorder.start(),
-      stopPpgRecording: () => ppgRecorder.stopAndExport(),
-      stopExportAndUploadPpgRecording: () => ppgRecorder.stopExportAndUpload(),
-      startSpotCheck: () => bleService.startSpotCheck(),
-      stopSpotCheck: () => bleService.stopSpotCheck(),
-      sendCommand: (cmd: string) => bleService.sendCommand(cmd),
-      cancelEmergency: () => bleService.cancelEmergency(),
-      sendTestSos: () => bleService.sendTestSos(),
+      connectToDevice,
+      disconnectDevice,
+      forgetDevice,
+      refreshBatteryLevel,
+      startPpgRecording,
+      stopPpgRecording,
+      stopExportAndUploadPpgRecording,
+      startSpotCheck,
+      stopSpotCheck,
+      sendCommand,
+      cancelEmergency,
+      sendTestSos,
     }),
     [
       knownDevice,
@@ -172,6 +196,18 @@ export const BLEProvider: React.FC<{ children: React.ReactNode }> = ({
       emergencyType,
       emergencyCountdownSeconds,
       emergencyPayload,
+      connectToDevice,
+      disconnectDevice,
+      forgetDevice,
+      refreshBatteryLevel,
+      startPpgRecording,
+      stopPpgRecording,
+      stopExportAndUploadPpgRecording,
+      startSpotCheck,
+      stopSpotCheck,
+      sendCommand,
+      cancelEmergency,
+      sendTestSos,
     ],
   );
 

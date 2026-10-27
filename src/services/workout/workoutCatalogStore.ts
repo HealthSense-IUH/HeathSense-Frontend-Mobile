@@ -11,6 +11,7 @@ import {
 import { SEED_EXERCISES } from './exerciseSeedData';
 import i18n from '@/i18n';
 import { getMonthShort, getWeekdayShort } from './workoutI18n';
+import { workoutApiService } from './workoutApiService';
 
 const storage = createMMKV({
   id: 'healthsense-workout-storage',
@@ -230,7 +231,6 @@ export const useWorkoutCatalogStore = create<WorkoutCatalogState>((set, get) => 
 
       // Background sync with Spring Boot backend
       try {
-        const { workoutApiService } = require('./workoutApiService');
         workoutApiService.saveSession(session)
           .then((savedServerSession: any) => {
             if (savedServerSession && savedServerSession.id) {
@@ -257,7 +257,6 @@ export const useWorkoutCatalogStore = create<WorkoutCatalogState>((set, get) => 
 
     syncSessionsWithBackend: async (from?: string, to?: string) => {
       try {
-        const { workoutApiService } = require('./workoutApiService');
         const res = await workoutApiService.getSessions(0, 50, from, to);
         if (res && res.content && Array.isArray(res.content) && res.content.length > 0) {
           const localSessions = get().sessions;

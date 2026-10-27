@@ -9,7 +9,7 @@ import {
   Easing,
   StyleSheet,
 } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import {
   ArrowLeft,
   Settings,
@@ -29,7 +29,9 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/react/shallow';
 import { LiveMeasurementCard } from '@/components/features/health/LiveMeasurementCard';
 import { useBleStore } from '@/services/ble-management/bleStore';
-import { useBLE } from '@/context/BLEContext';
+import { bleService } from '@/services/ble-management/bleService';
+import { ppgRecorder } from '@/services/ppg-management/ppgRecorder';
+import { safeRouter } from '@/utils/safeNavigation';
 import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
 import { StitchHeartEcgIcon } from '@/components/ui/icons/StitchIcons';
 import { THEME } from '@/constants/theme';
@@ -39,61 +41,98 @@ import {
   useWorkoutEngineStore,
 } from '@/services/workout';
 
+// Sub-component riêng cho Spot-check để việc cập nhật BPM/SpO2 liên tục không làm re-render toàn bộ màn hình đo AFib
+const SpotCheckActivePod = React.memo(function SpotCheckActivePod() {
+  const { t } = useTranslation('health');
+  const { liveBPM, currentBPM, liveSpO2, currentSpO2 } = useBleStore(
+    useShallow(state => ({
+      liveBPM: state.liveBPM,
+      currentBPM: state.currentBPM,
+      liveSpO2: state.liveSpO2,
+      currentSpO2: state.currentSpO2,
+    }))
+  );
+
+  const spotBPM = liveBPM ?? (currentBPM > 0 ? currentBPM : null);
+  const spotSpO2 = liveSpO2 ?? (currentSpO2 > 0 ? currentSpO2 : null);
+
+  return (
+    <View
+      style={{
+        width: 176,
+        height: 176,
+        borderRadius: 88,
+        backgroundColor: '#FFFFFF',
+        borderWidth: 2,
+        borderColor: '#10B981',
+        shadowColor: 'rgba(16, 185, 129, 0.25)',
+        shadowOffset: { width: 0, height: 12 },
+        shadowOpacity: 1,
+        shadowRadius: 28,
+        elevation: 6,
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 12,
+      }}
+    >
+      <View className="flex-row items-center gap-1.5 mb-1">
+        <HeartPulse color="#E11D48" size={24} strokeWidth={2.4} />
+        <Text className="text-3xl font-extrabold text-slate-900 tracking-tight">
+          {spotBPM !== null && spotBPM > 0 ? spotBPM : '--'}
+        </Text>
+        <Text className="text-xs font-bold text-slate-500">BPM</Text>
+      </View>
+      <View className="flex-row items-center bg-cyan-50 px-2.5 py-0.5 rounded-full border border-cyan-200/60 mt-0.5">
+        <Text className="text-xs font-semibold text-cyan-800">
+          SpO2: <Text className="font-extrabold text-cyan-700">{spotSpO2 !== null && spotSpO2 > 0 ? `${spotSpO2}%` : '--'}</Text>
+        </Text>
+      </View>
+      <Text className="text-[11px] font-bold text-emerald-600 uppercase tracking-wider mt-2">
+        {t('measure.spotCheck.measuring')}
+      </Text>
+    </View>
+  );
+});
+
 export default function AFibMeasureScreen() {
   const { t } = useTranslation('health');
-  const router = useRouter();
   const params = useLocalSearchParams<{ mode?: string }>();
   const [measureMode, setMeasureMode] = useState<'afib' | 'spot_check'>(
     params.mode === 'spot_check' ? 'spot_check' : 'afib'
   );
 
-  const {
-    sendCommand,
-    stopExportAndUploadPpgRecording,
-    startPpgRecording,
-    isSpotChecking,
-    startSpotCheck,
-    stopSpotCheck,
-  } = useBLE();
   const store = useBleStore(useShallow(state => ({
     isRecordingPpg: state.isRecordingPpg,
+    isSpotChecking: state.isSpotChecking,
     isAnalyzing: state.isAnalyzing,
     aiAnalysisResult: state.aiAnalysisResult,
     recordingError: state.recordingError,
     recordingStartedAt: state.recordingStartedAt,
     connectedDeviceId: state.connectedDeviceId,
-    currentBPM: state.currentBPM,
-    currentSpO2: state.currentSpO2,
-    liveBPM: state.liveBPM,
-    liveSpO2: state.liveSpO2,
     setRecordingState: state.setRecordingState,
   })));
 
-  const spotBPM = store.liveBPM ?? (store.currentBPM > 0 ? store.currentBPM : null);
-  const spotSpO2 = store.liveSpO2 ?? (store.currentSpO2 > 0 ? store.currentSpO2 : null);
+  const isSpotChecking = store.isSpotChecking;
 
   const workoutStatus = useWorkoutEngineStore((state) => state.status);
   const lastWorkoutEndedAt = useWorkoutEngineStore((state) => state.lastWorkoutEndedAt);
   const [availability, setAvailability] = useState(() => getAFibScreeningAvailability());
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setAvailability(getAFibScreeningAvailability());
-    }, 0);
-    const interval = setInterval(() => {
-      setAvailability(getAFibScreeningAvailability());
-    }, 1000);
-    return () => {
-      clearTimeout(timer);
-      clearInterval(interval);
-    };
+    const check = () => setAvailability(getAFibScreeningAvailability());
+    check();
+    const current = getAFibScreeningAvailability();
+    if (current.canScreen) return;
+    const interval = setInterval(check, 1000);
+    return () => clearInterval(interval);
   }, [workoutStatus, lastWorkoutEndedAt]);
 
   const [countdown, setCountdown] = useState<number | null>(null);
   const [timeLeft, setTimeLeft] = useState(60);
   const [localUploadMsg, setLocalUploadMsg] = useState<string | null>(null);
 
-  const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const countdownTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const isCountingDownRef = useRef(false);
 
   // Persistent React Native animation value
   const [rotateAnim] = useState(() => new Animated.Value(0));
@@ -126,7 +165,7 @@ export default function AFibMeasureScreen() {
     outputRange: ['0deg', '360deg'],
   });
 
-  // Timer logic for measuring
+  // Timer logic for measuring: đếm lùi 60s và tự động hoàn tất khi về 0s
   useEffect(() => {
     if (!isRecording || !startedAt) {
       return;
@@ -135,29 +174,40 @@ export default function AFibMeasureScreen() {
       const elapsed = Math.floor((Date.now() - startedAt) / 1000);
       const remaining = Math.max(0, 60 - elapsed);
       setTimeLeft(remaining);
+      if (remaining === 0) {
+        clearInterval(interval);
+        // Ngay khi về 0s, tự động dừng ghi và xuất upload phân tích AI ngay lập tức
+        void ppgRecorder.stopExportAndUpload().catch((err) => {
+          console.warn('[AFibMeasure] Tự động xuất CSV & upload PPG khi hết 60s thất bại:', err);
+        });
+      }
     }, 1000);
     return () => clearInterval(interval);
   }, [isRecording, startedAt]);
 
+  const clearAllCountdownTimeouts = () => {
+    countdownTimeoutsRef.current.forEach((t) => clearTimeout(t));
+    countdownTimeoutsRef.current = [];
+    isCountingDownRef.current = false;
+  };
+
   // Clean up countdown and stop spot-check on unmount
   useEffect(() => {
     return () => {
-      if (countdownIntervalRef.current) {
-        clearInterval(countdownIntervalRef.current);
-      }
+      clearAllCountdownTimeouts();
       if (useBleStore.getState().isSpotChecking) {
-        void stopSpotCheck().catch(() => {});
+        void bleService.stopSpotCheck().catch(() => {});
       }
     };
-  }, [stopSpotCheck]);
+  }, []);
 
   const handleSpotCheckToggle = async () => {
     if (!isConnected) return;
     try {
       if (isSpotChecking) {
-        await stopSpotCheck();
+        await bleService.stopSpotCheck();
       } else {
-        await startSpotCheck();
+        await bleService.startSpotCheck();
       }
     } catch (err) {
       console.warn('[SpotCheck] Failed to toggle spot check:', err);
@@ -166,14 +216,15 @@ export default function AFibMeasureScreen() {
 
   const startMeasurement = async () => {
     try {
-      startPpgRecording();
-      await sendCommand("CMD:START_SCREENING");
+      ppgRecorder.start();
+      await bleService.sendCommand("CMD:START_SCREENING");
     } catch (err) {
       console.warn("[AFibMeasure] Failed to send screening command:", err);
     }
   };
 
   const startCountdown = () => {
+    if (isCountingDownRef.current || isRecording || isAnalyzing) return;
     const current = getAFibScreeningAvailability();
     if (!current.canScreen) {
       if (current.reason === 'WORKOUT_IN_PROGRESS') {
@@ -193,37 +244,50 @@ export default function AFibMeasureScreen() {
     }
 
     if (!isConnected) return;
-    if (countdownIntervalRef.current) {
-      clearInterval(countdownIntervalRef.current);
-    }
+
+    clearAllCountdownTimeouts();
+    isCountingDownRef.current = true;
     setLocalUploadMsg(null);
     setTimeLeft(60);
     store.setRecordingState({ aiAnalysisResult: null, recordingError: null });
     setCountdown(3);
 
-    let counter = 3;
-    countdownIntervalRef.current = setInterval(() => {
-      counter -= 1;
-      if (counter > 0) {
-        setCountdown(counter);
-      } else {
-        if (countdownIntervalRef.current) {
-          clearInterval(countdownIntervalRef.current);
-          countdownIntervalRef.current = null;
-        }
-        setCountdown(null);
-        void startMeasurement();
-      }
+    // Chuỗi timeout chính xác 1s mỗi bước (3 -> 2 -> 1 -> Bắt đầu), không bị nhảy bước do nghẽn interval
+    const t2 = setTimeout(() => {
+      setCountdown(2);
     }, 1000);
+
+    const t1 = setTimeout(() => {
+      setCountdown(1);
+    }, 2000);
+
+    const tStart = setTimeout(() => {
+      setCountdown(null);
+      isCountingDownRef.current = false;
+      void startMeasurement();
+    }, 3000);
+
+    countdownTimeoutsRef.current = [t2, t1, tStart];
   };
 
   const handleManualUpload = async () => {
     if (!isRecording) return;
     setLocalUploadMsg(t('measure.processingData'));
     try {
-      await stopExportAndUploadPpgRecording();
+      await ppgRecorder.stopExportAndUpload();
     } catch (err: any) {
       setLocalUploadMsg(err?.message || t('measure.uploadError'));
+    }
+  };
+
+  const handleCancelMeasurement = async () => {
+    ppgRecorder.cancelRecording(t('ppg.cancelled'));
+    setLocalUploadMsg(null);
+    setTimeLeft(60);
+    try {
+      await bleService.sendCommand("CMD:IDLE");
+    } catch (err) {
+      console.warn('[AFibMeasure] Failed to send IDLE command on cancel:', err);
     }
   };
 
@@ -254,7 +318,7 @@ export default function AFibMeasureScreen() {
       }
       headerLeft={
         <Pressable
-          onPress={() => router.back()}
+          onPress={() => safeRouter.back()}
           className="w-11 h-11 rounded-full bg-white/95 shadow-sm border border-blue-100 items-center justify-center active:opacity-80"
           style={{
             shadowColor: 'rgba(13, 110, 253, 0.08)',
@@ -282,10 +346,11 @@ export default function AFibMeasureScreen() {
         {/* Mode Selector Tabs (AFib 60s vs Spot-check) */}
         <View className="flex-row bg-slate-200/80 p-1 rounded-2xl mb-2.5 self-center">
           <Pressable
+            key="mode-tab-afib"
             onPress={() => {
               if (!isRecording && !isSpotChecking) setMeasureMode('afib');
             }}
-            className={`px-4 py-2 rounded-xl flex-row items-center gap-1.5 ${
+            className={`px-4 py-2 rounded-xl flex-row items-center gap-1.5 will-change-variable ${
               measureMode === 'afib' ? 'bg-white shadow-xs' : 'opacity-75'
             }`}
           >
@@ -300,10 +365,11 @@ export default function AFibMeasureScreen() {
           </Pressable>
 
           <Pressable
+            key="mode-tab-spot-check"
             onPress={() => {
               if (!isRecording && !isSpotChecking) setMeasureMode('spot_check');
             }}
-            className={`px-4 py-2 rounded-xl flex-row items-center gap-1.5 ${
+            className={`px-4 py-2 rounded-xl flex-row items-center gap-1.5 will-change-variable ${
               measureMode === 'spot_check' ? 'bg-white shadow-xs' : 'opacity-75'
             }`}
           >
@@ -345,40 +411,7 @@ export default function AFibMeasureScreen() {
                 />
 
                 {/* Central Active Spot-checking Pod */}
-                <View
-                  style={{
-                    width: 176,
-                    height: 176,
-                    borderRadius: 88,
-                    backgroundColor: '#FFFFFF',
-                    borderWidth: 2,
-                    borderColor: '#10B981',
-                    shadowColor: 'rgba(16, 185, 129, 0.25)',
-                    shadowOffset: { width: 0, height: 12 },
-                    shadowOpacity: 1,
-                    shadowRadius: 28,
-                    elevation: 6,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: 12,
-                  }}
-                >
-                  <View className="flex-row items-center gap-1.5 mb-1">
-                    <HeartPulse color="#E11D48" size={24} strokeWidth={2.4} />
-                    <Text className="text-3xl font-extrabold text-slate-900 tracking-tight">
-                      {spotBPM !== null && spotBPM > 0 ? spotBPM : '--'}
-                    </Text>
-                    <Text className="text-xs font-bold text-slate-500">BPM</Text>
-                  </View>
-                  <View className="flex-row items-center bg-cyan-50 px-2.5 py-0.5 rounded-full border border-cyan-200/60 mt-0.5">
-                    <Text className="text-xs font-semibold text-cyan-800">
-                      SpO2: <Text className="font-extrabold text-cyan-700">{spotSpO2 !== null && spotSpO2 > 0 ? `${spotSpO2}%` : '--'}</Text>
-                    </Text>
-                  </View>
-                  <Text className="text-[11px] font-bold text-emerald-600 uppercase tracking-wider mt-2">
-                    {t('measure.spotCheck.measuring')}
-                  </Text>
-                </View>
+                <SpotCheckActivePod />
               </View>
             ) : (
               /* Ready / Idle State for Spot-check */
@@ -573,7 +606,7 @@ export default function AFibMeasureScreen() {
                 {t('afibHistory.card.afibProbability', { value: ((result.confidence ?? 0) * 100).toFixed(1) })}
               </Text>
               <Pressable
-                onPress={() => router.push(`/health-record/${result.id}` as any)}
+                onPress={() => safeRouter.navigate(`/health-record/${result.id}` as any)}
                 hitSlop={8}
                 className="mt-1.5 flex-row items-center active:opacity-70"
                 style={{ gap: 2 }}
@@ -763,12 +796,20 @@ export default function AFibMeasureScreen() {
                 </LinearGradient>
               )
             ) : isRecording ? (
-              <Pressable
-                onPress={handleManualUpload}
-                className="w-full bg-rose-500 py-4 rounded-2xl flex-row items-center justify-center shadow-lg shadow-rose-500/30 active:opacity-80 mb-2"
-              >
-                <Text className="text-base font-bold text-white">{t('measure.stopAndAnalyze')}</Text>
-              </Pressable>
+              <View className="gap-2.5 mb-2">
+                <Pressable
+                  onPress={handleManualUpload}
+                  className="w-full bg-rose-500 py-4 rounded-2xl flex-row items-center justify-center shadow-lg shadow-rose-500/30 active:opacity-80"
+                >
+                  <Text className="text-base font-bold text-white">{t('measure.stopAndAnalyze')}</Text>
+                </Pressable>
+                <Pressable
+                  onPress={handleCancelMeasurement}
+                  className="w-full py-3 rounded-2xl flex-row items-center justify-center active:opacity-75 bg-slate-100/90 border border-slate-200"
+                >
+                  <Text className="text-sm font-semibold text-slate-600">{t('common:actions.cancel')}</Text>
+                </Pressable>
+              </View>
             ) : (
               /* Stitch Gradient 3-tone CTA Button */
               <LinearGradient
@@ -855,7 +896,7 @@ export default function AFibMeasureScreen() {
                       link: (
                         <Text
                           className="underline font-bold"
-                          onPress={() => router.push("/(public)/scan" as any)}
+                          onPress={() => safeRouter.navigate("/(public)/scan" as any)}
                         />
                       ),
                     }}

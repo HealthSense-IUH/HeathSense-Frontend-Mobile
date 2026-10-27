@@ -7,6 +7,7 @@ const storage = createMMKV({ id: 'step_tracking_storage' });
 // An toàn: Dùng dynamic require để tránh crash ứng dụng khi chạy trên môi trường không có expo-sensors
 function getPedometerModule() {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const Sensors = require('expo-sensors');
     return Sensors?.Pedometer || null;
   } catch {
@@ -384,7 +385,7 @@ class StepTrackingService {
         hourlySteps: hourlyData,
         deviceSource: Platform.OS === 'ios' ? 'IOS_CORE_MOTION' : 'ANDROID_PEDOMETER',
       });
-    } catch (e) {
+    } catch {
       // Ignore background sync errors
     }
   }

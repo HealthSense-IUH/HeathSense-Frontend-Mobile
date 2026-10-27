@@ -2,6 +2,7 @@ import { useWorkoutEngineStore } from './workoutEngineStore';
 
 let LocationModule: typeof import('expo-location') | null = null;
 try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   LocationModule = require('expo-location');
 } catch {
   console.warn('ExpoLocation native module not available in this client binary; GPS tracking is disabled.');
