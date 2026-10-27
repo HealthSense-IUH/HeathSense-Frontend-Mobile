@@ -36,6 +36,8 @@ const buildTimestampFileName = (date: Date) => {
 class PpgRecorder {
   private rows: string[] = [];
   private sampleIndex = 0;
+  private lastCountUpdateAt = 0;
+  private isExporting = false;
 
   /**
    * Khoảng cách giữa 2 mẫu PPG (ms). Thiết bị lấy mẫu mỗi ~10ms = 100Hz.
@@ -43,16 +45,22 @@ class PpgRecorder {
   private static readonly SAMPLE_INTERVAL_MS = 10;
 
   /**
-   * Số mẫu tối thiểu cho 1 phút đo Pha 1 hợp lệ (~45 giây = 4500 mẫu ở 100Hz).
-   * Nếu ít hơn 4500 mẫu (do bị ngắt bởi chuyển động/tháo thiết bị), phiên ghi sẽ bị hủy.
+   * Số mẫu tối thiểu cho 1 phút đo Pha 1 hợp lệ (~30 giây = 3000 mẫu ở 100Hz).
+   * Đủ cho mô hình AI trích xuất đặc trưng HRV và chẩn đoán AFib.
    */
-  private static readonly MIN_VALID_SAMPLES = 4500;
+  private static readonly MIN_VALID_SAMPLES = 3000;
+
+  public getSampleCount(): number {
+    return this.sampleIndex;
+  }
 
   start() {
     const now = Date.now();
 
     this.rows = [];
     this.sampleIndex = 0;
+    this.lastCountUpdateAt = 0;
+    this.isExporting = false;
     useBleStore.getState().resetLivePpgData();
 
     useBleStore.getState().setRecordingState({
@@ -95,9 +103,14 @@ class PpgRecorder {
       this.sampleIndex += 1;
     });
 
-    store.setRecordingState({
-      recordingSampleCount: this.sampleIndex,
-    });
+    // Chỉ cập nhật recordingSampleCount vào store tối đa 1 lần/giây để không làm nghẽn JS thread
+    const now = Date.now();
+    if (now - this.lastCountUpdateAt >= 1000) {
+      this.lastCountUpdateAt = now;
+      store.setRecordingState({
+        recordingSampleCount: this.sampleIndex,
+      });
+    }
   }
 
   /**
@@ -108,10 +121,12 @@ class PpgRecorder {
 
     this.rows = [];
     this.sampleIndex = 0;
+    this.isExporting = false;
 
     store.setRecordingState({
       isRecordingPpg: false,
       isExportingRecording: false,
+      isAnalyzing: false,
       recordingStartedAt: null,
       recordingSampleCount: 0,
       lastRecordingFileUri: null,
@@ -128,7 +143,7 @@ class PpgRecorder {
   async stopAndExport(options?: { enableSharing?: boolean }): Promise<PpgRecordingResult> {
     const store = useBleStore.getState();
 
-    if (!store.isRecordingPpg) {
+    if (!store.isRecordingPpg && !this.isExporting) {
       throw new Error(i18n.t("health:ppg.noActiveSession"));
     }
 
@@ -198,14 +213,30 @@ class PpgRecorder {
     }
   }
 
-  async stopExportAndUpload(): Promise<{ recording: PpgRecordingResult; record?: HealthRecordResponse }> {
+  async stopExportAndUpload(): Promise<{ recording?: PpgRecordingResult; record?: HealthRecordResponse }> {
     const store = useBleStore.getState();
-    // Xuất file CSV âm thầm (enableSharing = false)
-    const recording = await this.stopAndExport({ enableSharing: false });
-    let record: HealthRecordResponse | undefined;
+
+    if (!store.isRecordingPpg && !this.isExporting) {
+      return {};
+    }
+    if (this.isExporting) {
+      return {};
+    }
+    this.isExporting = true;
+
+    // Chuyển UI ngay sang trạng thái analyzing để người dùng biết máy đang xử lý, không bị treo ở 0s
+    store.setRecordingState({
+      isRecordingPpg: false,
+      isExportingRecording: true,
+      isAnalyzing: true,
+      recordingError: null,
+    });
 
     try {
-      store.setRecordingState({ isAnalyzing: true, recordingError: null });
+      // Xuất file CSV âm thầm (enableSharing = false)
+      const recording = await this.stopAndExport({ enableSharing: false });
+      let record: HealthRecordResponse | undefined;
+
       // Dynamic import ppgApi để tránh phụ thuộc vòng
       const { uploadPpgRecord } = await import("./ppgApi");
       record = await uploadPpgRecord(recording);
@@ -221,17 +252,23 @@ class PpgRecorder {
 
       store.setRecordingState({
         isAnalyzing: false,
-        aiAnalysisResult: record
+        isExportingRecording: false,
+        aiAnalysisResult: record,
       });
-    } catch (err) {
-      console.error("[PpgRecorder] Lỗi khi upload PPG record lên Backend/S3:", err);
-      store.setRecordingState({
-        isAnalyzing: false,
-        recordingError: err instanceof Error ? err.message : i18n.t("health:ppg.analysisError")
-      });
-    }
 
-    return { recording, record };
+      return { recording, record };
+    } catch (err: any) {
+      console.warn("[PpgRecorder] Lỗi khi xuất file hoặc upload AI:", err);
+      store.setRecordingState({
+        isRecordingPpg: false,
+        isExportingRecording: false,
+        isAnalyzing: false,
+        recordingError: err instanceof Error ? err.message : i18n.t("health:ppg.analysisError"),
+      });
+      throw err;
+    } finally {
+      this.isExporting = false;
+    }
   }
 }
 

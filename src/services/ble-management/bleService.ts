@@ -488,14 +488,9 @@ class HuyWatchBleService {
 
           // Hoàn tất Pha 1: Tự động dừng ghi, xuất file CSV, tải lên S3 và xác nhận với Backend
           if (store.isRecordingPpg) {
-            if (store.recordingSampleCount >= 4500) {
-              void ppgRecorder.stopExportAndUpload().catch((err) => {
-                console.warn("Lỗi tự động xuất CSV & upload PPG khi hoàn tất Pha 1:", err);
-              });
-            } else {
-              // Ít hơn 4500 mẫu -> Hủy âm thầm không gây cảnh báo lỗi
-              ppgRecorder.cancelRecording(i18n.t("settings:ble.recording.notEnoughSamples"));
-            }
+            void ppgRecorder.stopExportAndUpload().catch((err) => {
+              console.warn("Lỗi tự động xuất CSV & upload PPG khi hoàn tất Pha 1:", err);
+            });
           }
         } else if (line.startsWith("R2:")) {
           // Báo cáo hoàn tất Pha 2 (30 giây đo trung bình - CHỈ cập nhật BPM/SpO2, KHÔNG xuất/upload file PPG)
@@ -581,6 +576,9 @@ class HuyWatchBleService {
               : i18n.t("settings:ble.recording.interruptedRemoved");
             ppgRecorder.cancelRecording(reason);
           }
+          if (line.includes("NOT_WEARING") && store.isSpotChecking) {
+            store.setIsSpotChecking(false);
+          }
         }
       } else {
         const sample = this.parsePpgLine(line);
@@ -593,7 +591,7 @@ class HuyWatchBleService {
       if (store.isRecordingPpg) {
         ppgRecorder.appendSamples(ppgSamples);
       }
-      this.livePpgSamples = [...this.livePpgSamples, ...ppgSamples].slice(-500);
+      this.livePpgSamples = [...this.livePpgSamples, ...ppgSamples].slice(-150);
       this.pendingPpgSampleCount += ppgSamples.length;
 
       if (now - this.storeUpdateAt >= STORE_HEALTH_UPDATE_INTERVAL_MS) {
