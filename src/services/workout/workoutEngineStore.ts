@@ -13,6 +13,7 @@ import i18n from '@/i18n';
 // Decouple bleService to avoid require cycle (bleService <-> workoutEngineStore)
 const sendBleWorkoutCommand = (cmd: string) => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { bleService } = require('@/services/ble-management/bleService');
     if (bleService && typeof bleService.sendCommand === 'function') {
       void bleService.sendCommand(cmd).catch(() => {});

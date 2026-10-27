@@ -22,7 +22,7 @@ export const bleStorage = {
 
         try{
             return JSON.parse(raw) as KnownBleDevice;
-        }catch(err){
+        }catch{
             storage.remove(KNOWN_DEVICE_KEY);
             return null;
         }

@@ -172,7 +172,7 @@ export default function NutritionGroupScreen() {
 
   const group = useQuery({ queryKey: ['nutrition', 'group', slug], queryFn: () => nutritionApi.getGroup(slug), enabled: !!slug });
   const foods = useQuery({ queryKey: ['nutrition', 'group-foods', slug], queryFn: () => nutritionApi.getGroupFoods(slug), enabled: !!slug });
-  const list = foods.data ?? [];
+  const list = useMemo(() => foods.data ?? [], [foods.data]);
   const foodNames = useMemo(() => Array.from(new Set(list.map((f) => f.foodName))), [list]);
   const variants = useMemo(() => (selectedType ? list.filter((f) => f.foodName === selectedType) : []), [list, selectedType]);
   const shown = filter === 'ALL' ? variants : variants.filter((v) => v.guidance === filter);

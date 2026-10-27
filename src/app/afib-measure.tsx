@@ -170,7 +170,6 @@ export default function AFibMeasureScreen() {
     if (!isRecording || !startedAt) {
       return;
     }
-    setTimeLeft(60);
     const interval = setInterval(() => {
       const elapsed = Math.floor((Date.now() - startedAt) / 1000);
       const remaining = Math.max(0, 60 - elapsed);
@@ -284,6 +283,7 @@ export default function AFibMeasureScreen() {
   const handleCancelMeasurement = async () => {
     ppgRecorder.cancelRecording(t('ppg.cancelled'));
     setLocalUploadMsg(null);
+    setTimeLeft(60);
     try {
       await bleService.sendCommand("CMD:IDLE");
     } catch (err) {

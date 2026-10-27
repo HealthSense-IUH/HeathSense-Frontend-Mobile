@@ -90,7 +90,7 @@ export default function HistoryTab() {
   const [filter, setFilter] = useState<RecordStatusFilter>('all');
   const { data, isLoading, isFetching, error, refetch } = useMyRecords(page, PAGE_SIZE);
 
-  const records = data?.content ?? [];
+  const records = useMemo(() => data?.content ?? [], [data?.content]);
   const totalPages = Math.max(1, data?.totalPages ?? 1);
   const totalElements = data?.totalElements ?? 0;
 
