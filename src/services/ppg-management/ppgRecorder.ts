@@ -10,6 +10,8 @@ export type PpgSample = {
   ir: number;
   bpm?: number | null;
   spo2?: number | null;
+  /** Cờ cử động từ IMU (1 = đang cử động, 0 = yên); null nếu firmware không gửi */
+  motion?: number | null;
 };
 
 export type PpgRecordingResult = {
@@ -18,7 +20,8 @@ export type PpgRecordingResult = {
   sampleCount: number;
 };
 
-const CSV_HEADER = "Time(ms),Red,IR,Bpm,SpO2";
+// Motion: cờ cử động từ IMU của vòng tay, lưu kèm để đối chiếu; mô hình AI không dùng cột này.
+const CSV_HEADER = "Time(ms),Red,IR,Bpm,SpO2,Motion";
 
 const pad = (value: number) => value.toString().padStart(2, "0");
 
@@ -45,10 +48,11 @@ class PpgRecorder {
   private static readonly SAMPLE_INTERVAL_MS = 10;
 
   /**
-   * Số mẫu tối thiểu cho 1 phút đo Pha 1 hợp lệ (~30 giây = 3000 mẫu ở 100Hz).
-   * Đủ cho mô hình AI trích xuất đặc trưng HRV và chẩn đoán AFib.
+   * Số mẫu tối thiểu để AI Service phân tích được ít nhất 1 cửa sổ: 2 giây đầu bị bỏ
+   * (nhiễu khởi động) + 1 cửa sổ 30 giây = 32 giây = 3200 mẫu ở 100Hz.
+   * Một lần đo đủ 72 giây cho 5 cửa sổ (xem AFIB_MEASUREMENT_SECONDS).
    */
-  private static readonly MIN_VALID_SAMPLES = 3000;
+  private static readonly MIN_VALID_SAMPLES = 3200;
 
   public getSampleCount(): number {
     return this.sampleIndex;
@@ -98,6 +102,7 @@ class PpgRecorder {
           sample.ir,
           sample.bpm ?? "",
           sample.spo2 ?? "",
+          sample.motion ?? "",
         ].join(","),
       );
       this.sampleIndex += 1;

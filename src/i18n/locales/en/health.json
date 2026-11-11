@@ -135,12 +135,12 @@
       "badge": {
         "cooldown": "Heart recovery: {{time}}",
         "workout": "Workout in progress",
-        "default": "60s clinical screening"
+        "default": "72-second screening"
       },
       "title": "AFib Screening",
       "latest": "Latest measurement: {{label}}",
       "cooldownHint": "You just finished a workout. To let your heart rate settle and avoid false alerts, please rest for another {{time}} before measuring.",
-      "description": "60s clinical rest protocol and AI analysis to detect early signs of atrial fibrillation and arrhythmias.",
+      "description": "72-second resting measurement with AI analysis to flag possible atrial fibrillation. Results are for reference only and do not replace a physician's diagnosis.",
       "cta": {
         "cooldown": "Recovery: {{time}}",
         "workout": "Paused during workout",
@@ -150,16 +150,16 @@
       "hint": {
         "cooldown": "Rest 10 min",
         "workout": "Workout active",
-        "default": "60s protocol"
+        "default": "72s protocol"
       }
     }
   },
   "measure": {
     "title": "AFib Screening",
     "settingsAria": "Clinical measurement settings",
-    "protocolBadge": "60s AFib clinical protocol",
-    "protocolSteps": "1. Sit still in a comfortable chair with back support.\n2. Keep your arm at heart level.\n3. Do not move or talk during the 60-second measurement.\n4. The PPG sensor will automatically capture the optical signal and send it to the AI model for analysis.",
-    "instruction": "Keep your arm still and the strap snug on your wrist for the entire <b>60-second measurement</b>.",
+    "protocolBadge": "72s AFib screening protocol",
+    "protocolSteps": "1. Sit still in a comfortable chair with back support.\n2. Keep your arm at heart level.\n3. Do not move or talk during the 72-second measurement.\n4. The PPG sensor will automatically capture the optical signal and send it to the AI model for analysis.",
+    "instruction": "Keep your arm still and the strap snug on your wrist for the entire <b>72-second measurement</b>.",
     "preparing": "Get ready",
     "recording": "Recording",
     "analyzing": "AI is analyzing...",
@@ -176,7 +176,7 @@
       "cooldown": "Heart recovery ({{time}})",
       "workout": "Paused during workout",
       "processing": "Processing result...",
-      "start": "Start 60-second measurement"
+      "start": "Start 72-second measurement"
     },
     "banner": {
       "cooldown": "In the 10-minute heart recovery window ({{time}}). Please rest to avoid false alerts.",
@@ -197,7 +197,7 @@
     },
     "spotCheck": {
       "tabTitle": "Spot-check (Vitals)",
-      "screeningTabTitle": "AFib Screening (60s)",
+      "screeningTabTitle": "AFib Screening (72s)",
       "badge": "Live Vital Signs",
       "title": "Instant Heart Rate & SpO2",
       "description": "Spot-check lets you check your heart rate and oxygen saturation anytime, without post-workout cardiac cooldown restrictions.",
@@ -278,6 +278,17 @@
     "file": "File: {{name}}",
     "aiConclusion": "AI conclusion:",
     "afibProbability": "Atrial fibrillation probability",
+    "temporal": {
+      "title": "30-second window analysis",
+      "alertFive": "Alert: 5 consecutive windows with probability ≥ 80% and agreeing models (at {{time}} s)",
+      "alertTwo": "Alert: 2 consecutive windows with probability ≥ 90% and agreeing models (at {{time}} s)",
+      "noAlert": "No alert: not enough consecutive windows met the thresholds",
+      "unavailable": "The active model does not support the temporal alert rule",
+      "accepted": "Windows with acceptable signal quality: {{accepted}}/{{total}}",
+      "window": "{{start}}–{{end}} s",
+      "rejected": "Noisy signal",
+      "note": "Window probabilities are for reference only and do not replace a physician's diagnosis."
+    },
     "avgHeartRate": "Avg. heart rate",
     "lfHfRatio": "LF/HF ratio",
     "hrvTitle": "Heart Rate Variability (HRV) metrics",
@@ -386,7 +397,7 @@
     },
     "settingsAlert": {
       "title": "Analysis settings",
-      "message": "The AI system automatically syncs and classifies heart rhythm abnormalities from 60s PPG recordings according to clinical standards.",
+      "message": "The AI system automatically syncs and analyzes 72-second PPG recordings to flag possible atrial fibrillation.",
       "measureNow": "Measure now"
     },
     "preparingChart": "Preparing chart...",
@@ -419,7 +430,7 @@
   "ppg": {
     "cancelled": "PPG recording cancelled.",
     "noActiveSession": "No PPG recording session is running.",
-    "notEnoughData": "Not enough data for 1 minute ({{samples}}/{{required}} samples). Export cancelled.",
+    "notEnoughData": "Recording too short to analyze ({{samples}}/{{required}} samples). Export cancelled.",
     "exportFailed": "Unable to export the CSV file.",
     "shareTitle": "Export PPG CSV data",
     "analysisError": "AI analysis error",
