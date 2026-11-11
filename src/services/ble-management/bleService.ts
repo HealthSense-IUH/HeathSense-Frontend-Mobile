@@ -647,7 +647,8 @@ class HuyWatchBleService {
     });
   }
 
-  // Parse 1 dòng PPG: 5 cột (millis,red,ir,bpm,spo2) hoặc 3 cột legacy (millis,red,ir)
+  // Parse 1 dòng PPG: 6 cột (millis,red,ir,bpm,spo2,motion), 5 cột (firmware cũ, không có cờ cử động)
+  // hoặc 3 cột legacy (millis,red,ir)
   private parsePpgLine(line: string): PpgSample | null {
     const cols = line.split(",");
     if (cols.length < 3) return null;
@@ -660,6 +661,8 @@ class HuyWatchBleService {
 
     const bpm = cols.length >= 5 ? parseInt(cols[3], 10) : null;
     const spo2 = cols.length >= 5 ? parseInt(cols[4], 10) : null;
+    // Cờ cử động từ IMU của vòng tay (1 = đang cử động), firmware nRF52840 gửi kèm từng mẫu
+    const motion = cols.length >= 6 ? parseInt(cols[5], 10) : null;
 
     return {
       deviceMillis: Number.isFinite(deviceMillis) ? deviceMillis : null,
@@ -667,6 +670,7 @@ class HuyWatchBleService {
       ir,
       bpm: bpm !== null && Number.isFinite(bpm) ? bpm : null,
       spo2: spo2 !== null && Number.isFinite(spo2) ? spo2 : null,
+      motion: motion !== null && Number.isFinite(motion) ? motion : null,
     };
   }
 

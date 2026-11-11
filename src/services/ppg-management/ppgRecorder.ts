@@ -10,6 +10,8 @@ export type PpgSample = {
   ir: number;
   bpm?: number | null;
   spo2?: number | null;
+  /** Cờ cử động từ IMU (1 = đang cử động, 0 = yên); null nếu firmware không gửi */
+  motion?: number | null;
 };
 
 export type PpgRecordingResult = {
@@ -18,7 +20,8 @@ export type PpgRecordingResult = {
   sampleCount: number;
 };
 
-const CSV_HEADER = "Time(ms),Red,IR,Bpm,SpO2";
+// Motion: cờ cử động từ IMU của vòng tay, lưu kèm để đối chiếu; mô hình AI không dùng cột này.
+const CSV_HEADER = "Time(ms),Red,IR,Bpm,SpO2,Motion";
 
 const pad = (value: number) => value.toString().padStart(2, "0");
 
@@ -99,6 +102,7 @@ class PpgRecorder {
           sample.ir,
           sample.bpm ?? "",
           sample.spo2 ?? "",
+          sample.motion ?? "",
         ].join(","),
       );
       this.sampleIndex += 1;
