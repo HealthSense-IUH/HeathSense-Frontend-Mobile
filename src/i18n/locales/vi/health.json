@@ -135,12 +135,12 @@
       "badge": {
         "cooldown": "Hồi phục tim: {{time}}",
         "workout": "Đang tập luyện thể thao",
-        "default": "Chẩn đoán lâm sàng 60s"
+        "default": "Tầm soát 72 giây"
       },
       "title": "Tầm soát Rung nhĩ (AFib)",
       "latest": "Lần đo gần nhất: {{label}}",
       "cooldownHint": "Vừa kết thúc bài tập. Để nhịp tim ổn định và tránh cảnh báo sai, vui lòng nghỉ tĩnh thêm {{time}} trước khi đo.",
-      "description": "Quy trình đo tĩnh 60 giây và phân tích AI để phát hiện sớm các dấu hiệu rung nhĩ và bất thường nhịp tim.",
+      "description": "Quy trình đo tĩnh 72 giây và phân tích AI để phát hiện dấu hiệu nghi ngờ rung nhĩ. Kết quả chỉ để tham khảo, không thay thế chẩn đoán của bác sĩ.",
       "cta": {
         "cooldown": "Hồi phục: {{time}}",
         "workout": "Tạm ngắt khi tập",
@@ -150,16 +150,16 @@
       "hint": {
         "cooldown": "Nghỉ tĩnh 10p",
         "workout": "Vận động active",
-        "default": "Quy trình 60s"
+        "default": "Quy trình 72s"
       }
     }
   },
   "measure": {
     "title": "Tầm soát Rung nhĩ",
     "settingsAria": "Cài đặt đo lâm sàng",
-    "protocolBadge": "Quy trình chuẩn y khoa AFib 60s",
-    "protocolSteps": "1. Ngồi yên tĩnh trên ghế tựa lưng thoải mái.\n2. Giữ cánh tay đặt ngang tầm tim.\n3. Không cử động hoặc nói chuyện trong suốt 60 giây đo.\n4. Cảm biến PPG sẽ tự động thu thập tín hiệu quang học và gửi về mô hình AI chẩn đoán.",
-    "instruction": "Đảm bảo giữ yên cánh tay và dây đeo vừa vặn với cổ tay trong suốt <b>60 giây đo</b>.",
+    "protocolBadge": "Quy trình tầm soát AFib 72s",
+    "protocolSteps": "1. Ngồi yên tĩnh trên ghế tựa lưng thoải mái.\n2. Giữ cánh tay đặt ngang tầm tim.\n3. Không cử động hoặc nói chuyện trong suốt 72 giây đo.\n4. Cảm biến PPG sẽ tự động thu thập tín hiệu quang học và gửi về mô hình AI phân tích.",
+    "instruction": "Đảm bảo giữ yên cánh tay và dây đeo vừa vặn với cổ tay trong suốt <b>72 giây đo</b>.",
     "preparing": "Chuẩn bị",
     "recording": "Đang thu thập",
     "analyzing": "AI đang phân tích...",
@@ -176,7 +176,7 @@
       "cooldown": "Hồi phục tim ({{time}})",
       "workout": "Tạm ngắt khi đang tập luyện",
       "processing": "Đang xử lý kết quả...",
-      "start": "Bắt đầu đo 60 giây"
+      "start": "Bắt đầu đo 72 giây"
     },
     "banner": {
       "cooldown": "Đang trong 10 phút hồi phục tim ({{time}}). Vui lòng nghỉ tĩnh để tránh cảnh báo sai.",
@@ -197,7 +197,7 @@
     },
     "spotCheck": {
       "tabTitle": "Đo tức thời (Spot-check)",
-      "screeningTabTitle": "Tầm soát AFib (60s)",
+      "screeningTabTitle": "Tầm soát AFib (72s)",
       "badge": "Đo sinh hiệu trực tiếp",
       "title": "Kiểm tra nhanh Nhịp tim & SpO2",
       "description": "Đo tức thời cho phép kiểm tra nhịp tim và SpO2 bất cứ lúc nào, không bị chặn bởi thời gian hồi phục tim sau tập.",
@@ -278,6 +278,17 @@
     "file": "File: {{name}}",
     "aiConclusion": "Kết luận AI:",
     "afibProbability": "Khả năng bị rung nhĩ",
+    "temporal": {
+      "title": "Phân tích theo cửa sổ 30 giây",
+      "alertFive": "Có cảnh báo: 5 cửa sổ liên tiếp có xác suất ≥ 80% và các mô hình đồng thuận (giây {{time}})",
+      "alertTwo": "Có cảnh báo: 2 cửa sổ liên tiếp có xác suất ≥ 90% và các mô hình đồng thuận (giây {{time}})",
+      "noAlert": "Không có cảnh báo: chưa đủ cửa sổ liên tiếp đạt ngưỡng",
+      "unavailable": "Mô hình đang dùng không hỗ trợ quy tắc cảnh báo theo thời gian",
+      "accepted": "Cửa sổ đạt chất lượng tín hiệu: {{accepted}}/{{total}}",
+      "window": "{{start}}–{{end}} giây",
+      "rejected": "Tín hiệu nhiễu",
+      "note": "Xác suất của từng cửa sổ chỉ để tham khảo, không thay thế chẩn đoán của bác sĩ."
+    },
     "avgHeartRate": "Nhịp tim TB",
     "lfHfRatio": "Tỷ lệ LF/HF",
     "hrvTitle": "Các chỉ số Biến thiên Nhịp tim (HRV)",
@@ -386,7 +397,7 @@
     },
     "settingsAlert": {
       "title": "Cài đặt phân tích",
-      "message": "Hệ thống AI tự động đồng bộ và phân loại bất thường nhịp tim qua PPG 60s theo chuẩn y khoa.",
+      "message": "Hệ thống AI tự động đồng bộ và phân tích bản ghi PPG 72 giây để tầm soát dấu hiệu nghi ngờ rung nhĩ.",
       "measureNow": "Đo lâm sàng ngay"
     },
     "preparingChart": "Đang chuẩn bị biểu đồ...",
@@ -419,7 +430,7 @@
   "ppg": {
     "cancelled": "Đã hủy phiên ghi PPG.",
     "noActiveSession": "Chưa có phiên ghi dữ liệu PPG đang chạy.",
-    "notEnoughData": "Dữ liệu không đủ 1 phút ({{samples}}/{{required}} mẫu). Hủy xuất file.",
+    "notEnoughData": "Bản ghi quá ngắn để phân tích ({{samples}}/{{required}} mẫu). Hủy xuất file.",
     "exportFailed": "Không thể xuất file CSV.",
     "shareTitle": "Xuất dữ liệu PPG CSV",
     "analysisError": "Lỗi phân tích AI",

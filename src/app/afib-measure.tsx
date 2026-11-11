@@ -36,6 +36,7 @@ import { ScreenWrapper } from '@/components/layout/ScreenWrapper';
 import { StitchHeartEcgIcon } from '@/components/ui/icons/StitchIcons';
 import { THEME } from '@/constants/theme';
 import { getPredictionMeta } from '@/constants/healthRecords';
+import { AFIB_MEASUREMENT_SECONDS } from '@/constants/measurement';
 import {
   getAFibScreeningAvailability,
   useWorkoutEngineStore,
@@ -128,7 +129,7 @@ export default function AFibMeasureScreen() {
   }, [workoutStatus, lastWorkoutEndedAt]);
 
   const [countdown, setCountdown] = useState<number | null>(null);
-  const [timeLeft, setTimeLeft] = useState(60);
+  const [timeLeft, setTimeLeft] = useState(AFIB_MEASUREMENT_SECONDS);
   const [localUploadMsg, setLocalUploadMsg] = useState<string | null>(null);
 
   const countdownTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -165,20 +166,20 @@ export default function AFibMeasureScreen() {
     outputRange: ['0deg', '360deg'],
   });
 
-  // Timer logic for measuring: đếm lùi 60s và tự động hoàn tất khi về 0s
+  // Timer logic for measuring: đếm lùi AFIB_MEASUREMENT_SECONDS (72 s) và tự động hoàn tất khi về 0s
   useEffect(() => {
     if (!isRecording || !startedAt) {
       return;
     }
     const interval = setInterval(() => {
       const elapsed = Math.floor((Date.now() - startedAt) / 1000);
-      const remaining = Math.max(0, 60 - elapsed);
+      const remaining = Math.max(0, AFIB_MEASUREMENT_SECONDS - elapsed);
       setTimeLeft(remaining);
       if (remaining === 0) {
         clearInterval(interval);
         // Ngay khi về 0s, tự động dừng ghi và xuất upload phân tích AI ngay lập tức
         void ppgRecorder.stopExportAndUpload().catch((err) => {
-          console.warn('[AFibMeasure] Tự động xuất CSV & upload PPG khi hết 60s thất bại:', err);
+          console.warn('[AFibMeasure] Tự động xuất CSV & upload PPG khi hết giờ đo thất bại:', err);
         });
       }
     }, 1000);
@@ -248,7 +249,7 @@ export default function AFibMeasureScreen() {
     clearAllCountdownTimeouts();
     isCountingDownRef.current = true;
     setLocalUploadMsg(null);
-    setTimeLeft(60);
+    setTimeLeft(AFIB_MEASUREMENT_SECONDS);
     store.setRecordingState({ aiAnalysisResult: null, recordingError: null });
     setCountdown(3);
 
@@ -283,7 +284,7 @@ export default function AFibMeasureScreen() {
   const handleCancelMeasurement = async () => {
     ppgRecorder.cancelRecording(t('ppg.cancelled'));
     setLocalUploadMsg(null);
-    setTimeLeft(60);
+    setTimeLeft(AFIB_MEASUREMENT_SECONDS);
     try {
       await bleService.sendCommand("CMD:IDLE");
     } catch (err) {

@@ -11,6 +11,7 @@ import { getPredictionMeta, HRV_TABLE_ROWS } from '@/constants/healthRecords';
 import { formatHrvNumber, formatRecordDate } from '@/utils/formatters';
 import { PredictionBadge } from '@/components/features/health/PredictionBadge';
 import { MeasurementVisuals } from '@/components/features/health/MeasurementVisuals';
+import { TemporalRuleCard } from '@/components/features/health/TemporalRuleCard';
 import type { HrvFeatures } from '@/types/health-records';
 
 /** 4 chỉ số sinh lý chính hiện ở trên bảng HRV (giống web). labelKey = khóa i18n trong namespace health; label = chữ cố định. */
@@ -108,6 +109,9 @@ export default function HealthRecordDetailScreen() {
             </View>
           ) : null}
         </View>
+
+        {/* Kết quả theo cửa sổ 30 s và quy tắc cảnh báo theo thời gian */}
+        <TemporalRuleCard analysis={features.windowAnalysis} />
 
         {/* Sóng mạch, SQI, Poincaré */}
         <MeasurementVisuals features={features} />
