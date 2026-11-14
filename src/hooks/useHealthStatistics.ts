@@ -11,7 +11,10 @@ export const useHealthStatistics = (filter: StatisticsPeriod, referenceDate: Dat
   const period: StatisticsPeriod = filter;
 
   const formattedDate = referenceDate.toISOString();
-  const dateKey = formattedDate.split('T')[0];
+  const localYear = referenceDate.getFullYear();
+  const localMonth = String(referenceDate.getMonth() + 1).padStart(2, '0');
+  const localDay = String(referenceDate.getDate()).padStart(2, '0');
+  const dateKey = `${localYear}-${localMonth}-${localDay}`;
 
   let timezone = 'UTC';
   try {
@@ -23,7 +26,7 @@ export const useHealthStatistics = (filter: StatisticsPeriod, referenceDate: Dat
   }
 
   const query = useQuery<HealthStatisticsResponse, Error>({
-    queryKey: [QUERY_KEYS.HEALTH_STATS, period, dateKey],
+    queryKey: [QUERY_KEYS.HEALTH_STATS, period, dateKey, timezone],
     queryFn: () => getHealthStatisticsApi(period, formattedDate, timezone),
     placeholderData: keepPreviousData, // Giữ data cũ trong lúc fetch data mới để chống giật UI
     staleTime: 5 * 60 * 1000, // Cache dữ liệu 5 phút: chuyển tab tức thì 0ms, không tốn request mạng

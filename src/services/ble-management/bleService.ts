@@ -476,7 +476,7 @@ class HuyWatchBleService {
           continue;
         }
         if (line.startsWith("R1:") || line.startsWith("R:")) {
-          // Báo cáo hoàn tất Pha 1 (1 phút đo PPG)
+          // Báo cáo hoàn tất Pha 1 (72 giây đo PPG)
           const parts = line.slice(line.indexOf(":") + 1).split(",");
           if (parts.length >= 2) {
             const bpm = parseInt(parts[0], 10);

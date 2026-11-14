@@ -152,7 +152,7 @@ class PpgRecorder {
       throw new Error(i18n.t("health:ppg.noActiveSession"));
     }
 
-    // Kiểm tra đủ số lượng mẫu cho 1 phút đo Pha 1 hợp lệ
+    // Kiểm tra đủ số lượng mẫu tối thiểu cho Pha 1 hợp lệ
     if (this.sampleIndex < PpgRecorder.MIN_VALID_SAMPLES) {
       const msg = i18n.t("health:ppg.notEnoughData", { samples: this.sampleIndex, required: PpgRecorder.MIN_VALID_SAMPLES });
       this.cancelRecording(msg);

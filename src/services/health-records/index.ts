@@ -63,5 +63,6 @@ export const getRecordDownloadUrlApi = async (id: string | number): Promise<stri
   const response = await axiosClient.get<ApiResponse<PresignedUrlResponse>>(
     `/api/health-records/${id}/download-url`
   );
-  return unwrap(response)?.uploadUrl ?? null;
+  const unwrapped = unwrap(response);
+  return (unwrapped as any)?.downloadUrl ?? unwrapped?.uploadUrl ?? null;
 };

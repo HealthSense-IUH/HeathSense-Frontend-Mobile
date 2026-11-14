@@ -4,6 +4,8 @@ import { PresignedUrlRequest } from '@/types/request';
 import axiosClient from '@/utils/axiosClient';
 import { HealthRecordResponse, PresignedUrlResponse } from '@/types/response';
 import { PpgRecordingResult } from './ppgRecorder';
+import { QUERY_KEYS } from '@/constants/queryKeys';
+import { queryClient } from '@/utils/queryClient';
 import i18n from '@/i18n';
 
 /**
@@ -123,18 +125,25 @@ export const uploadPpgRecord = async (
         let recordResponse = await confirmUpload(String(presigned.recordId));
 
         // 5. Polling chờ AI phân tích xong (trạng thái chuyển sang COMPLETED hoặc FAILED)
-        const maxAttempts = 30; // 30 lần * 2 giây = 60 giây timeout
+        const maxAttempts = 30; // 30 lần * 2 giây = 60 giây
         let attempts = 0;
         
         while (recordResponse.status === 'PROCESSING' || recordResponse.status === 'PENDING_UPLOAD') {
             if (attempts >= maxAttempts) {
-                throw new Error(i18n.t('health:ppg.analysisTimeout'));
+                console.warn('[PPG] Quá 60s chờ AI, trả về bản ghi PROCESSING để màn chi tiết tiếp tục theo dõi.');
+                break;
             }
             // Đợi 2 giây
             await new Promise(resolve => setTimeout(resolve, 2000));
             recordResponse = await getHealthRecord(String(presigned.recordId));
             attempts++;
         }
+
+        // Làm mới cache danh sách và thống kê ngay sau khi có bản ghi mới
+        void queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.HEALTH_RECORDS] });
+        void queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.HEALTH_STATS] });
+        void queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.HEALTH_HISTORY_DATES] });
+        void queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.HEALTH_HISTORY_BY_DATE] });
 
         if (recordResponse.status === 'FAILED') {
             throw new Error(i18n.t('health:ppg.analysisFailed'));
