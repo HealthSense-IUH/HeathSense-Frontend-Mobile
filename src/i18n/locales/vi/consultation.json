@@ -242,7 +242,7 @@
       "requiresReview": "Cần kiểm tra thủ công"
     },
     "toast": {
-      "requestSuccessDescription": "Yêu cầu gia hạn của bạn đã được gửi đến Điều phối viên chăm sóc.",
+      "requestSuccessDescription": "Yêu cầu gia hạn của bạn đã được gửi đến Quản trị viên.",
       "requestErrorDescription": "Không thể gửi yêu cầu gia hạn vào lúc này.",
       "cancelSuccessDescription": "Yêu cầu gia hạn đã được hủy. Thời hạn phiên chăm sóc hiện tại giữ nguyên.",
       "cancelErrorDescription": "Không thể hủy yêu cầu gia hạn lúc này.",

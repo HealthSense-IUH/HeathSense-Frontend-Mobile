@@ -242,7 +242,7 @@
       "requiresReview": "Requires manual review"
     },
     "toast": {
-      "requestSuccessDescription": "Your renewal request has been sent to the Care Coordinator.",
+      "requestSuccessDescription": "Your renewal request has been sent to the Administrator.",
       "requestErrorDescription": "Unable to send the renewal request at this time.",
       "cancelSuccessDescription": "The renewal request has been cancelled. The current care session end date remains unchanged.",
       "cancelErrorDescription": "Unable to cancel the renewal request at this time.",
