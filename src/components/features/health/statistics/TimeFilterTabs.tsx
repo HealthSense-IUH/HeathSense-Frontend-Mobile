@@ -8,6 +8,11 @@ interface TimeFilterTabsProps {
   onChange: (filter: StatisticsPeriod) => void;
 }
 
+const activeTabStyle = {
+  backgroundColor: '#FFFFFF',
+  boxShadow: '0 1px 2px rgba(15, 23, 42, 0.06)',
+};
+
 export function TimeFilterTabs({ activeFilter, onChange }: TimeFilterTabsProps) {
   const { t } = useTranslation('health');
   return (
@@ -16,9 +21,8 @@ export function TimeFilterTabs({ activeFilter, onChange }: TimeFilterTabsProps) 
         <Pressable
           key={filter}
           onPress={() => onChange(filter)}
-          className={`flex-1 items-center justify-center py-2 rounded-xl transition-all active:opacity-80 ${
-            activeFilter === filter ? 'bg-white shadow-sm' : 'bg-transparent'
-          }`}
+          className="flex-1 items-center justify-center py-2 rounded-xl active:opacity-80"
+          style={activeFilter === filter ? activeTabStyle : undefined}
         >
           <Text
             className={`text-sm ${

@@ -109,6 +109,24 @@ export default function HistoryTab() {
 
   const header = (
     <View style={{ gap: 12 }} className="mb-3">
+      <View className="flex-row" style={{ gap: 8 }}>
+        <Pressable
+          onPress={() => router.push('/afib-analysis-details' as any)}
+          className="flex-1 flex-row items-center justify-center bg-blue-50 border border-blue-100 rounded-xl py-2.5 px-3 active:opacity-80"
+          style={{ gap: 6 }}
+        >
+          <BarChart3 size={15} color="#0D6EFD" />
+          <Text className="text-xs font-bold text-[#0D6EFD]" numberOfLines={1}>{t('analysis.title')}</Text>
+        </Pressable>
+        <Pressable
+          onPress={() => router.push('/reports' as any)}
+          className="flex-1 flex-row items-center justify-center bg-white border border-slate-200/80 rounded-xl py-2.5 px-3 active:opacity-80"
+          style={{ gap: 6, ...shadow }}
+        >
+          <HeartPulse size={15} color="#0D6EFD" />
+          <Text className="text-xs font-semibold text-slate-700" numberOfLines={1}>{t('reports.title')}</Text>
+        </Pressable>
+      </View>
       <View className="flex-row items-center bg-white rounded-xl border border-slate-200/70 px-3 h-11" style={{ gap: 8 }}>
         <Search size={16} color="#0D6EFD" />
         <TextInput
