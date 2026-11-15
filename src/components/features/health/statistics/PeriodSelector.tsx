@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, Pressable } from 'react-native';
-import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 
 interface PeriodSelectorProps {
@@ -8,9 +8,10 @@ interface PeriodSelectorProps {
   monthText: string;
   onPrev: () => void;
   onNext: () => void;
+  disableNext?: boolean;
 }
 
-export function PeriodSelector({ monthText, onPrev, onNext }: PeriodSelectorProps) {
+export function PeriodSelector({ monthText, onPrev, onNext, disableNext = false }: PeriodSelectorProps) {
   const { t } = useTranslation('health');
   return (
     <View className="flex justify-center pt-2 pb-1 mx-5">
@@ -33,16 +34,18 @@ export function PeriodSelector({ monthText, onPrev, onNext }: PeriodSelectorProp
         </Pressable>
 
         <View className="flex-row items-center px-3">
-          <Text className="text-sm font-bold text-slate-800 mr-1.5">{monthText}</Text>
-          <ChevronDown color="#64748B" size={14} strokeWidth={2.5} />
+          <Text className="text-sm font-bold text-slate-800">{monthText}</Text>
         </View>
 
         <Pressable
           onPress={onNext}
-          className="w-8 h-8 rounded-full bg-blue-50/90 items-center justify-center active:opacity-75"
+          disabled={disableNext}
+          className={`w-8 h-8 rounded-full items-center justify-center ${
+            disableNext ? 'bg-slate-100 opacity-40' : 'bg-blue-50/90 active:opacity-75'
+          }`}
           aria-label={t('analysis.period.nextAria')}
         >
-          <ChevronRight color="#0D6EFD" size={16} strokeWidth={2.5} />
+          <ChevronRight color={disableNext ? '#94A3B8' : '#0D6EFD'} size={16} strokeWidth={2.5} />
         </Pressable>
       </View>
     </View>

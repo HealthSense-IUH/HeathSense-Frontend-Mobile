@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import {
   Activity,
+  BarChart3,
   Battery,
   Bluetooth,
   ChevronRight,
@@ -296,9 +297,20 @@ export default function HomeScreen() {
         </TouchableOpacity>
 
         {/* Tổng quan sức khỏe: 6 thẻ, mỗi thẻ gắn nhãn thời điểm (trực tiếp / hôm nay / lần đo gần nhất) */}
-        <View className="mb-3">
-          <Text className="text-lg font-bold text-slate-900 tracking-tight">{t('home.overview.title')}</Text>
-          <Text className="text-xs text-slate-500">{t('home.overview.description')}</Text>
+        <View className="mb-3 flex-row items-center justify-between" style={{ gap: 8 }}>
+          <View className="flex-1">
+            <Text className="text-lg font-bold text-slate-900 tracking-tight">{t('home.overview.title')}</Text>
+            <Text className="text-xs text-slate-500">{t('home.overview.description')}</Text>
+          </View>
+          <Pressable
+            onPress={() => router.push('/afib-analysis-details' as any)}
+            className="flex-row items-center px-3 py-1.5 rounded-full bg-blue-50 border border-blue-100 active:opacity-80"
+            style={{ gap: 4 }}
+          >
+            <BarChart3 size={14} color="#0D6EFD" />
+            <Text className="text-xs font-semibold text-[#0D6EFD]">{t('analysis.title')}</Text>
+            <ChevronRight size={13} color="#0D6EFD" />
+          </Pressable>
         </View>
         <View className="flex-row flex-wrap justify-between">
           <StatCard

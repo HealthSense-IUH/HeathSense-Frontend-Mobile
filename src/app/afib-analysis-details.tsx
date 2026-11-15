@@ -1,7 +1,7 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { View, Text, ActivityIndicator, Pressable, ScrollView, Alert } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { View, Text, ActivityIndicator, Pressable, ScrollView, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
-import { ChevronLeft, Settings, Info, Plus } from 'lucide-react-native';
+import { ChevronLeft, Info, Plus } from 'lucide-react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { BarChart } from 'react-native-gifted-charts';
@@ -24,19 +24,34 @@ export default function AFibAnalysisDetailsScreen() {
   const { t } = useTranslation('health');
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { width: windowWidth } = useWindowDimensions();
   const [activeFilter, setActiveFilter] = useState<StatisticsPeriod>('DAY');
   const [referenceDate, setReferenceDate] = useState(new Date());
-  const [isReady, setIsReady] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsReady(true);
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, []);
+  const [chartContainerWidth, setChartContainerWidth] = useState(0);
 
   const { data, loading, error } = useHealthStatistics(activeFilter, referenceDate);
+
+  const canGoNext = useMemo(() => {
+    const now = new Date();
+    const d = referenceDate;
+    if (activeFilter === 'DAY') {
+      const refDay = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+      return refDay < today;
+    }
+    if (activeFilter === 'WEEK') {
+      const mondayOf = (x: Date) => {
+        const m = new Date(x.getFullYear(), x.getMonth(), x.getDate());
+        m.setDate(m.getDate() - ((m.getDay() + 6) % 7));
+        return m.getTime();
+      };
+      return mondayOf(d) < mondayOf(now);
+    }
+    if (activeFilter === 'MONTH') {
+      return d.getFullYear() * 12 + d.getMonth() < now.getFullYear() * 12 + now.getMonth();
+    }
+    return d.getFullYear() < now.getFullYear();
+  }, [activeFilter, referenceDate]);
 
   const handlePrev = () => {
     const newDate = new Date(referenceDate);
@@ -48,6 +63,7 @@ export default function AFibAnalysisDetailsScreen() {
   };
 
   const handleNext = () => {
+    if (!canGoNext) return;
     const newDate = new Date(referenceDate);
     if (activeFilter === 'DAY') newDate.setDate(newDate.getDate() + 1);
     else if (activeFilter === 'WEEK') newDate.setDate(newDate.getDate() + 7);
@@ -127,6 +143,11 @@ export default function AFibAnalysisDetailsScreen() {
         if (day !== 1 && day % 5 !== 0) {
           displayLabel = '';
         }
+      } else if (activeFilter === 'DAY') {
+        const hour = parseInt(item.label, 10);
+        if (hour !== 0 && hour !== 6 && hour !== 12 && hour !== 18 && hour !== 23) {
+          displayLabel = '';
+        }
       }
 
       return {
@@ -141,19 +162,19 @@ export default function AFibAnalysisDetailsScreen() {
 
   const totalResults = (data?.totalNormal || 0) + (data?.totalAfibRisk || 0) + (data?.totalAfibSuspected || 0) + (data?.totalUncertain || 0);
 
-  const handleSettingsPress = () => {
-    Alert.alert(
-      t('analysis.settingsAlert.title'),
-      t('analysis.settingsAlert.message'),
-      [
-        {
-          text: t('analysis.settingsAlert.measureNow'),
-          onPress: () => router.push('/afib-measure' as any),
-        },
-        { text: t('common:actions.close'), style: 'cancel' },
-      ]
-    );
-  };
+  const chartMetrics = useMemo(() => {
+    const fallbackWidth = Math.max(220, windowWidth - 80); // mx-5 (40) + p-5 (40)
+    const availableWidth = chartContainerWidth > 0 ? chartContainerWidth : fallbackWidth;
+    const yAxisWidth = 34;
+    const plotWidth = Math.max(180, availableWidth - yAxisWidth);
+    const count = Math.max(1, chartData.length);
+    const step = plotWidth / count;
+    const ratio = activeFilter === 'WEEK' ? 0.48 : activeFilter === 'YEAR' ? 0.52 : 0.56;
+    const barWidth = Math.max(3, Math.min(22, Math.floor(step * ratio)));
+    const spacing = Math.max(2, Math.floor((plotWidth - barWidth * count) / count));
+    const initialSpacing = Math.max(2, Math.floor(spacing / 2));
+    return { plotWidth, yAxisWidth, barWidth, spacing, initialSpacing };
+  }, [chartContainerWidth, windowWidth, chartData.length, activeFilter]);
 
   const renderContent = () => {
     if (loading) {
@@ -175,25 +196,21 @@ export default function AFibAnalysisDetailsScreen() {
       );
     }
 
-    if (!isReady) {
-      return (
-        <View className="py-20 justify-center items-center">
-          <ActivityIndicator size="large" color="#0D6EFD" />
-          <Text className="mt-4 text-slate-500 font-medium text-sm">{t('analysis.preparingChart')}</Text>
-        </View>
-      );
-    }
-
     let chartAreaContent;
     if (chartData.length > 0) {
       chartAreaContent = (
         <BarChart
-          key={activeFilter}
+          key={`${activeFilter}-${chartMetrics.plotWidth}`}
           isAnimated
-          animationDuration={800}
+          animationDuration={450}
           stackData={chartData}
-          barWidth={activeFilter === 'MONTH' ? 6 : (activeFilter === 'DAY' ? 8 : 12)}
-          spacing={activeFilter === 'MONTH' ? 4 : (activeFilter === 'DAY' ? 8 : 16)}
+          width={chartMetrics.plotWidth}
+          yAxisLabelWidth={chartMetrics.yAxisWidth}
+          barWidth={chartMetrics.barWidth}
+          spacing={chartMetrics.spacing}
+          initialSpacing={chartMetrics.initialSpacing}
+          endSpacing={4}
+          disableScroll
           xAxisThickness={1}
           xAxisColor="#CBD5E1"
           yAxisThickness={0}
@@ -248,7 +265,15 @@ export default function AFibAnalysisDetailsScreen() {
             elevation: 2,
           }}
         >
-          <View className="relative w-full pb-2">
+          <View
+            className="relative w-full pb-2"
+            onLayout={(e) => {
+              const nextWidth = Math.round(e.nativeEvent.layout.width);
+              if (nextWidth > 0 && nextWidth !== chartContainerWidth) {
+                setChartContainerWidth(nextWidth);
+              }
+            }}
+          >
             {chartAreaContent}
             {/* Year Label at Bottom Left of X-Axis timeline */}
             <Text className="text-slate-600 font-bold text-[10px] mt-1 pl-1">
@@ -336,21 +361,8 @@ export default function AFibAnalysisDetailsScreen() {
             {t('analysis.title')}
           </Text>
 
-          {/* Settings Action Button */}
-          <Pressable
-            onPress={handleSettingsPress}
-            className="w-10 h-10 rounded-full bg-white items-center justify-center border border-slate-100 active:opacity-80"
-            style={{
-              shadowColor: 'rgba(13, 110, 253, 0.06)',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 1,
-              shadowRadius: 12,
-              elevation: 2,
-            }}
-            aria-label={t('common:tabs.settings')}
-          >
-            <Settings color="#64748B" size={18} strokeWidth={2.2} />
-          </Pressable>
+          {/* Spacer giữ tiêu đề căn giữa */}
+          <View className="w-10 h-10" />
         </View>
         {/* END: TopNavigationBar */}
 
@@ -369,6 +381,7 @@ export default function AFibAnalysisDetailsScreen() {
             monthText={periodText}
             onPrev={handlePrev}
             onNext={handleNext}
+            disableNext={!canGoNext}
           />
 
           {renderContent()}
